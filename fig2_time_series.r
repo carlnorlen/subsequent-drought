@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: May 20, 2021
+#Date Updated: Januay 10, 2021
 #Purpose: Create time series graph for publication
 
 #Navigate to directory: cd /C/Users/Carl/mystuff/Goulden_Lab/Forest_Dieback/dieback/figure_set/final_figures_redo
@@ -27,7 +27,7 @@ land_dir <- "D:\\Large_Files\\Landsat"
 # dir_ca <- "D:\\Large_Files\\TIGER\\ca-state-boundary"
 
 #Directory for drought monitor polygons
-dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
+# dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
 
 #Load Time Series data sets
 first <- read.csv(file.path(land_dir, 'dNDMI_NDMI_PET_Temp_ADS_trajectories_first_drought_full_region_300m_v9.csv'))
@@ -123,80 +123,3 @@ p3 <- ggplot() +
 (p1 / p2 / p3) + plot_annotation(tag_levels = 'a', theme = theme(legend.margin=margin(t = 0, unit='cm'))) + plot_layout(heights = c(0.95,0.95,1))
 
 ggsave(filename = 'Fig2_drought_time_series.png', height=11, width=11, units = 'cm', dpi=900)
-
-# unique(time.series$dNDMI_count)
-#Time Series 
-# p4 <- ggplot() + 
-#   geom_rect(data = data.frame(xmin = as.Date('1998-10-01'), xmax = as.Date('2002-09-30'), ymin = -Inf, ymax = Inf), 
-#             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-#   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
-#             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-#   geom_line(data = time.series, mapping = aes(x = time_start, y = NDMI_mean, color = drought), size = 1) +  
-#   # geom_ribbon(data=time.series, mapping=aes(x=time_start, ymin=dNDMI_p25, ymax=dNDMI_p75, fill = drought), alpha = 0.2) +
-#   guides(color = guide_legend(title = 'Sequence', nrow = 2, title.position = 'top'), linetype = guide_legend(title = 'Sequence', nrow = 2, title.position = 'top')) +
-#   theme_bw() + geom_hline(yintercept = 0, linetype='dashed') + 
-#   scale_linetype_manual(values=c("twodash", "solid")) +
-#   scale_color_manual(values=c("black", "dark gray")) +
-#   theme(axis.text.y = element_text(size = 10), axis.title.y = element_text(size = 10), axis.title.x=element_blank(), legend.position = 'none', 
-#         axis.text.x=element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-#   ylab('NDMI')
-# 
-# p5 <- ggplot() + 
-#   geom_rect(data = data.frame(xmin = as.Date('1998-10-01'), xmax = as.Date('2002-09-30'), ymin = -Inf, ymax = Inf), 
-#             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-#   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
-#             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-#   geom_line(data = time.series, mapping = aes(x = time_start, y = ppt_mean, linetype = drought, color = drought), size = 1) +  
-#   # geom_ribbon(data=time.series, mapping=aes(x=time_start, ymin=dNDMI_p25, ymax=dNDMI_p75, fill = drought), alpha = 0.2) +
-#   theme_bw() + geom_hline(yintercept = 0, linetype='dashed') + 
-#   scale_linetype_manual(values=c("twodash", "solid")) +
-#   scale_color_manual(values=c("black", "dark gray")) +
-#   theme(axis.text.y = element_text(size = 10), axis.title.y = element_text(size = 10), axis.title.x=element_blank(), legend.position = 'none', 
-#         axis.text.x=element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-#   ylab(expression('Precip (mm yr'^-1*')'))
-# 
-# p6 <- ggplot() + 
-#   geom_rect(data = data.frame(xmin = as.Date('1998-10-01'), xmax = as.Date('2002-09-30'), ymin = -Inf, ymax = Inf), 
-#             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-#   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
-#             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-#   geom_line(data = time.series, mapping = aes(x = time_start, y = ET_mean, linetype = drought, color = drought), size = 1) +  
-#   # geom_ribbon(data=time.series, mapping=aes(x=time_start, ymin=dNDMI_p25, ymax=dNDMI_p75, fill = drought), alpha = 0.2) +
-#   theme_bw() + geom_hline(yintercept = 0, linetype='dashed') + 
-#   scale_linetype_manual(values=c("twodash", "solid")) +
-#   scale_color_manual(values=c("black", "dark gray")) +
-#   theme(axis.text.y = element_text(size = 10), axis.title.y = element_text(size = 10), axis.title.x=element_blank(), legend.position = 'none', 
-#         axis.text.x=element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-#   ylab(expression('ET (mm yr'^-1*')'))
-# 
-# # p7 <- ggplot() + 
-# #   geom_rect(data = data.frame(xmin = as.Date('1998-10-01'), xmax = as.Date('2002-09-30'), ymin = -Inf, ymax = Inf), 
-# #             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-# #   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
-# #             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-# #   geom_line(data = time.series, mapping = aes(x = time_start, y = biomass_mean, linetype = drought, color = drought), size = 1) +  
-# #   # geom_ribbon(data=time.series, mapping=aes(x=time_start, ymin=dNDMI_p25, ymax=dNDMI_p75, fill = drought), alpha = 0.2) +
-# #   theme_bw() + geom_hline(yintercept = 0, linetype='dashed') + 
-# #   scale_linetype_manual(values=c("twodash", "solid")) +
-# #   scale_color_manual(values=c("black", "dark gray")) +
-# #   theme(axis.text.y = element_text(size = 10), axis.title.y = element_text(size = 10), axis.title.x=element_blank(), legend.position = 'none', 
-# #         axis.text.x=element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-# #   ylab(expression('Biomass (Mg ha'^-1*')'))
-# # 
-# # p8 <- ggplot() + 
-# #   geom_rect(data = data.frame(xmin = as.Date('1998-10-01'), xmax = as.Date('2002-09-30'), ymin = -Inf, ymax = Inf), 
-# #             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-# #   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
-# #             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-# #   geom_line(data = time.series, mapping = aes(x = time_start, y = tmax_mean, linetype = drought, color = drought), size = 1) +  
-# #   # geom_ribbon(data=time.series, mapping=aes(x=time_start, ymin=dNDMI_p25, ymax=dNDMI_p75, fill = drought), alpha = 0.2) +
-# #   theme_bw() + geom_hline(yintercept = 0, linetype='dashed') + 
-# #   scale_linetype_manual(values=c("twodash", "solid")) +
-# #   scale_color_manual(values=c("black", "dark gray")) +
-# #   theme(axis.text.y = element_text(size = 10), axis.title.y = element_text(size = 10), axis.title.x=element_text(size = 10), legend.position = 'none', 
-# #         axis.text.x=element_text(size = 10), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-# #   ylab('Temp (C)')
-# 
-# (p4 / p5 / p6) + plot_annotation(tag_levels = 'A', theme = theme(legend.margin=margin(t = 0, unit='cm'))) + plot_layout(heights = c(0.95,0.95,1))
-# 
-# ggsave(filename = 'SFig8_drought_time_series.png', height=11, width=11, units = 'cm', dpi=900)

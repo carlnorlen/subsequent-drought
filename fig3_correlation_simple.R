@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: October 1, 2021
+#Date Edited: January 10, 2021
 #Purpose: Create plots of various landsat derived variables and group them by cover classes (LANDFIRE Veg Type)
 #use a large study region than main figures. Trying to work on revising manuscript for a re-submission to GCB (or a different journal)
 # If necessary: install/update packages
@@ -138,7 +138,7 @@ p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.8)
 	  
 f1 <- ggarrange(p1, p2, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend = FALSE)
-f1
+# f1
 
 #Add shared Y label and x-label
 annotate_figure(f1, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), 
@@ -181,7 +181,7 @@ p4 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.2)
 	  
 f2 <- ggarrange(p3, p4, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend = FALSE)
-f2
+# f2
 
 #Add shared x-axis and y-axis labels
 annotate_figure(f2, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
@@ -207,7 +207,7 @@ p5 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   scale_fill_gradient2(name = "Grid Cells", limits = c(0,2950), midpoint = 1475, low = "cornflowerblue", 
                        mid = "yellow", high = "red", na.value = 'transparent') +
   scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
-p5
+# p5
 
 #Save the figure as a png
 ggsave(filename = 'SFig5_spi48_count_SPI48_grid_scatter.png', device = 'png', height=6, width=7, units = 'cm', dpi=900)
@@ -247,7 +247,7 @@ p7 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.2)
 
 f3 <- ggarrange(p6, p7, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend = FALSE)
-f3
+# f3
 
 annotate_figure(f3, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
@@ -288,7 +288,7 @@ p9 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.2)
 
 f4 <- ggarrange(p8, p9, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend = FALSE)
-f4
+# f4
 
 annotate_figure(f4, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
@@ -329,7 +329,7 @@ p11 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.2)
 
 f5 <- ggarrange(p10, p11, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend = FALSE)
-f5
+# f5
 
 annotate_figure(f5, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
@@ -393,12 +393,12 @@ p12 <-ggplot(filter(all.ca.dndmi, drought.sequence != '1999-2002 Only' & !is.na(
   # annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
   # annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) +
   # facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.2)
-p12
+# p12
 
 ggsave(filename = 'SFig11_dNDMI_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
 
 #What is the sample size?
-length(filter(all.ca.dndmi, drought.sequence != '1999-2002 Only' & !is.na(drought.sequence)))
+# length(filter(all.ca.dndmi, drought.sequence != '1999-2002 Only' & !is.na(drought.sequence)))
 
 #Single Panel dNDMI comparison
 p13 <-ggplot(filter(all.ca.dndmi, drought.sequence != '1999-2002 Only' & !is.na(drought.sequence)), # 
@@ -423,8 +423,8 @@ p13 <-ggplot(filter(all.ca.dndmi, drought.sequence != '1999-2002 Only' & !is.na(
 # annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
 # annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) +
 # facet_wrap( ~ second) #+ scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.2)
-p13
+# p13
 
 ggsave(filename = 'SFig12_dNDMI_scatter.png', device = 'png', height=7, width = 8, units = 'cm', dpi=900)
 
-all.ca.spi48 %>% filter(drought.sequence = '')
+# all.ca.spi48 %>% filter(drought.sequence = '')

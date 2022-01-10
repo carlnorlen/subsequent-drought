@@ -30,7 +30,7 @@ dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 spi_dir <- "D:\\Large_Files\\WRCC\\All"
 
 #Directory for drought monitor polygons
-dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
+# dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
 
 #CSV version of landsat data directory
 dir_in <- "D:\\Large_Files\\Landsat"
@@ -286,7 +286,7 @@ p8 <- ggplot() +
   ggtitle("2012-2015")
 
 f4 <- ggarrange(p7, p8, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
-f4
+# f4
 ggsave(filename = 'SupFig4_Biomass_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
 
 # Temp for 1999-2002 drought
@@ -324,7 +324,7 @@ p10 <- ggplot() +
   ggtitle("2012-2015")
 
 f5 <- ggarrange(p9, p10, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
-f5
+# f5
 ggsave(filename = 'SupFig5_Temperature_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
 
 # Die-off (ADS) for 1999-2002 drought

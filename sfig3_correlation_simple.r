@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: November 17, 2021
+#Date Edited: January 10, 2021
 #Purpose: Create density plot figures for supplement of various landsat derived variables and group by drought and region
 
 #Packages to load

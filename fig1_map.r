@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: May 20, 2021
+#Date Updated: January 10, 2021
 #Purpose: Create map figures for publication
 
 #Navigate to directory: cd /C/Users/Carl/mystuff/Goulden_Lab/Forest_Dieback/dieback/figure_set/final_figures_redo
@@ -32,8 +32,8 @@ land_dir <- "D:\\Large_Files\\Landsat"
 socal_dir <- "D:\\Large_Files\\socal"
 landfire_dir <- "D:\\Large_Files\\LANDFIRE"
 frap_dir <- "D:\\Large_Files\\FRAP\\raster"
-wrcc_dir <- "D:\\Large_Files\\WRCC"
-data_dir <- "D:\\Large_Files\\WRCC\\All"
+# wrcc_dir <- "D:\\Large_Files\\WRCC"
+# data_dir <- "D:\\Large_Files\\WRCC\\All"
 data_30m_dir <- "D:\\Large_Files\\WRCC\\SPI48_30m"
 dir_out <- "D:\\Large_Files\\WRCC\\SPI48_30m"
 work_dir <- "C:\\Users\\can02\\mystuff\\Goulden_Lab\\Forest_Dieback\\dieback\\figure_set\\final_figures_redo"
@@ -43,7 +43,7 @@ dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 spi_dir <- "D:\\Large_Files\\WRCC\\All"
 
 #Directory for drought monitor polygons
-dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
+# dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
 
 #CSV version of landsat data directory
 dir_in <- "D:\\Large_Files\\Landsat"
@@ -87,21 +87,21 @@ west.ext <- as(extent(west_st_20m), 'SpatialPolygons')
 crs(west.ext) <- c
 
 #Load USDM data
-usdm.august2002.dataset <- st_read(file.path(dir_usdm, 'USDM_20020827.shp'))
-usdm.august2002.dataset <- st_transform(usdm.august2002.dataset, c)
-usdm.august2002.dataset <- subset(usdm.august2002.dataset, DM >= 3)
-usdm.august2002.dataset <- st_crop(usdm.august2002.dataset, west.ext)
+# usdm.august2002.dataset <- st_read(file.path(dir_usdm, 'USDM_20020827.shp'))
+# usdm.august2002.dataset <- st_transform(usdm.august2002.dataset, c)
+# usdm.august2002.dataset <- subset(usdm.august2002.dataset, DM >= 3)
+# usdm.august2002.dataset <- st_crop(usdm.august2002.dataset, west.ext)
 
-usdm.august2015.dataset <- st_read(file.path(dir_usdm, 'USDM_20150825.shp'))
-usdm.august2015.dataset <- st_transform(usdm.august2015.dataset, c)
-usdm.august2015.dataset <- subset(usdm.august2015.dataset, DM >= 2)
-usdm.august2015.dataset <- st_crop(usdm.august2015.dataset, west.ext)
+# usdm.august2015.dataset <- st_read(file.path(dir_usdm, 'USDM_20150825.shp'))
+# usdm.august2015.dataset <- st_transform(usdm.august2015.dataset, c)
+# usdm.august2015.dataset <- subset(usdm.august2015.dataset, DM >= 2)
+# usdm.august2015.dataset <- st_crop(usdm.august2015.dataset, west.ext)
 
-#USDM overlap polygon
-usdm.both.dataset <- st_read(file.path(dir_usdm, 'USDM_DM234_082002_082015.shp'))
-usdm.both.dataset <- st_transform(usdm.both.dataset, c)
-usdm.both.dataset <- subset(usdm.both.dataset, DM >= 3 & DM_1 >= 3)
-usdm.both.dataset <- st_crop(usdm.both.dataset, west.ext)
+# #USDM overlap polygon
+# usdm.both.dataset <- st_read(file.path(dir_usdm, 'USDM_DM234_082002_082015.shp'))
+# usdm.both.dataset <- st_transform(usdm.both.dataset, c)
+# usdm.both.dataset <- subset(usdm.both.dataset, DM >= 3 & DM_1 >= 3)
+# usdm.both.dataset <- st_crop(usdm.both.dataset, west.ext)
 
 #Select USFS EcoRegions
 usfs.regions <- st_read(file.path(dir_usfs, 'S_USA.EcomapSubsections.shp'))
@@ -112,8 +112,8 @@ usfs.socal <- subset(usfs.regions, MAP_UNIT_S == 'M262Bh' | MAP_UNIT_S == 'M262B
 usfs.socal.union <- usfs.socal %>% st_union()
 
 #Loading in US Drought Monitor Data
-drought.west <- raster(file.path(wrcc_dir,"SPI48_9_2002_2015_drought_mask_west_conus_cropped.tif"))
-drought.socal <- raster(file.path(wrcc_dir, 'SPI48_9_2002_2015_drought_mask_cropped_v2.tif'))
+# drought.west <- raster(file.path(wrcc_dir,"SPI48_9_2002_2015_drought_mask_west_conus_cropped.tif"))
+# drought.socal <- raster(file.path(wrcc_dir, 'SPI48_9_2002_2015_drought_mask_cropped_v2.tif'))
 
 #Remapped LANDFIRE (SPI48 <= -1.5 & Within 0.5)
 spi48_2015.300m <- raster(file.path(socal_dir, 'Drought_second_300m_v5.tif'))
@@ -183,7 +183,7 @@ p2 <- p1 + #annotate("text", x = -120, y = 35, label = "Sierra \nNevada") + anno
     legend.direction = "vertical") +
   guides(fill = guide_legend(ncol = 1, nrow = 3,
                              title.position = "top", title.hjust = 0.5), override.aes = list(fill = 0.4))
-p2
+# p2
 
 #Create a figure to compare SPI48 for the two droughts and figure out the drought sequences experienced by the two regions.
 p3 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = sierra_prop, group = sierra_prop)) +
@@ -216,7 +216,7 @@ p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + anno
 p4
 #Combine the two figures into one plot
 f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'), heights = c(1,1), widths = c(1, 1.5))
-f1
+# f1
 
 ggsave(filename = 'Fig1_both_droughts_SPI48_300m_map.png', height=10, width= 20, units = 'cm', dpi=900)
 # ggsave(filename = 'SupFig2_both_droughts_SPI48_300m_map.svg', height=12, width= 8, units = 'cm', dpi=900, device = 'svg')
@@ -241,6 +241,6 @@ p5 <-ggplot(all.usfs, mapping = aes(x = spi48_09_2002_mean, y = spi48_09_2015_me
   scale_color_manual(name = "Region", breaks = c(261,262), labels = c('Sierra \nNevada', 'Southern \nCalifornia'),
                         values = c('261' = 'dark gray', '262' = 'black'))
 
-p5
+# p5
 ggsave(filename = 'SupFig4_FIA_subsections_both_droughts_SPI48_300m_map.png', height=12, width= 13, units = 'cm', dpi=900)
 
