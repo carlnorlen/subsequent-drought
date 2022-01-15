@@ -1,35 +1,23 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: January 10, 2021
-#Purpose: Create density plot figures for supplement of various landsat derived variables and group by drought and region
+#Date Edited: January 14, 2022
+#Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr')
+
 # Load packages
 lapply(p,require,character.only=TRUE)
-# If necessary: install/update packages
-# install.packages('purrr',repo='https://cloud.r-project.org/')
-# library(purrr)
 #Set working directory
-#setwd("/C/Users/Carl/mystuff/Goulden_Lab/Forest_Dieback/dieback/figure_set/zonal_stats/type_conifer")
-#cd /C/Users/Carl/mystuff/Goulden_Lab/Forest_Dieback/dieback/figure_set/sup_figures_redo
-#cd /C/Users/can02/mystuff/Goulden_Lab/Forest_Dieback/dieback/final_figure_set
-#Command for calling the script in the command line: R < sfig3_correlation.r --vanilla
 setwd('C:/Users/can02/mystuff/Goulden_Lab/Forest_Dieback/dieback/final_figure_set_redo')
 
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
 all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
 
+#Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
-
-#Convert trees/acre to trees/hectare
-all.ca$ADS_2004 <- all.ca$ADS_2004 * 2.41705
-all.ca$ADS_2017 <- all.ca$ADS_2017 * 2.41705
-
-#Calculate difference in Pr-ET 4yr
-all.ca$dPET_4yr <- all.ca$PET_4yr_2015 - all.ca$PET_4yr_2002
 
 #Adding a drought sequence column to the data set
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
@@ -40,71 +28,75 @@ all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5)
 # all.ca %>% group_by(drought.sequence) %>% count()
 
 #California drought sequences California region
+#select columns of data
 all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
+
+#Add the year of the 1999-2002 data
 all.ca.1stDrought$drought <- '1999-2002'
+
+#Rename the columns
 colnames(all.ca.1stDrought) <- c('pixel.id','NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
-# names(all.ca.1stDrought)
+
+#Select columns of the 2012-2015 data
 all.ca.2ndDrought <- dplyr::select(all.ca, c(system.index, NDMI_2012, dNDMI_2017, dET_2017, dBiomass_2017, PET_4yr_2015, ppt_4yr_2015, tmax_4yr_2015, ET_4yr_2015, ET_2012, biomass_2012, ADS_2017, spi48_09_2015, elevation, latitude, longitude, USFS_zone, drought.sequence))
+
+#Add the year of the 2012-2015 data
 all.ca.2ndDrought$drought <- '2012-2015'
+
+#Rename the columns
 colnames(all.ca.2ndDrought) <- c('pixel.id', 'NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence','drought')
-# names(all.ca.2ndDrought)
-# names(all.ca.1stDrought)
+
+#Combine all the data in one data frame
 all.ca.combined <- rbind(all.ca.1stDrought, all.ca.2ndDrought)
 
 #Translate the region code to text
 all.ca.combined$region[all.ca.combined$USFS == 261] <- "Sierra Nevada"
 all.ca.combined$region[all.ca.combined$USFS == 262] <- "Southern California"
 
-#Pulling out a random sample
-# pixel.sample <- all.ca.combined %>% dplyr::filter(sequence != '1999-2002 Only' & !is.na(sequence)) %>% group_by(sequence) %>% dplyr::select(pixel.id) %>% unique() %>% sample_frac(0.1)
-
-#Filter the full data set for the sample I selected
-# all.ca.sample <- all.ca.combined %>% filter(pixel.id %in% pixel.sample$pixel.id)
-# all.ca.sample <- all.ca.combined
-
+#Convert the ADS data to categorical mortality or no mortality
 all.ca.combined <- all.ca.combined %>% mutate(ADS.cat = case_when(
-                                          (ADS / 2.41705) >= 5 ~ 1, 
-                                          (ADS / 2.41705) < 5 ~ 0))
-# summary(all.ca.sample)
+                                          (ADS) >= 5 ~ 1, #mortality
+                                          (ADS) < 5 ~ 0)) #no mortality
 
-#Make variables into dummy categorical variables for statistical analysis
+#Make drought sequence into dummy categorical variables for statistical analysis
 all.ca.sample <- all.ca.combined %>% mutate(sequence.f = case_when(
                                    sequence == 'Both Droughts' ~ 0, 
                                    sequence == '2012-2015 Only' ~ 1))
 
+#Make years into dummy variables for statistical analysis
 all.ca.sample <- all.ca.sample %>% mutate(drought.f = case_when(
                                     drought == '1999-2002' ~ 0, 
                                     drought == '2012-2015' ~ 1))
 
+#Select the drought sequence samples and data columns for analysis
 dataset <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
                              dplyr::select('PET_4yr', 'NDMI', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
 
+#Convert the dummy variables to a numeric format
 dataset$sequence.f <- as.numeric(dataset$sequence.f)
 dataset$drought.f <- as.numeric(dataset$drought.f)
-# summary(dataset)
-# cov(dataset)
-all.ca
+
+#Calcuate counts for different types subsets of data
 all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '1999-2002') %>% count()
 
-summary(all.ca.combined %>% dplyr::filter(drought == '1999-2002'))
 
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
-
+#Convert dummy variable to factors
 all.ca.sample$sequence.f <- factor(all.ca.sample$sequence.f)
 all.ca.sample$drought.f <- factor(all.ca.sample$drought.f)
 
-# summary(dataset)
-# cov(dataset)
-
+#Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.f)
 dataset$drought.f <- as.factor(dataset$drought.f)
 
+#Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Onlyl
 task = makeClassifTask(data = dataset, target = "sequence.f")
 task.over <- undersample(task, rate = 0.2)
 
+#The undersampled dataset
 dataset.over <- getTaskData(task.over)
 
 #Scale data sets to help with relative importance analysis.
@@ -115,78 +107,57 @@ dataset.over$tmax_4yr.scale <- scale(dataset.over$tmax_4yr)
 dataset.over$sequence.scale <- scale(as.numeric(dataset.over$sequence.f))
 dataset.over$drought.scale <- scale(as.numeric(dataset.over$drought.f))
 
-#The full model
-# dndmi.lm = lm(data = filter(all.ca.sample, sequence == 'Both Droughts' | sequence == '2012-2015 Only'), 
-#                 formula = dNDMI ~ drought.f*sequence.f + PET_4yr + biomass + tmax_4yr)
-# dndmi.both.lm = lm(data = filter(all.ca.sample, sequence == 'Both Droughts'), 
-#               formula = dNDMI ~ drought.f + PET_4yr + biomass + tmax_4yr)
-# dndmi.2015.lm = lm(data = filter(all.ca.sample, sequence == '2012-2015 Only'), 
-#                    formula = dNDMI ~ drought.f + PET_4yr + biomass + tmax_4yr)
+#The full multiple regression linear model
 dndmi.over.lm = lm(data = dataset.over, 
-                formula = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass) # + NDMI)
+                formula = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass)
 
-summary(dndmi.over.lm)
+#Get the model results as a datafram
 df.dndmi.lm <- dndmi.over.lm %>% tidy() %>% as.data.frame()
-df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
-# calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg")
-dndmi.relimp <- calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg") 
-# dndmi.relimp
-# dndmi.relimp$lmg
-# as.data.frame(dndmi.relimp$lmg)
-# rbind(data.frame(lmg = 0), dndmi.relimp$lmg)
-df.dndmi.lm$relimp <- c(0, 0.03706293, 0.01952194, 0.36576597, 0.09262433, 0.02743045, 0.45759438)
-# When NDMI (second to last) is included c(0, 0.03608272, 0.01951721, 0.33348437, 0.07745288, 0.02456035, 0.06889390, 0.44000856)
 
+#Label the columns of the data frame
+df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
+
+#Calculate the relative importance of model variables with a relative weight analysis.
+dndmi.relimp <- calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg") 
+
+#Add the results of the relative weigth analysis to the data frame
+df.dndmi.lm$relimp <- c(0, 0.03706293, 0.01952194, 0.36576597, 0.09262433, 0.02743045, 0.45759438)
+
+#Covert the relative weight analysis outputs as percentages
 df.dndmi.lm$relimp.pct <- df.dndmi.lm$relimp * 100
 
+#Create a table of the relative weight analysis results
 df.dndmi.tbl <- df.dndmi.lm %>% dplyr::select(variable, estimate, std.error, statistic, p.value, relimp.pct)
-# df.tHSD
+
+#Update the relative weight analysis column names
 colnames(df.dndmi.tbl) <- c('Variable', 'Coefficient', 'Standard Error', 'T-Statistic', 'p-value', 'Relative Importance (%)')
+
+#Create the data table with a title
 tba <- kbl(df.dndmi.tbl, caption = "Table S4: Die-off (dNDMI) Multiple Linear Regression", digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+
+#Export the data table as a .PNG file
 as_image(x = tba, width = 6, file = "STable4_multiple_regression_results.png", zoom = 5.0)
 
-# ADS.over.glm = glm(data = dataset.over, 
-#                    formula = ADS.cat ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, family = 'binomial')
-# summary(ADS.over.glm)
-# df.ADS.glm <- ADS.over.glm %>% tidy() %>% as.data.frame()
-# df.ADS.glm
-# df.ADS.glm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
-# 
-# df.ADS.tbl <- df.ADS.glm %>% dplyr::select(variable, estimate, std.error, statistic, p.value,)
-# # df.tHSD
-# colnames(df.ADS.tbl) <- c('Variable', 'Coefficient', 'Standard Error', 'Z-value', 'p-value')
-# tbb <- kbl(df.ADS.tbl, caption = "Table S5: Die-off (ADS) Multiple Logistic Regression", digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-# as_image(x = tbb, width = 6, file = "STable5_multiple_logistic_regression_results.png", zoom = 5.0)
-# 
-# nullmod <- glm(data = dataset.over, ADS.cat~1, family="binomial")
-# nullmod
-# logLik(nullmod)
-# logLik(ADS.over.glm)
-# pseudo.rsq <- 1-(logLik(ADS.over.glm)/logLik(nullmod))
-# pseudo.rsq
-# summary(dndmi.scale.lm)
-# plot(resid(dndmi.over.lm))
+#Convert the dummy data back to a numeric format
 dataset.over$sequence.f <- as.numeric(dataset.over$sequence.f)
 dataset.over$drought.f <- as.numeric(dataset.over$drought.f)
 
 #Do a analysis with segmented linear regression and scaled predictors
-# cor(dataset.over)
-# dndmi.over.seg <- segmented(obj = dndmi.over.lm, seg.Z = ~PET_4yr)
-dndmi.scale.lm = lm(data = dataset.over, 
-                    formula = dNDMI.scale ~ drought.scale * sequence.scale + PET_4yr.scale + tmax_4yr.scale + biomass.scale)
-dndmi.scale.seg <- segmented(obj = dndmi.scale.lm, seg.Z = ~PET_4yr.scale)
-summary(dndmi.scale.seg)
-dndmi.scale.imp <- caret::varImp(dndmi.scale.seg, useModel = TRUE, nonpara = TRUE, scale = FALSE)
-# colnames(dndmi.scale.imp)
-dndmi.scale.imp$Rela.Imp <- dndmi.scale.imp$'Overall' / sum(dndmi.scale.imp$'Overall')
-dndmi.scale.imp
-names(dndmi.scale.seg)
-dndmi.seg.tbl <- dndmi.scale.seg %>% dplyr::select('terms', 'coefficients')
-data.frame(dndmi.scale.seg$coefficients)
-df.dndmi.seg <- summary(dndmi.scale.seg) %>% tidy() %>% as.data.frame()
-df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
-# calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg")
-dndmi.relimp <- calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg") 
+# dndmi.scale.lm = lm(data = dataset.over, 
+#                     formula = dNDMI.scale ~ drought.scale * sequence.scale + PET_4yr.scale + tmax_4yr.scale + biomass.scale)
+# dndmi.scale.seg <- segmented(obj = dndmi.scale.lm, seg.Z = ~PET_4yr.scale)
+# summary(dndmi.scale.seg)
+# dndmi.scale.imp <- caret::varImp(dndmi.scale.seg, useModel = TRUE, nonpara = TRUE, scale = FALSE)
+# # colnames(dndmi.scale.imp)
+# dndmi.scale.imp$Rela.Imp <- dndmi.scale.imp$'Overall' / sum(dndmi.scale.imp$'Overall')
+# dndmi.scale.imp
+# names(dndmi.scale.seg)
+# dndmi.seg.tbl <- dndmi.scale.seg %>% dplyr::select('terms', 'coefficients')
+# data.frame(dndmi.scale.seg$coefficients)
+# df.dndmi.seg <- summary(dndmi.scale.seg) %>% tidy() %>% as.data.frame()
+# df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
+# # calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg")
+# dndmi.relimp <- calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg") 
 
 
 #Filter the data into subsets for modeling
@@ -196,14 +167,16 @@ all.ca.second.1999 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & dr
 all.ca.second.2012 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '2012-2015' & !is.na(sequence))
 
 # #Linear Models for dNDMI ~ Pr-ET
-all.ca.both.1999.lm <- lm(data = all.ca.both.1999, dNDMI ~ PET_4yr)
-summary(all.ca.both.1999.lm)
-all.ca.both.2012.lm <- lm(data = all.ca.both.2012, dNDMI ~ PET_4yr)
-all.ca.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ PET_4yr)
-all.ca.second.2012.lm <- lm(data = all.ca.second.2012, dNDMI ~ PET_4yr)
+#Models for Both Droughts
+all.ca.both.1999.lm <- lm(data = all.ca.both.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.both.2012.lm <- lm(data = all.ca.both.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
 
+#Models for 2012-2015 Only
+all.ca.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.second.2012.lm <- lm(data = all.ca.second.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
+
+#Calculate the sgemented model
 all.ca.both.1999.seg <- segmented(all.ca.both.1999.lm)
-summary(all.ca.both.1999.seg)
 all.ca.second.2012.seg <- segmented(all.ca.second.2012.lm)
 
 #Add predicted dNDMI values
@@ -216,7 +189,6 @@ all.ca.second.2012$dNDMI_predict = predict(all.ca.second.2012.seg)
 all.ca.models <- rbind(all.ca.both.1999, all.ca.both.2012, all.ca.second.1999, all.ca.second.2012)
 
 #R-Squared values for the four models
-
 r2.a  <- format(summary(all.ca.both.1999.seg)$r.squared, digits = 3)
 r2.b <- format(summary(all.ca.both.2012.lm)$r.squared, digits = 2)
 r2.c <- format(summary(all.ca.second.1999.lm)$r.squared, digits = 1)
@@ -234,13 +206,6 @@ r2.text <- data.frame(
             x = c(2500, 2500, 2500, 2500),
             y = c(-0.25, -0.25, -0.25, -0.25)
 )
-
-# as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = r2.a))))
-# r2.text
-# paste(R^2,' = ',format(r2.a, digits = 3), sep = "")
-# expression(paste('R^2 =',format(r2.b, digits = 2), sep = ""))
-
-#Consider adding a figure for ADS similar to the Pr-ET figure
 
 #Plot dNDMI versus Pr-ET by drought sequence and time period.
 p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
