@@ -1,16 +1,17 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: January 14, 2022
+#Date Edited: January 18, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr')
 
-# Load packages
+#Load packages
 lapply(p,require,character.only=TRUE)
+
 #Set working directory
-setwd('C:/Users/can02/mystuff/Goulden_Lab/Forest_Dieback/dieback/final_figure_set_redo')
+setwd('C:/Users/can02/mystuff/subsequent-drought')
 
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
@@ -22,13 +23,9 @@ all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 #Adding a drought sequence column to the data set
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
                      (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2012-2015 Only',
-                     (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1999-2002 Only')) #,
-                     #spi48_09_2002 > -1.5 & spi48_09_2015 > -1.5 & dSPI48 <= 0.5 ~ 'No Droughts'))
+                     (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1999-2002 Only')) 
 
-# all.ca %>% group_by(drought.sequence) %>% count()
-
-#California drought sequences California region
-#select columns of data
+#Select columns of data
 all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
 #Add the year of the 1999-2002 data
@@ -76,11 +73,11 @@ dataset <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequenc
 dataset$sequence.f <- as.numeric(dataset$sequence.f)
 dataset$drought.f <- as.numeric(dataset$drought.f)
 
-#Calcuate counts for different types subsets of data
+#Calculate sample size for 1999-2002 and proportion impacted by drought
 all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '1999-2002') %>% count()
 
-
+#Calculate sample sizes for 2012-2015 and proportion impacted by drought
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
@@ -92,33 +89,33 @@ all.ca.sample$drought.f <- factor(all.ca.sample$drought.f)
 dataset$sequence.f <- as.factor(dataset$sequence.f)
 dataset$drought.f <- as.factor(dataset$drought.f)
 
-#Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Onlyl
+#Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Only
 task = makeClassifTask(data = dataset, target = "sequence.f")
-task.over <- undersample(task, rate = 0.2)
+task.under <- undersample(task, rate = 0.2)
 
 #The undersampled dataset
-dataset.over <- getTaskData(task.over)
+dataset.under <- getTaskData(task.under)
 
 #Scale data sets to help with relative importance analysis.
-dataset.over$dNDMI.scale <- scale(dataset.over$dNDMI)
-dataset.over$PET_4yr.scale <- scale(dataset.over$PET_4yr)
-dataset.over$biomass.scale <- scale(dataset.over$biomass)
-dataset.over$tmax_4yr.scale <- scale(dataset.over$tmax_4yr)
-dataset.over$sequence.scale <- scale(as.numeric(dataset.over$sequence.f))
-dataset.over$drought.scale <- scale(as.numeric(dataset.over$drought.f))
+dataset.under$dNDMI.scale <- scale(dataset.under$dNDMI)
+dataset.under$PET_4yr.scale <- scale(dataset.under$PET_4yr)
+dataset.under$biomass.scale <- scale(dataset.under$biomass)
+dataset.under$tmax_4yr.scale <- scale(dataset.under$tmax_4yr)
+dataset.under$sequence.scale <- scale(as.numeric(dataset.under$sequence.f))
+dataset.under$drought.scale <- scale(as.numeric(dataset.under$drought.f))
 
 #The full multiple regression linear model
-dndmi.over.lm = lm(data = dataset.over, 
+dndmi.under.lm = lm(data = dataset.under, 
                 formula = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass)
 
 #Get the model results as a datafram
-df.dndmi.lm <- dndmi.over.lm %>% tidy() %>% as.data.frame()
+df.dndmi.lm <- dndmi.under.lm %>% tidy() %>% as.data.frame()
 
 #Label the columns of the data frame
 df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
 
 #Calculate the relative importance of model variables with a relative weight analysis.
-dndmi.relimp <- calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg") 
+dndmi.relimp <- calc.relimp(dndmi.under.lm, rela = TRUE, type = "lmg") 
 
 #Add the results of the relative weigth analysis to the data frame
 df.dndmi.lm$relimp <- c(0, 0.03706293, 0.01952194, 0.36576597, 0.09262433, 0.02743045, 0.45759438)
@@ -139,26 +136,8 @@ tba <- kbl(df.dndmi.tbl, caption = "Table S4: Die-off (dNDMI) Multiple Linear Re
 as_image(x = tba, width = 6, file = "STable4_multiple_regression_results.png", zoom = 5.0)
 
 #Convert the dummy data back to a numeric format
-dataset.over$sequence.f <- as.numeric(dataset.over$sequence.f)
-dataset.over$drought.f <- as.numeric(dataset.over$drought.f)
-
-#Do a analysis with segmented linear regression and scaled predictors
-# dndmi.scale.lm = lm(data = dataset.over, 
-#                     formula = dNDMI.scale ~ drought.scale * sequence.scale + PET_4yr.scale + tmax_4yr.scale + biomass.scale)
-# dndmi.scale.seg <- segmented(obj = dndmi.scale.lm, seg.Z = ~PET_4yr.scale)
-# summary(dndmi.scale.seg)
-# dndmi.scale.imp <- caret::varImp(dndmi.scale.seg, useModel = TRUE, nonpara = TRUE, scale = FALSE)
-# # colnames(dndmi.scale.imp)
-# dndmi.scale.imp$Rela.Imp <- dndmi.scale.imp$'Overall' / sum(dndmi.scale.imp$'Overall')
-# dndmi.scale.imp
-# names(dndmi.scale.seg)
-# dndmi.seg.tbl <- dndmi.scale.seg %>% dplyr::select('terms', 'coefficients')
-# data.frame(dndmi.scale.seg$coefficients)
-# df.dndmi.seg <- summary(dndmi.scale.seg) %>% tidy() %>% as.data.frame()
-# df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-year Pr-ET', 'four-year Temperature', 'Biomass', 'Time Period:Drought Sequence')
-# # calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg")
-# dndmi.relimp <- calc.relimp(dndmi.over.lm, rela = TRUE, type = "lmg") 
-
+dataset.under$sequence.f <- as.numeric(dataset.under$sequence.f)
+dataset.under$drought.f <- as.numeric(dataset.under$drought.f)
 
 #Filter the data into subsets for modeling
 all.ca.both.1999 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '1999-2002' & !is.na(sequence))
@@ -216,16 +195,13 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_text(data = r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
-  # stat_cor(aes(label = paste(..rr.label..)), size = 3.5, color = 'black', label.y.npc="top", label.x.npc = 0.7, r.accuracy = 0.001, p.accuracy = 0.001) +
   labs(fill = "Grid Cells") +
-  # guides(color=guide_legend(title.position = "top", title.hjust = 0.5, ncol = 2, nrow=5, byrow=TRUE), shape=guide_legend(title.position = "top", title.hjust = 0.5, ncol = 2, nrow=5, byrow=TRUE)) +
-  # ggtitle("1999-2002 Drought") +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10), strip.text.y = element_text(size = 10)) + #Presentation text sizes.
   scale_fill_gradient2(limits = c(10,370), breaks = c(10,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
-  # scale_alpha(range = c(0.1, 1)) +
   ylim(0.1, -0.3) + xlim(-2500, 3500) + facet_grid(factor(sequence, levels = c('Both Droughts', '2012-2015 Only')) ~ drought)
 
+#Add a shared legend in a customized position on the figure
 p3 + theme(
   legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
   legend.justification = c(1, 0),
@@ -238,15 +214,20 @@ p3 + theme(
                                title.hjust = 0.5, 
                                ticks.colour = "black"))
 
+#Save the figure as a .png file
 ggsave(filename = 'Fig5_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
   dplyr::select('PET_4yr', 'ET_4yr', 'ppt_4yr', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
-summary(dataset.2)
+
+#Create a task to use with the caret package
 task.2 <- makeClassifTask(data = dataset.2, target = "sequence.f")
+
+#Under sample the data by 20%
 task.2.under <- undersample(task.2, rate = 0.2)
 
+#Get the actual data o]ut of the caret task
 dataset.2.under <- getTaskData(task.2.under)
 
 #Make variables into dummy categorical variables for statistical analysis
@@ -254,16 +235,15 @@ dataset.2.under <- dataset.2.under %>% mutate(sequence = case_when(
   sequence.f == 0 ~ 'Both Droughts', 
   sequence.f == 1 ~ '2012-2015 Only'))
 
+#Create column with the years for the data as a string
 dataset.2.under <- dataset.2.under %>% mutate(drought = case_when(
   drought.f == 0 ~ '1999-2002', 
   drought.f == 1 ~ '2012-2015'))
-dataset.2.under
-dataset.3 <- dataset.2.under %>% arrange(drought.f, pixel.id, by_group = TRUE)
-dataset.3
 
-# all.ca.filter <- filter(all.ca.sample, !is.na(sequence) & sequence != '1999-2002 Only')
-summary(dataset.2.under)
-#Trying out a combined anova/t-test analysis for Biomass
+#Sort the data by drought and pixel.id to prepare for Chi-squared test
+dataset.3 <- dataset.2.under %>% arrange(drought.f, pixel.id, by_group = TRUE)
+
+#Combined anova/t-test analysis for Biomass by year collected and drought sequence
 biomass.aov <- aov(data = dataset.2.under, biomass ~ drought*sequence)
 
 #Tukey Post Hoc analysis for biomass
@@ -298,23 +278,25 @@ dNDMI.aov <- aov(data = dataset.2.under, dNDMI ~ drought*sequence)
 
 #Tukey Post Hoc analysis for dNDMI
 dNDMI.tHSD <- TukeyHSD(dNDMI.aov)
-# summary(dNDMI.tHSD)
-#Combine a list of tukey HSD tests
+
+#Create a combined a list of Tukey HSD tests
 tHSD <- list(biomass.tHSD, dNDMI.tHSD, 
              PET_4yr.tHSD, tmax_4yr.tHSD)
 
 #Create a data frame of tukey HSD tests
 df.tHSD <- as.data.frame(purrr::map_df(tHSD, tidy))
 
-#Labels for columns
+#Create labels for columns in HTML format
 df.tHSD$variable <- c('Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</sup>)',
                    'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI',
                    'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)',
                    'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)')
 
+#Get the sample size for the two main drought sequences
 dataset.2.under %>% filter(sequence == '2012-2015 Only' & drought == '1999-2002') %>% count()
 dataset.2.under %>% filter(sequence == 'Both Droughts' & drought == '1999-2002') %>% count()
-#Add mean values for 1999-2002
+
+#Add mean values for Estimate 1
 df.tHSD$estimate.1 <- c(#Biomass density
                         mean((dataset.2.under %>% filter(drought == '2012-2015'))$biomass), mean((dataset.2.under %>% filter(sequence == 'Both Droughts'))$biomass),
                         mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2012-2015 Only'))$biomass), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
@@ -336,8 +318,8 @@ df.tHSD$estimate.1 <- c(#Biomass density
                         mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr),
                         mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr))
 
-df.tHSD$estimate.1
-#Add mean values for 2012-2015
+
+#Add mean values for Estimate 2
 df.tHSD$estimate.2 <- c(#Biomass
                         mean((dataset.2.under %>% filter(drought == '1999-2002'))$biomass), mean((dataset.2.under %>% filter(sequence == '2012-2015 Only'))$biomass),
                         mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2012-2015 Only'))$biomass), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2012-2015 Only'))$biomass),
@@ -359,12 +341,6 @@ df.tHSD$estimate.2 <- c(#Biomass
                         mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2012-2015 Only'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2012-2015 Only'))$tmax_4yr),
                         mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2012-2015 Only'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr))
 
-df.tHSD$diff.pct <- df.tHSD$estimate / df.tHSD$estimate.1 * 100
-
-df.tHSD$low.pct <- df.tHSD$conf.low / df.tHSD$estimate.1 * 100
-
-df.tHSD$high.pct <- df.tHSD$conf.high / df.tHSD$estimate.1 * 100
-
 #Select and sort the tukey HSD columns and 
 df.tHSD.pub <- df.tHSD %>% dplyr::select(variable, contrast, estimate.1, estimate.2, estimate, conf.low, conf.high, adj.p.value)
 
@@ -374,6 +350,14 @@ colnames(df.tHSD.pub) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2',
 #ANOVA and Tukey HSD comparing by time period and drought sequence
 tb1 <- kbl(df.tHSD.pub, format = 'html', caption = "Table S1: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
 as_image(x = tb1, width = 10, file = "STable1_tHSD_test_results.png", zoom = 5.0)  
+
+#Create same table as Table 1, but add a percent change column, not included with manuscript
+#Calculate proportion differences from Tukey HSD tests
+df.tHSD$diff.pct <- df.tHSD$estimate / df.tHSD$estimate.1 * 100
+
+df.tHSD$low.pct <- df.tHSD$conf.low / df.tHSD$estimate.1 * 100
+
+df.tHSD$high.pct <- df.tHSD$conf.high / df.tHSD$estimate.1 * 100
 
 #Select and sort the tukey HSD columns and 
 df.tHSD.sup <- df.tHSD %>% dplyr::select(variable, contrast, estimate.1, estimate.2, estimate, conf.low, conf.high, diff.pct, high.pct, low.pct, adj.p.value)
@@ -389,7 +373,7 @@ as_image(x = tb3, width = 10, file = "STable5_tHSD_test_results.png", zoom = 5.0
 all.ca.both <- all.ca %>% dplyr::filter(drought.sequence == 'Both Droughts')
 all.ca.2015 <- all.ca %>% dplyr::filter(drought.sequence == '2012-2015 Only')
 
-#Paired t-tests for geospatial data sets
+#Paired t-tests for Geo-spatial data sets
 #Biomass
 biomass.both.t <- t.test(data = all.ca.both, x = all.ca.both$biomass_1999, y = all.ca.both$biomass_2012, paired = TRUE)
 biomass.2015.t <- t.test(data = all.ca.2015, x = all.ca.2015$biomass_1999, y = all.ca.2015$biomass_2012, paired = TRUE)
@@ -437,12 +421,6 @@ df.t$value.1999 <- c(mean(all.ca.both$biomass_1999), mean(all.ca.2015$biomass_19
 df.t$value.2012 <- c(mean(all.ca.both$biomass_2012), mean(all.ca.2015$biomass_2012), mean(all.ca.both$dNDMI_2017), mean(all.ca.2015$dNDMI_2017),
                      mean(all.ca.both$PET_4yr_2015), mean(all.ca.2015$PET_4yr_2015), mean(all.ca.both$tmax_4yr_2015), mean(all.ca.2015$tmax_4yr_2015))
 
-df.t$diff.pct <- df.t$estimate / df.t$value.1999 * 100
-
-df.t$low.pct <- df.t$conf.low / df.t$value.1999 * 100
-
-df.t$high.pct <- df.t$conf.high / df.t$value.1999 * 100
-
 #Select columns and put them in order
 df.t.label <- df.t %>% dplyr::select(variable, sequence, value.1999, value.2012, estimate, conf.low, conf.high, statistic, p.value) 
 
@@ -453,6 +431,15 @@ colnames(df.t.label) <- c('Variable','Drought Sequence', 'Estimate 1', 'Estimate
 tb2 <- kbl(df.t.label, format = 'html', caption = "Table S2: Paired two-tailed T-Test Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
 as_image(x = tb2, width = 10, file = "STable2_t_test_results.png", zoom = 5.0)
 
+#Create table that is the same as Table 2, but has percent change column. Not included with manuscript
+#Calculate percent differences for paired t-tests
+df.t$diff.pct <- df.t$estimate / df.t$value.1999 * 100
+
+df.t$low.pct <- df.t$conf.low / df.t$value.1999 * 100
+
+df.t$high.pct <- df.t$conf.high / df.t$value.1999 * 100
+
+#Select columns
 df.t.sup <- df.t %>% dplyr::select(variable, sequence, value.1999, value.2012, estimate, conf.low, conf.high, diff.pct, low.pct, high.pct, statistic, p.value, parameter) 
 
 #Give the different columns names
@@ -493,46 +480,30 @@ ADS <- as.data.frame(ADS)
 
 #Do the chi-squared test
 mychi <- chisq.test(ADS)
+
+#Print the results of the chi-square
 mychi
+
+#Print the expected result if there is no association
 mychi$expected
 
-#Do a chi-squared just for the both drought locations
-ADS.both <- matrix(c(as.numeric(ADS.1999.both.dead), as.numeric(ADS.2015.both.dead),
-                as.numeric(ADS.1999.both.alive), as.numeric(ADS.2015.both.alive)), ncol=2)
-
-colnames(ADS.both) <- c("Mortality", "No Mortality")
-rownames(ADS.both) <- c('Both Droughts: 1999-2002', 'Both Droughts: 2012-2015')
-ADS.both <- as.data.frame(ADS.both)
-
-mychi.both <- chisq.test(ADS.both)
-mychi.both
-mychi.both$expected
-
-#Do a chi-squared just for the 2012-2015 Only locations
-ADS.second <- matrix(c(as.numeric(ADS.1999.second.dead), as.numeric(ADS.2015.second.dead),
-                       as.numeric(ADS.1999.second.alive), as.numeric(ADS.2015.second.alive)), ncol=2)
-
-colnames(ADS.second) <- c("Mortality", "No Mortality")
-rownames(ADS.second) <- c('2012-2015 Only: 1999-2002','2012-2015 Only: 2012-2015')
-ADS.second <- as.data.frame(ADS.second)
-
-mychi.second <- chisq.test(ADS.second)
-mychi.second
-mychi.second$expected
-
 #Calculate proportion of ADS mortality and no mortality by drought sequence and time period
+#2012-2015 Only sample in 1999-2002
 second.2002 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% sum()
 second.2002.total <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% count()
 second.2002 / second.2002.total
 
+#2012-2015 Only sample in 2012-2015
 second.2015 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% sum()
 second.2015.total <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% count()
 second.2015 / second.2015.total
 
+#Both Droughts sample in 1999-2002
 both.2002 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% sum()
 both.2002.total <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% count()
 both.2002 / both.2002.total
 
+#Both Droughts sample in 2012-2015
 both.2015 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% sum()
 both.2015.total <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% count()
 both.2015 / both.2015.total
