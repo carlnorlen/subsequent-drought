@@ -789,33 +789,50 @@ trees.second.type <- trees.second %>% group_by(tree_type, PLOT, Tree_Status, dro
 #Convert into a data frame
 trees.second.type <- as.data.frame(trees.second.type)
 
-#Full plot summaries
+#Full plot summaries by tree type
 type.second.sum <- trees.second %>% group_by(tree_type, PLOT, drought) %>% summarize(
 									   biomass = sum(live_biomass),
 									   count = sum(count),
 									   basal_area = sum(basal_area)
 		)
 
+#Full plot summaries without tree type
+plot.second.sum <- trees.second %>% group_by(PLOT, drought, Tree_Status) %>% summarize(
+  biomass = sum(live_biomass),
+  count = sum(count),
+  basal_area = sum(basal_area)
+)
+
+head(plot.second.sum)
+
 #Adding in zero rows for Tree Types analysis
+#Add the live pine tree data by plot
 type.second.live.pine <- subset(trees.second.type, Tree_Status == 'Live' & tree_type == 'pine/fir')
 colnames(type.second.live.pine) <- c("tree_type", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.type.second.live.pine <- left_join(plots.second.both, type.second.live.pine, by = c('PLOT', 'drought'))
 join.type.second.live.pine$Tree_Status <- 'Live'
 
+#Add the live other tree data by plot
 type.second.live.other <- subset(trees.second.type, Tree_Status == 'Live' & tree_type == 'other tree')
 colnames(type.second.live.other) <- c("tree_type", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.type.second.live.other <- left_join(plots.second.both, type.second.live.other, by = c('PLOT', 'drought'))
 join.type.second.live.other$Tree_Status <- 'Live'
 
+#Add the total live tree data by plot
+type.second.live.total <- subset(trees.second.type, Tree_Status == 'Live')
+colnames(type.second.live.other) <- c("tree_type", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
+join.type.second.live.other <- left_join(plots.second.both, type.second.live.other, by = c('PLOT', 'drought'))
+join.type.second.live.other$Tree_Status <- 'Live'
+
+
 type.second.live <- rbind(join.type.second.live.pine, join.type.second.live.other)
 type.second.live <- dplyr::select(type.second.live, -rmv)
 
-# trees.second.type
 type.second.dead.pine <- subset(trees.second.type, Tree_Status == 'Dead' & tree_type == 'pine/fir')
 colnames(type.second.dead.pine) <- c("tree_type", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.type.second.dead.pine <- left_join(plots.second.both, type.second.dead.pine, by = c('PLOT', 'drought'))
 join.type.second.dead.pine$Tree_Status <- 'Dead'
-# join.type.second.dead.pine
+
 type.second.dead.other <- subset(trees.second.type, Tree_Status == 'Dead' & tree_type == 'other tree')
 colnames(type.second.dead.other) <- c("tree_type", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.type.second.dead.other <- left_join(plots.second.both, type.second.dead.other, by = c('PLOT', 'drought'))
@@ -824,8 +841,11 @@ join.type.second.dead.other$Tree_Status <- 'Dead'
 type.second.dead <- rbind(join.type.second.dead.pine, join.type.second.dead.other)
 type.second.dead <- dplyr::select(type.second.dead, -rmv)
 
+#Add a row for each plot of with the total live and dead biomass
+
 type.second.join <- left_join(type.second.sum, type.second.live, by = c('PLOT', 'drought', 'tree_type'))
 type.second.all <- left_join(type.second.join, type.second.dead, by = c('PLOT', 'drought', 'tree_type'))
+head(type.second.all)
 
 #Filling in live plot variables
 type.second.all$count.live[is.na(type.second.all$count.live)] <- 0
@@ -839,7 +859,9 @@ type.second.all$basal_area.dead[is.na(type.second.all$basal_area.dead)] <- 0
 type.second.all$basal_area.mort <- type.second.all$basal_area.dead / type.second.all$basal_area * 100
 type.second.all <- as.data.frame(type.second.all)
 
-#Summaries by tree types
+head(type.second.all)
+
+#Summaries by tree types across plots
 type.second.summary <- type.second.all %>% group_by(tree_type, drought) %>% summarize(
 																			  biomass.mean = mean(biomass),
 																			  biomass.sd = sd(biomass),
@@ -892,12 +914,13 @@ p1_textb <- data.frame(label = c("n = 44", "n = 26", "n = 199", "n = 192"),
 )
 
 #Create the mortality (%) bar chart
-p1 <- ggbarplot(filter(type.both.all, tree_type == "pine/fir"), x = "drought", y = "basal_area.mort", fill = "sequence", 
+p1 <- ggbarplot(filter(type.both.all), x = "drought", y = "basal_area.mort", fill = "tree_type", 
            ylab = 'Mortality (%)', xlab = "Time Period", order = c("1999-2002", "2012-2015"), position = position_dodge(), #stat = "density",
            add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
        guides(color = "none") + theme_bw() +
-       scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Drought \nSequence',
-                         labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
+       scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Tree \n', 
+                         labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
+                         #labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
                          aesthetics = "fill") +
        theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
              legend.position = c(0.75, 0.45), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
@@ -907,7 +930,7 @@ p1 <- ggbarplot(filter(type.both.all, tree_type == "pine/fir"), x = "drought", y
        geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
        geom_text(data = data.frame(label = "Mean \n+/- SE", y = 30, x = 1.25, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
        facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
-
+p1
 #Save figure as a .png file
 ggsave(filename = 'Fig4_needleleaf_conifer_mortality_barplot.png', height=7, width=12, units = 'cm', dpi=900)
 
