@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: January 14, 2022
+#Date Updated: March 29, 2022
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
@@ -113,7 +113,8 @@ p1 <- ggplot() +
 	  legend.key = element_rect(fill = NA), legend.text=element_text(size=8), legend.title = element_text(size=8))
 
 #Add annotations to map of SPI48 exposure
-p2 <- p1 + theme(
+p2 <- p1 + 
+    theme(
     legend.justification = c(1, 0),
     legend.position = c(0.85, 0.65),
     legend.text = element_text(size = 6),
@@ -122,6 +123,8 @@ p2 <- p1 + theme(
   guides(fill = guide_legend(ncol = 1, nrow = 3,
                              title.position = "top", title.hjust = 0.5), override.aes = list(fill = 0.4))
 
+p2    
+    
 #Create a figure of the sample size comparing SPI48 2002 versus SPI48 2015
 p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = count, group = count)) +
   geom_bin2d(mapping = aes(group = count, alpha = ..count..), binwidth = c(0.1, 0.1)) + theme_bw() + 
