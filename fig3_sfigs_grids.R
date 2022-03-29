@@ -312,8 +312,7 @@ p11 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
                        low = "black", mid = "cornsilk", high = "dark grey")
 
 #Add annotations and move the legend into the corner of the figure.
-p12 <- p11 + #annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly") +
-  #annotate("text", x = -2.4, y = -3, label = "Both \nDroughts") + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly") +
+p12 <- p11 +
   theme(
     legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
     legend.justification = c(1, 0),

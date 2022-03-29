@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: January 14, 2022
+#Date Updated: March 29, 2022
 #Purpose: Create Figure 2 time series for publication
 
 #Load required scripts for teh script
@@ -65,7 +65,7 @@ p1 <- ggplot() +
   scale_color_manual(values=c("#E66100", "#5D3A9B"), labels = c('Both \nDroughts', '2012-2015 \nOnly')) +
   theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), axis.title.x = element_blank(), legend.position = c(0.2, 0.6), legend.background = element_rect(colour = NA, fill = NA),
         legend.key = element_rect(fill = NA), axis.text.x = element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) + 
-  ylab('Die-off\n(% Area)')
+  ylab(expression(atop('Die-off','(% Area)')))
 
 #Create a dNDMI time series
 p2 <- ggplot() + 
@@ -98,7 +98,7 @@ p3 <- ggplot() +
   scale_color_manual(values=c("#E66100", "#5D3A9B")) +
   theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), axis.title.x = element_blank(), legend.position = 'none', 
         axis.text.x = element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) + 
-  ylab(expression('Biomass\n(Mg ha'^-1*')')) 
+  ylab(expression(atop('Biomass', paste('(Mg ',ha^{-1},')')))) 
 
 #Create a Pr-ET time series graph
 p4 <- ggplot() +
@@ -115,7 +115,7 @@ p4 <- ggplot() +
     scale_color_manual(values=c("#E66100", "#5D3A9B")) +
 	  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), legend.position = 'none', 
 	  axis.title.y = element_text(size = 10), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-	  xlab('Year') + ylab(expression('Pr-ET\n(mm yr'^-1*')')) 
+	  xlab('Year') + ylab(expression(atop('Pr-ET',paste('(mm ',yr^{-1},')')))) 
 
 #Combine the three time series graphs into one
 (p1 / p2 / p3 / p4) + plot_annotation(tag_levels = 'a', theme = theme(legend.margin=margin(t = 0, unit='cm'))) + plot_layout(heights = c(0.95,0.95,0.95,1))

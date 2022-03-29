@@ -918,7 +918,7 @@ p1 <- ggbarplot(filter(type.both.all), x = "drought", y = "basal_area.mort", fil
            ylab = 'Mortality (%)', xlab = "Time Period", order = c("1999-2002", "2012-2015"), position = position_dodge(), #stat = "density",
            add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
        guides(color = "none") + theme_bw() +
-       scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Tree \n', 
+       scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Tree \nType', 
                          labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
                          #labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
                          aesthetics = "fill") +
