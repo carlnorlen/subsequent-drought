@@ -122,20 +122,24 @@ p2 <- p1 + theme(
   guides(fill = guide_legend(ncol = 1, nrow = 3,
                              title.position = "top", title.hjust = 0.5), override.aes = list(fill = 0.4))
 
-#Create a figure to compare SPI48 for the two droughts and figure out the drought sequences experienced by the two regions.
-p3 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = sierra_prop, group = sierra_prop)) +
-  geom_bin2d(mapping = aes(group = sierra_prop), binwidth = c(0.1, 0.1)) + theme_bw() + 
+#Create a figure of the sample size comparing SPI48 2002 versus SPI48 2015
+p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = count, group = count)) +
+  geom_bin2d(mapping = aes(group = count, alpha = ..count..), binwidth = c(0.1, 0.1)) + theme_bw() + 
+  theme(legend.position="bottom", legend.text = element_text(size=6)) + 
   ylim(-3.5, 0) + xlim(-3, 2) +
-  ylab('SPI48 2012-2015') +  xlab('SPI48 1999-2002') +  
+  ylab('SPI48 2012-2015') +  xlab('SPI48 1999-2002') + 
   geom_vline(xintercept = 0, size = 0.5) + 
   geom_hline(yintercept = 0, size = 0.5) +
   geom_vline(xintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
-  guides(fill = guide_colorbar(title.position = "top", title.hjust = 0.5, title.vjust = 0.5, barwidth = 4, barheight = 1, ticks.colour = "black"), alpha = FALSE) +
+  guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, title.vjust = 0.5, ticks.colour = "black"), alpha = FALSE) +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
-        axis.title.y = element_text(size = 10), plot.title = element_text(size = 12, hjust = 0.5)) + #Presentation text sizes.
-  scale_fill_gradient2(name = "Region", limits = c(0, 100), midpoint = 50,  breaks = c(0, 50, 100), labels = c('Southern \nCalifornia', '50/50 \nMix', 'Sierra \nNevada'),
-                     low = "black", mid = "cornsilk", high = "dark grey")
+        axis.title.y = element_text(size = 10), legend.background = element_rect(colour = NA, fill = NA), 
+        legend.justification = c(1, 0), legend.position = c(0.99, 0.6), legend.text = element_text(size = 6), 
+        legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 12)) +  
+  scale_fill_gradient2(name = "Grid Cells", limits = c(0,2950), midpoint = 1475, low = "cornflowerblue", 
+                       mid = "yellow", high = "red", na.value = 'transparent') +
+  scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
 
 #Add annotations and move the legend into the corner of the figure.
 p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly") +
@@ -143,7 +147,7 @@ p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + anno
   theme(
     legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
     legend.justification = c(1, 0),
-    legend.position = c(0.65, 0.7),
+    legend.position = c(0.59, 0.7),
     legend.text = element_text(size = 6),
     legend.title = element_text(size = 8),
     legend.direction = "horizontal") 
