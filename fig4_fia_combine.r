@@ -1037,12 +1037,12 @@ join.DIA.second.dead.largest$Tree_Status <- 'Dead'
 DIA.second.dead <- rbind(join.DIA.second.dead.small, join.DIA.second.dead.mid, join.DIA.second.dead.large, join.DIA.second.dead.largest) #, join.DIA.dead.large)
 DIA.second.dead <- select(DIA.second.dead, -rmv)
 DIA.second.join <- left_join(DIA.second.sum, DIA.second.live, by = c('PLOT', 'drought', 'DIA.group'))
-DIA.second.join
-DIA.second.sum
-DIA.second.dead
-DIA.second.live
-
-DIA.second.join
+# DIA.second.join
+# DIA.second.sum
+# DIA.second.dead
+# DIA.second.live
+# 
+# DIA.second.join
 DIA.second.all <- left_join(DIA.second.join, DIA.second.dead, by = c('PLOT', 'drought', 'DIA.group'))
 
 #Filling in live plot variables
@@ -1226,20 +1226,20 @@ p1_textb <- data.frame(label = c("n = 44", "n = 26", "n = 199", "n = 192"),
 )
 
 #Create the mortality (%) bar chart
-p1 <- ggbarplot(filter(type.both.all), x = "drought", y = "basal_area.mort", fill = "tree_type", 
+p1 <- ggbarplot(filter(type.both.all), x = "drought", y = "basal_area.mort", fill = "tree_type", color = 'sequence', 
            ylab = 'Mortality (%)', xlab = "Time Period", order = c("1999-2002", "2012-2015"), position = position_dodge(), #stat = "density",
            add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
-       guides(color = "none") + theme_bw() +
-       scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Tree \nType', 
-                         labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
-                         #labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
-                         aesthetics = "fill") +
+       guides(color = "none", fill = guide_legend('Tree \nType')) + theme_bw() +
+       scale_color_manual(values = c("black", "black"), name = 'Drought \nSequence', 
+                         # labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
+                         labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
+                         aesthetics = "color") +
        theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
              legend.position = c(0.75, 0.45), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
              legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
              axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
-       geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
-       geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
+       # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
+       # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
        geom_text(data = data.frame(label = "Mean \n+/- SE", y = 30, x = 1.25, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
        facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
 p1
@@ -1282,11 +1282,35 @@ p2 <-   ggbarplot(filter(type.both.all, tree_type == "pine/fir"), x = "drought",
 ggsave(filename = 'SFig6_needleleaf_conifer_basal_area_boxplot.png', height=7, width=14, units = 'cm', dpi=900)
 # DIA.both.all
 #Create a DIA mortality bar chart
-p3 <- ggbarplot(filter(DIA.both.all), x = "drought", y = "basal_area.mort", fill = "DIA.group", color = 'sequence', 
-                ylab = 'Mortality (%)', xlab = "Time Period", order = c("1999-2002", "2012-2015"), position = position_dodge(), #stat = "density",
+p3 <- ggbarplot(filter(DIA.both.all, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+                x = "DIA.group", y = "basal_area.mort", fill = "sequence",  
+                ylab = 'Mortality (%)', xlab = "Diameter (cm)", order = c('12.7-19.9 cm', '20-29.9 cm', '30-39.9 cm', '40+ cm'), position = position_dodge(), #stat = "density",
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
-  theme_bw() + guides(color = 'none', fill = guide_legend("Diameter \nGroup")) +
-  scale_color_manual(values = c("#E66100", "#5D3A9B"), name = 'Drought \nSequence',
+  theme_bw() + #guides(color = 'none', fill = guide_legend("Diameter \nGroup")) +
+  scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Drought \nSequence',
+                    #labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
+                    labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
+                    aesthetics = "fill") +
+  theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
+        legend.position = c(0.72, 0.28), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
+  # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
+  # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 35, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) #+ 
+  #facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p3
+
+#Save the figure as a .png file
+ggsave(filename = 'SFig7_mortality_by_DBH_boxplot.png', height=7, width=14, units = 'cm', dpi=900)
+
+p4 <- ggbarplot(filter(type.both.all), 
+                x = "drought", y = "basal_area", fill = "tree_type",color = "sequence",   
+                ylab = 'Basal Area', xlab = "Time Period", order = c("1999-2002", "2012-2015"), position = position_dodge(), #stat = "density",
+                add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
+  theme_bw() + guides(color = 'none', fill = guide_legend("Tree \nType")) +
+  scale_color_manual(values = c("black", "black"), 
+                     name = 'Drought \nSequence',
                     #labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
                     labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
                     aesthetics = "color") +
@@ -1298,17 +1322,16 @@ p3 <- ggbarplot(filter(DIA.both.all), x = "drought", y = "basal_area.mort", fill
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   geom_text(data = data.frame(label = "Mean \n+/- SE", y = 35, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
-p3
-
-#Save the figure as a .png file
-ggsave(filename = 'SFig7_mortality_by_DBH_boxplot.png', height=7, width=14, units = 'cm', dpi=900)
+p4
 
 # DIA.summary.all
 #Doing the normal analysis
-type.aov.dead <- aov(data = filter(type.both.all, tree_type == 'pine/fir'), basal_area.mort ~ drought * sequence)
+type.aov.dead <- aov(data = filter(type.both.all), basal_area.mort ~ drought * sequence * tree_type)
+summary(type.aov.dead)
 
 #Tukey Post Hoc analysis of dead basal area by tree species type
 type.dead.tHSD <- TukeyHSD(type.aov.dead) 
+type.dead.tHSD
 
 #ANOVA of basal area by tree species type 
 type.aov.basal.dead <- aov(data = filter(type.both.all, tree_type == "pine/fir"), basal_area.dead ~ drought*sequence)
@@ -1321,14 +1344,26 @@ type.aov.basal.2 <- aov(data = filter(type.both.all, tree_type == 'pine/fir'), b
 
 #Tukey Post Hoc analysis of basal area by tree species type
 type.basal.tHSD.2 <- TukeyHSD(type.aov.basal.2) 
+type.basla.tHSD.2
 
 #ANOVA analysis of DIA for Pine/Fir
-DIA.aov.dead <- aov(data = filter(DIA.both.all), basal_area.mort ~ DIA.group * drought * sequence)
+DIA.aov.dead <- aov(data = filter(DIA.both.all),  #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+                    basal_area.mort ~ DIA.group * sequence * drought)
 summary(DIA.aov.dead)
 
 #Tukey Post Hoc analysis of dead basal area by DIA
 DIA.dead.tHSD <- TukeyHSD(DIA.aov.dead)
 DIA.dead.tHSD
+
+#ANOVA analysis of tree type basal area for Pine/Fir
+type.all.aov <- aov(data = filter(type.both.all, sequence == 'Both Droughts'),  #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+                    basal_area ~ tree_type * drought)
+summary(type.all.aov)
+
+#Tukey Post Hoc analysis of dead basal area by DIA
+type.all.tHSD <- TukeyHSD(type.all.aov)
+type.all.tHSD
+
 
 #Combine Tukey HSD values
 fia.tHSD <- list(type.dead.tHSD, #type.basal.dead.tHSD, 
