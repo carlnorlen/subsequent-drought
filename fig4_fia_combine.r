@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: January 18, 2022
+#Date Edited: March 31, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis 
 
 # Specify necessary packages
@@ -242,13 +242,13 @@ trees.all$tree_type <- recode(.x=trees.all$COMMON_NAME, 'California black oak' =
 
 #Sort into tree diameter groups
 trees.all <- trees.all %>% mutate(DIA.group = case_when(
-  DIA >= 40 ~ '40+ cm',
-  DIA >= 30 & DIA < 40 ~ '30-39.9 cm', 
-  DIA >= 20 & DIA <= 30 ~ '20-29.9 cm',
-  DIA < 20 ~ '12.7-19.9 cm'))
+  DIA >= 65 ~ '65+ cm',
+  DIA >= 45 & DIA < 65 ~ '45-64.9 cm', 
+  DIA >= 25 & DIA <= 45 ~ '25-44.9 cm',
+  DIA < 25 ~ '12.7-24.9 cm'))
 
 #Make the new DIA.group column a factor
-trees.all$DIA.group = with(trees.all, factor(DIA.group, levels = c('12.7-19.9 cm', '20-29.9 cm', '30-39.9 cm', '40+ cm')))
+trees.all$DIA.group = with(trees.all, factor(DIA.group, levels = c('12.7-24.9 cm', '25-44.9 cm', '45-64.9 cm', '65+ cm')))
 
 #Make the grouped data a data drame
 trees.all <- as.data.frame(trees.all)
@@ -443,31 +443,31 @@ trees.type <- as.data.frame(trees.type)
 
 #Make sure to include all the zeros
 #Create the DIA small group
-DIA.live.small <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '12.7-19.9 cm')
+DIA.live.small <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '12.7-24.9 cm')
 colnames(DIA.live.small) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.live.small <- left_join(plots.both, DIA.live.small, by = c('PLOT', 'drought'))
-join.DIA.live.small$DIA.group <- '12.7-19.9 cm'
+join.DIA.live.small$DIA.group <- '12.7-24.9 cm'
 join.DIA.live.small$Tree_Status <- 'Live'
 
 #Create the DIA mid group
-DIA.live.mid <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '20-29.9 cm')
+DIA.live.mid <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '25-44.9 cm')
 colnames(DIA.live.mid) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.live.mid <- left_join(plots.both, DIA.live.mid, by = c('PLOT', 'drought'))
-join.DIA.live.mid$DIA.group <- '20-29.9 cm'
+join.DIA.live.mid$DIA.group <- '25-44.9 cm'
 join.DIA.live.mid$Tree_Status <- 'Live'
 
 #Create the DIA large group
-DIA.live.large <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '30-39.9 cm')
+DIA.live.large <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '45-64.9 cm')
 colnames(DIA.live.large) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.live.large <- left_join(plots.both, DIA.live.large, by = c('PLOT', 'drought'))
-join.DIA.live.large$DIA.group <- '30-39.9 cm'
+join.DIA.live.large$DIA.group <- '45-64.9 cm'
 join.DIA.live.large$Tree_Status <- 'Live'
 
 #Create the DIA largest group
-DIA.live.largest <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '40+ cm')
+DIA.live.largest <- subset(trees.DIA, Tree_Status == 'Live' & DIA.group == '65+ cm')
 colnames(DIA.live.largest) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.live.largest <- left_join(plots.both, DIA.live.largest, by = c('PLOT', 'drought'))
-join.DIA.live.largest$DIA.group <- '40+ cm'
+join.DIA.live.largest$DIA.group <- '65+ cm'
 join.DIA.live.largest$Tree_Status <- 'Live'
 
 DIA.live <- rbind(join.DIA.live.small, join.DIA.live.mid, join.DIA.live.large, join.DIA.live.largest) 
@@ -476,31 +476,31 @@ DIA.live <- select(DIA.live, -rmv)
 
 #Dead plots
 #Create the DIA small group
-DIA.dead.small <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '12.7-19.9 cm')
+DIA.dead.small <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '12.7-24.9 cm')
 colnames(DIA.dead.small) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.dead.small <- left_join(plots.both, DIA.dead.small, by = c('PLOT', 'drought'))
-join.DIA.dead.small$DIA.group <- '12.7-19.9 cm'
+join.DIA.dead.small$DIA.group <- '12.7-24.9 cm'
 join.DIA.dead.small$Tree_Status <- 'dead'
 
 #Create the DIA mid group
-DIA.dead.mid <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '20-29.9 cm')
+DIA.dead.mid <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '25-44.9 cm')
 colnames(DIA.dead.mid) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.dead.mid <- left_join(plots.both, DIA.dead.mid, by = c('PLOT', 'drought'))
-join.DIA.dead.mid$DIA.group <- '20-29.9 cm'
+join.DIA.dead.mid$DIA.group <- '25-44.9 cm'
 join.DIA.dead.mid$Tree_Status <- 'Dead'
 
 #Create the DIA large group
-DIA.dead.large <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '30-39.9 cm')
+DIA.dead.large <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '45-64.9 cm')
 colnames(DIA.dead.large) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.dead.large <- left_join(plots.both, DIA.dead.large, by = c('PLOT', 'drought'))
-join.DIA.dead.large$DIA.group <- '30-39.9 cm'
+join.DIA.dead.large$DIA.group <- '45-64.9 cm'
 join.DIA.dead.large$Tree_Status <- 'dead'
 
 #Create the DIA largest group
-DIA.dead.largest <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '40+ cm')
+DIA.dead.largest <- subset(trees.DIA, Tree_Status == 'Dead' & DIA.group == '65+ cm')
 colnames(DIA.dead.largest) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.dead.largest <- left_join(plots.both, DIA.dead.largest, by = c('PLOT', 'drought'))
-join.DIA.dead.largest$DIA.group <- '40+ cm'
+join.DIA.dead.largest$DIA.group <- '65+ cm'
 join.DIA.dead.largest$Tree_Status <- 'Dead'
 
 #Bind the dead DIA groups together
@@ -844,16 +844,25 @@ trees.second$tree_type <- recode(.x=trees.second$COMMON_NAME, 'California black 
 
 #Sort into tree diameter groups
 trees.second <- trees.second %>% mutate(DIA.group = case_when(
-  DIA >= 40 ~ '40+ cm',
-  DIA >= 30 & DIA < 40 ~ '30-39.9 cm', 
-  DIA >= 20 & DIA <= 30 ~ '20-29.9 cm',
-  DIA < 20 ~ '12.7-19.9 cm'))
+  DIA >= 65 ~ '65+ cm',
+  DIA >= 45 & DIA < 65 ~ '45-64.9 cm', 
+  DIA >= 25 & DIA <= 45 ~ '25-44.9 cm',
+  DIA < 25 ~ '12.7-24.9 cm'))
 
 #Make the new DIA.group column a factor
-trees.second$DIA.group = with(trees.second, factor(DIA.group, levels = c('12.7-19.9 cm', '20-29.9 cm', '30-39.9 cm', '40+ cm')))
+trees.second$DIA.group = with(trees.second, factor(DIA.group, levels = c('12.7-24.9 cm', '25-44.9 cm', '45-64.9 cm', '65+ cm')))
 
 #Convert into a data frame
 trees.second <- as.data.frame(trees.second)
+summary(trees.second)
+trees.second %>% filter(COMMON_NAME == "ponderosa pine") %>% count()
+trees.second %>% filter(COMMON_NAME == "ponderosa pine") %>% summary()
+trees.all %>% filter(COMMON_NAME == "ponderosa pine") %>% summary()
+trees.all %>% group_by(COMMON_NAME) %>% count() %>% tail()
+
+Species.All.Death.Summary <- trees.all %>% filter(drought == '1999-2002') %>% group_by(COMMON_NAME, Tree_Status) %>% summarize(DIA.mean = sum(DIA*count)/sum(count), count.all = sum(count))
+
+Species.Second.Death.Summary <- trees.second %>% filter(drought == '2012-2015') %>% group_by(COMMON_NAME, Tree_Status) %>% summarize(DIA.mean = sum(DIA*count)/sum(count), sum(count))
 
 #Add the DIA grouping
 
@@ -973,31 +982,31 @@ plot.second.summmary <- as.data.frame(plot.second.summary)
 
 #Make sure to include all the zeros
 #Create the DIA small group
-DIA.second.live.small <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '12.7-19.9 cm')
+DIA.second.live.small <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '12.7-24.9 cm')
 colnames(DIA.second.live.small) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.second.live.small <- left_join(plots.second.both, DIA.second.live.small, by = c('PLOT', 'drought'))
-join.DIA.second.live.small$DIA.group <- '12.7-19.9 cm'
+join.DIA.second.live.small$DIA.group <- '12.7-24.9 cm'
 join.DIA.second.live.small$Tree_Status <- 'Live'
 
 #Create the DIA mid group
-DIA.second.live.mid <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '20-29.9 cm')
+DIA.second.live.mid <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '25-44.9 cm')
 colnames(DIA.second.live.mid) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.second.live.mid <- left_join(plots.second.both, DIA.second.live.mid, by = c('PLOT', 'drought'))
-join.DIA.second.live.mid$DIA.group <- '20-29.9 cm'
+join.DIA.second.live.mid$DIA.group <- '25-44.9 cm'
 join.DIA.second.live.mid$Tree_Status <- 'Live'
 
 #Create the DIA large group
-DIA.second.live.large <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '30-39.9 cm')
+DIA.second.live.large <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '45-64.9 cm')
 colnames(DIA.second.live.large) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.second.live.large <- left_join(plots.second.both, DIA.second.live.large, by = c('PLOT', 'drought'))
-join.DIA.second.live.large$DIA.group <- '30-39.9 cm'
+join.DIA.second.live.large$DIA.group <- '45-64.9 cm'
 join.DIA.second.live.large$Tree_Status <- 'Live'
 
 #Create the DIA largest group
-DIA.second.live.largest <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '40+ cm')
+DIA.second.live.largest <- subset(trees.second.DIA, Tree_Status == 'Live' & DIA.group == '65+ cm')
 colnames(DIA.second.live.largest) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.live", "count.live", "basal_area.live")
 join.DIA.second.live.largest <- left_join(plots.second.both, DIA.second.live.largest, by = c('PLOT', 'drought'))
-join.DIA.second.live.largest$DIA.group <- '40+ cm'
+join.DIA.second.live.largest$DIA.group <- '65+ cm'
 join.DIA.second.live.largest$Tree_Status <- 'Live'
 
 DIA.second.live <- rbind(join.DIA.second.live.small, join.DIA.second.live.mid, join.DIA.second.live.large, join.DIA.second.live.largest) 
@@ -1006,31 +1015,31 @@ DIA.second.live <- select(DIA.second.live, -rmv)
 
 #Dead plots
 #Create the DIA small group
-DIA.second.dead.small <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '12.7-19.9 cm')
+DIA.second.dead.small <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '12.7-24.9 cm')
 colnames(DIA.second.dead.small) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.second.dead.small <- left_join(plots.second.both, DIA.second.dead.small, by = c('PLOT', 'drought'))
-join.DIA.second.dead.small$DIA.group <- '12.7-19.9 cm'
+join.DIA.second.dead.small$DIA.group <- '12.7-24.9 cm'
 join.DIA.second.dead.small$Tree_Status <- 'dead'
 
 #Create the DIA mid group
-DIA.second.dead.mid <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '20-29.9 cm')
+DIA.second.dead.mid <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '25-44.9 cm')
 colnames(DIA.second.dead.mid) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.second.dead.mid <- left_join(plots.second.both, DIA.second.dead.mid, by = c('PLOT', 'drought'))
-join.DIA.second.dead.mid$DIA.group <- '20-29.9 cm'
+join.DIA.second.dead.mid$DIA.group <- '25-44.9 cm'
 join.DIA.second.dead.mid$Tree_Status <- 'Dead'
 
 #Create the DIA large group
-DIA.second.dead.large <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '30-39.9 cm')
+DIA.second.dead.large <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '45-64.9 cm')
 colnames(DIA.second.dead.large) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.second.dead.large <- left_join(plots.second.both, DIA.second.dead.large, by = c('PLOT', 'drought'))
-join.DIA.second.dead.large$DIA.group <- '30-39.9 cm'
+join.DIA.second.dead.large$DIA.group <- '45-64.9 cm'
 join.DIA.second.dead.large$Tree_Status <- 'Dead'
 
 #Create the DIA largest group
-DIA.second.dead.largest <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '40+ cm')
+DIA.second.dead.largest <- subset(trees.second.DIA, Tree_Status == 'Dead' & DIA.group == '65+ cm')
 colnames(DIA.second.dead.largest) <- c("DIA.group", "PLOT", "Tree_Status", "drought", "biomass.dead", "count.dead", "basal_area.dead")
 join.DIA.second.dead.largest <- left_join(plots.second.both, DIA.second.dead.largest, by = c('PLOT', 'drought'))
-join.DIA.second.dead.largest$DIA.group <- '40+ cm'
+join.DIA.second.dead.largest$DIA.group <- '65+ cm'
 join.DIA.second.dead.largest$Tree_Status <- 'Dead'
 
 #Bind the dead DIA groups together
@@ -1089,7 +1098,7 @@ DIA.second.all$sequence <- '2012-2015 Only'
 DIA.both.all <- rbind(DIA.all, DIA.second.all)
 
 #Make DIA.group a factor
-DIA.both.all$DIA.group <- factor(DIA.both.all$DIA.group, levels = c('12.7-19.9 cm', '20-29.9 cm', '30-39.9 cm', '40+ cm'))
+DIA.both.all$DIA.group <- factor(DIA.both.all$DIA.group, levels = c('12.7-24.9 cm', '25-44.9 cm', '45-64.9 cm', '65+ cm'))
 
 #Summarize by tree type
 trees.second.type <- trees.second %>% group_by(tree_type, PLOT, Tree_Status, drought) %>% summarize(
@@ -1282,23 +1291,23 @@ p2 <-   ggbarplot(filter(type.both.all, tree_type == "pine/fir"), x = "drought",
 ggsave(filename = 'SFig6_needleleaf_conifer_basal_area_boxplot.png', height=7, width=14, units = 'cm', dpi=900)
 # DIA.both.all
 #Create a DIA mortality bar chart
-p3 <- ggbarplot(filter(DIA.both.all, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
-                x = "DIA.group", y = "basal_area.mort", fill = "sequence",  
-                ylab = 'Mortality (%)', xlab = "Diameter (cm)", order = c('12.7-19.9 cm', '20-29.9 cm', '30-39.9 cm', '40+ cm'), position = position_dodge(), #stat = "density",
+p3 <- ggbarplot(filter(DIA.both.all), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+                x = "drought", y = "basal_area.mort", color = "sequence", fill = 'DIA.group', 
+                ylab = 'Mortality (%)', xlab = "Time Period", order = c('1999-2002', '2012-2015'), position = position_dodge(), #stat = "density",
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
-  theme_bw() + #guides(color = 'none', fill = guide_legend("Diameter \nGroup")) +
-  scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Drought \nSequence',
+  theme_bw() + guides(color = 'none', fill = guide_legend("Diameter \nGroup")) +
+  scale_color_manual(values = c("black", "black"), name = 'Drought \nSequence',
                     #labels = c("pine/fir" = "Needleleaf \nConifer", "other tree" = 'Other \nTrees'),
                     labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
-                    aesthetics = "fill") +
+                    aesthetics = "color") +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
         legend.position = c(0.72, 0.28), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
   # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 35, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) #+ 
-  #facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 35, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
 p3
 
 #Save the figure as a .png file
