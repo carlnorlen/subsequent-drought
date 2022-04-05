@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: February 20, 2022
+#Date Edited: April 4, 2022
 #Purpose: Create a chart showing the relationship between annual NDVI from Landsat and ET from flux towers
 
 p <- c('dplyr','tidyr','ggplot2','ggpubr','viridis','segmented', 'patchwork','RColorBrewer', 'broom', 'svglite', 'ggpmisc')
@@ -77,6 +77,13 @@ nlsFit <-
       start = start,
       data = sites.join)
 
+#Create the exponential fit between ET and NDVI, for forested sites
+nlsFit.forest <-
+  nls(formula = ET~alpha*exp(NDVI.mean*beta),
+      start = start,
+      data = sites.join %>% filter(Site %in% c('US-CZ1', 'US-CZ2', 'US-CZ3', 'US-CZ4', 'US-SCw', 'US-SCf')))
+nlsFit.forest
+
 #### Create scatter plot with exponential fit
 sites.join$Site <- factor(sites.join$Site)
 p1 <- ggplot(data = sites.join, mapping = aes(x = NDVI.mean, y = ET)) + 
@@ -92,3 +99,19 @@ f1 <- ggarrange(p1, ncol = 1, nrow = 1, common.legend = TRUE, legend = 'bottom')
 
 #Save the figure as a .PNG file
 ggsave(filename = 'SupFig8_NDVI_ET_scaling.png', height=10, width=12, units = 'cm', dpi=900)
+
+#### Create scatter plot with exponential fit for just forested sites
+p2 <- ggplot(data = sites.join %>% filter(Site %in% c('US-CZ1', 'US-CZ2', 'US-CZ3', 'US-CZ4', 'US-SCw', 'US-SCf')), 
+             mapping = aes(x = NDVI.mean, y = ET)) + 
+  scale_shape_manual(values=1:10) + theme_bw() +
+  geom_point(mapping = aes(color = Site, shape = Site), size = 2) + 
+  geom_smooth(method = nls, method.args = list(formula = y ~ alpha*exp(x*beta), start = start), se=FALSE, color = 'black') + 
+  stat_cor(aes(label = paste(..rr.label.., expression('ET = 132.223 * e'^'(2.579 * NDVI)'), sep = "~`,`~")), size = 3.5, color = 'black', r.accuracy = 0.001, p.accuracy = 0.001) +
+  theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) +
+  xlab('NDVI') + ylab(expression('ET (mm yr'^-1*')'))
+
+#Add the legend to the bottom of the figure
+f2 <- ggarrange(p2, ncol = 1, nrow = 1, common.legend = TRUE, legend = 'bottom')
+f2
+#Save the figure as a .PNG file
+ggsave(filename = 'SupFig9_Forest_NDVI_ET_scaling.png', height=10, width=12, units = 'cm', dpi=900)
