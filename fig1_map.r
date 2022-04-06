@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: March 29, 2022
+#Date Updated: April 4, 2022
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
@@ -98,7 +98,7 @@ all.ca.spi48 <- all.ca %>%
 p1 <- ggplot() +
 	  ggR(img = spi48.300m.both.mask, layer = 1, maxpixels = 1e10, geom_raster = TRUE, ggLayer = TRUE, forceCat = TRUE) +
 	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100"), breaks = c("1", "2", "3"), name = expression('SPI48'<= -1.5*''), 
-	                    labels = c("1999-2002 \nOnly", "2012-2015 \nOnly", "Both \nDroughts"), na.value = NA) +
+	                    labels = c("1st Drought \nOnly", "2nd Drought \nOnly", "Both \nDroughts"), na.value = NA) +
 	  geom_sf(data = ca_20m, color='black', size = 0.2, fill=NA) +
 	  geom_sf(data = usfs.sierra.union, color='dark gray', size = 0.6,  fill='dark gray', alpha = 0.4) +
 	  geom_sf(data = usfs.socal.union, color='black', size = 0.6,  fill='black', alpha = 0.2) +
@@ -130,9 +130,9 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   geom_bin2d(mapping = aes(group = count, alpha = ..count..), binwidth = c(0.1, 0.1)) + theme_bw() + 
   theme(legend.position="bottom", legend.text = element_text(size=6)) + 
   ylim(-3.5, 0) + xlim(-3, 2) +
-  ylab('SPI48 2012-2015') +  xlab('SPI48 1999-2002') + 
-  geom_vline(xintercept = 0, size = 0.5) + 
-  geom_hline(yintercept = 0, size = 0.5) +
+  ylab('SPI48 1999-2002') +  xlab('SPI48 2012-2015') + 
+  # geom_vline(xintercept = 0, size = 0.5) + 
+  # geom_hline(yintercept = 0, size = 0.5) +
   geom_vline(xintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
   guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, title.vjust = 0.5, ticks.colour = "black"), alpha = FALSE) +
@@ -145,12 +145,12 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
 
 #Add annotations and move the legend into the corner of the figure.
-p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly") +
-  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts") + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly") + 
+p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly") +
+  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts") + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly") + 
   theme(
     legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
     legend.justification = c(1, 0),
-    legend.position = c(0.59, 0.7),
+    legend.position = c(0.62, 0.7),
     legend.text = element_text(size = 6),
     legend.title = element_text(size = 8),
     legend.direction = "horizontal") 

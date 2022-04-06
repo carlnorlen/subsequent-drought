@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: March 29, 2022
+#Date Edited: April 4, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -85,10 +85,10 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
 	  geom_bin2d(mapping = aes(group = dNDMI_2004.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
 	  ylab(NULL) +  xlab(NULL) + 
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
-  geom_vline(xintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
-  geom_hline(yintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
+  geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
+  geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
     guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black"), alpha = "none") +
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
           axis.title.y = element_text(size = 10), plot.title = element_text(size = 10, hjust = 0.5), legend.background = element_rect(colour = NA, fill = NA), 
@@ -102,16 +102,16 @@ p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
 	  geom_bin2d(mapping = aes(group = dNDMI_2017.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
 	  ylab(NULL) +  xlab(NULL) +  
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
     guides(fill = "none", alpha = "none") +  
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
           axis.title.y = element_text(size = 10), strip.text = element_text(size = 10)) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
-  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
-  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) + 
+  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second) 
 
 #Combine the two figure panels into one	  
@@ -129,8 +129,8 @@ p3 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   geom_bin2d(mapping = aes(group = ADS_2004.prop), binwidth = c(0.1, 0.1)) + theme_bw() + 
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) + 
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black")) +
@@ -146,16 +146,16 @@ p4 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   geom_bin2d(mapping = aes(group = ADS_2017.prop), binwidth = c(0.1, 0.1)) + theme_bw() +  
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) +  
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = "none") +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
         axis.title.y = element_text(size = 10), strip.text = element_text(size = 10)) +
   scale_fill_gradient(name = "Mortality (% Grid Cells)", limits = c(0, 100), high = "#D41159", low = "lightyellow1", na.value = 'transparent') +
-  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
-  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) +
+  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second) 
 
 #Combine the two figure panels into one	
@@ -172,8 +172,8 @@ p5 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   geom_bin2d(mapping = aes(group = PET_4yr_2002.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) + 
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black")) +
@@ -189,16 +189,16 @@ p6 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   geom_bin2d(mapping = aes(group = PET_4yr_2015.mean), binwidth = c(0.1, 0.1)) + theme_bw() +  
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) +  
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = "none") +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
         axis.title.y = element_text(size = 10), strip.text = element_text(size = 10)) +
   scale_fill_gradient2(name = expression("Pr-ET (mm 4yr"^-1*")"), limits = c(-1700, 3000), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
-  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
-  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) +
+  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second)
 
 #Combine the two figure panels into one	
@@ -215,8 +215,8 @@ p7 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   geom_bin2d(mapping = aes(group = biomass_1999.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) + 
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black")) +
@@ -232,16 +232,16 @@ p8 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   geom_bin2d(mapping = aes(group = biomass_2012.mean), binwidth = c(0.1, 0.1)) + theme_bw() +  
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) +  
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = "none") +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
         axis.title.y = element_text(size = 10), strip.text = element_text(size = 10)) +
   scale_fill_gradient(name = expression("Biomass (Mg ha"^-1*")"), limits = c(10, 280), breaks = c(100,200), low = 'brown', high = 'green', na.value = 'transparent') +
-  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
-  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) +
+  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second) 
 
 #Combine the two figure panels into one	
@@ -258,8 +258,8 @@ p9 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   geom_bin2d(mapping = aes(group = tmax_4yr_2002.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) + 
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black")) +
@@ -275,16 +275,16 @@ p10 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   geom_bin2d(mapping = aes(group = tmax_4yr_2015.mean), binwidth = c(0.1, 0.1)) + theme_bw() +  
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab(NULL) +  xlab(NULL) +  
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = "none") +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
         axis.title.y = element_text(size = 10), strip.text = element_text(size = 10)) +
   scale_fill_gradient(name = "Temperature (C)", limits = c(6, 22), low = "blue", high = "red", na.value = 'transparent') +
-  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1992-2002 \nOnly", size = 3) +
-  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2012-2015 \nOnly", size = 3) +
+  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second) 
 
 #Combine the two figure panels into one	
@@ -301,8 +301,8 @@ p11 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
   geom_bin2d(mapping = aes(group = sierra_prop), binwidth = c(0.1, 0.1)) + theme_bw() + 
   ylim(-3.5, 0) + xlim(-3, 2) +
   ylab('SPI48 2012-2015') +  xlab('SPI48 1999-2002') +  
-  geom_vline(xintercept = 0, size = 0.25) + 
-  geom_hline(yintercept = 0, size = 0.25) +
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   guides(fill = guide_colorbar(title.position = "top", title.hjust = 0.5, title.vjust = 0.5, barwidth = 4, barheight = 1, ticks.colour = "black"), alpha = FALSE) +

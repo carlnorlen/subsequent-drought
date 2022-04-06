@@ -854,11 +854,11 @@ trees.second$DIA.group = with(trees.second, factor(DIA.group, levels = c('12.7-2
 
 #Convert into a data frame
 trees.second <- as.data.frame(trees.second)
-summary(trees.second)
-trees.second %>% filter(COMMON_NAME == "ponderosa pine") %>% count()
-trees.second %>% filter(COMMON_NAME == "ponderosa pine") %>% summary()
-trees.all %>% filter(COMMON_NAME == "ponderosa pine") %>% summary()
-trees.all %>% group_by(COMMON_NAME) %>% count() %>% tail()
+# summary(trees.second)
+# trees.second %>% filter(COMMON_NAME == "ponderosa pine") %>% count()
+# trees.second %>% filter(COMMON_NAME == "ponderosa pine") %>% summary()
+# trees.all %>% filter(COMMON_NAME == "ponderosa pine") %>% summary()
+# trees.all %>% group_by(COMMON_NAME) %>% count() %>% tail()
 
 Species.All.Death.Summary <- trees.all %>% filter(drought == '1999-2002') %>% group_by(COMMON_NAME, Tree_Status) %>% summarize(DIA.mean = sum(DIA*count)/sum(count), count.all = sum(count))
 
@@ -1292,6 +1292,27 @@ p2 <-   ggbarplot(filter(type.both.all, tree_type == "pine/fir"), x = "drought",
 p2
 #Save the figure as a .png file
 ggsave(filename = 'SFig6_needleleaf_conifer_basal_area_boxplot.png', height=7, width=14, units = 'cm', dpi=900)
+
+#Create the basal area bar chart figure with pine/fir versus 
+p3 <-   ggbarplot(filter(type.both.all), x = "drought", y = "basal_area", fill = "sequence",
+                  ylab = expression('Basal Area (m'^2*' ha'^-1*')'), xlab = "Time Period", order = c("1999-2002", "2012-2015"),
+                  add = "mean_se", error.plot = "errorbar", alpha = 0.8, position = position_dodge()) +
+  guides(color = "none") + theme_bw() +
+  scale_fill_manual(values = c("#E66100", "#5D3A9B"), name = 'Drought \nSequence',
+                    labels = c("Both Droughts" =  "Both \nDroughts", "2012-2015 Only" = "2012-2015 \nOnly"),
+                    aesthetics = "fill") +
+  theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0), legend.position = c(0.48, 0.55),
+        legend.text = element_text(size = 6), legend.title = element_text(size = 8), legend.direction = "vertical", 
+        axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
+  geom_text(data = p2_text, mapping = aes(x = x, y = y, label = label), size = 5) +
+  geom_text(data = p2_number, mapping = aes(x = x, y = y, label = label), size = 3) + 
+  geom_text(data = data.frame(label = "Mean +/- SE", y = 14.5, x = 1.28, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) +
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p4
+#Save the figure as a .png file
+ggsave(filename = 'SFig6_needleleaf_conifer_basal_area_boxplot.png', height=7, width=14, units = 'cm', dpi=900)
+
 # DIA.both.all
 #Create a DIA mortality bar chart
 # p3 <- ggbarplot(filter(DIA.both.all), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
