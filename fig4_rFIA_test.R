@@ -347,10 +347,10 @@ join.dia.all$tree_type <- as.factor(join.dia.all$tree_type)
 join.dia.all$sizeClass <- as.factor(join.dia.all$sizeClass)
 join.dia.all.type <- join.dia.all %>% group_by(pltID, time.period, sequence, sizeClass, tree_type, .drop = FALSE) %>% 
   summarize(BAA.all.sum = sum(BAA.all), BAA.live.sum = sum(BAA), BAA.dead.sum = sum(BAA.dead))
+
+#Convert tree_type and sizeClass back to characters
 join.dia.all.type$tree_type <- as.character(join.dia.all.type$tree_type)
 join.dia.all.type$sizeClass <- as.character(join.dia.all.type$sizeClass)
-# ungroup() %>% #Ungroup the data
-# complete(pltID, time.period, tree_type, fill = list(BAA.all.sum = 0, BAA.dead.sum = 0, BAA.live.sum = 0)) #Add the missing combinations of data
 
 #Calculate the precentage mortality
 join.dia.all.type$BAA.mort <- join.dia.all.type$BAA.dead.sum / (join.dia.all.type$BAA.all.sum) * 100
@@ -368,11 +368,11 @@ join.dia.all.summary <- join.dia.all.type %>% #mutate(BAA.mort = replace(BAA.mor
 join.dia.all.type %>% filter(tree_type == 'pine') %>% summary()
 
 #Do plots of the total basal area by sizeClass
-p2 <- ggplot() + geom_line(data = join.dia.all.type %>% filter(tree_type != 'oak' & tree_type != 'cedar' & 
+p2 <- ggplot() + geom_line(data = join.dia.all %>% filter(tree_type != 'oak' & tree_type != 'cedar' & 
                                                                tree_type != 'juniper' & tree_type != 'other conifer' & 
                                                                tree_type != 'deciduous') %>% group_by(tree_type, time.period, sequence, sizeClass) %>%
-                             summarize(BAA.mean = mean(BAA.all.sum)), 
-                       mapping = aes(x = as.numeric(sizeClass) * 2.54, y = BAA.mean, color = time.period)) + 
+                             summarize(BAA.mort = sum(BAA.dead)), 
+                       mapping = aes(x = as.numeric(sizeClass) * 2.54, y = BAA.mort, color = time.period)) + 
                        xlab('Size Class (cm)') + ylab(expression('Basal Area (m'^2*' ha'^-1*')')) + theme_bw() +
                        # scale_color_manual(values = c("black", "black"),
                        # aesthetics = "color") +
