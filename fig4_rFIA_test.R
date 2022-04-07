@@ -226,13 +226,13 @@ sp.dead.tHSD
 # ca$TREE$DIA
 tpa.dia.both.all.2002 <- tpa(ca, treeType = 'live', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
-                           DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                           DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 # tpa.dia.both.all.2002
 # makeClasses(ca, )
 #Dead basal area 
 tpa.dia.both.mort.2002 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = DIA >= 5 & INVYR %in% c("2002", "2003", "2004", "2005", "2006"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
-                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Rename the dead columns for TPA
 tpa.dia.both.mort.2002 <- tpa.dia.both.mort.2002 %>% select(pltID, sizeClass, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
@@ -241,102 +241,159 @@ join.dia.both.2002 <- left_join(tpa.dia.both.all.2002, tpa.dia.both.mort.2002, b
 
 #Replace the NAs with 0s
 join.dia.both.2002 <- join.dia.both.2002 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
-join.dia.both.2002
+# join.dia.both.2002
 
 #Both Droughts for 2012-2015
 #Live Basal Area
-tpa.dia.both.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'all', bySpecies = TRUE, bySizeClass = TRUE, makeClasses = 5, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
+tpa.dia.both.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
                            DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
-                           DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                           DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Dead basal area 
-tpa.dia.both.mort.2015 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, makeClass = 5, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
-                            DIA >= 5 & MORTYR %notin% c("2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012"),
+tpa.dia.both.mort.2015 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
+                            DIA >= 5 & MORTYR %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
-                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
-tpa.second.mort.2015 <- tpa.second.mort.2015 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+#Rename the dead BAA and TPA columns
+tpa.dia.both.mort.2015 <- tpa.dia.both.mort.2015 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
 
-join.second.2015 <- left_join(tpa.second.all.2015, tpa.second.mort.2015, by = c('pltID', 'YEAR','COMMON_NAME'))
+join.dia.both.2015 <- left_join(tpa.dia.both.all.2015, tpa.dia.both.mort.2015, by = c('pltID', 'YEAR','COMMON_NAME'))
 
 #Replace the NAs with 0s
-join.second.2015 <- join.second.2015 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
-# 
+join.dia.both.2015 <- join.dia.both.2015 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+ 
 
 ##Combine two different live basal area queries together
-tpa.dia.both.all.2002$time.period <- '1999-2002'
-tpa.dia.both.all.2015$time.period <- '2012-2015'
-tpa.dia.both.all <- rbind(tpa.dia.both.all.2002, tpa.dia.both.all.2015)
-tpa.dia.both.all$sequence <- 'Both Droughts'
-
-##Combine two different dead queries together for tree mortality
-tpa.dia.both.mort.2002$time.period <- '1999-2002'
-tpa.dia.both.mort.2015$time.period <- '2012-2015'
-tpa.dia.both.mort <- rbind(tpa.dia.both.mort.2002, tpa.dia.both.mort.2015)
-tpa.dia.both.mort$sequence <- 'Both Droughts'
+join.dia.both.2002$time.period <- '1999-2002'
+join.dia.both.2015$time.period <- '2012-2015'
+join.dia.both <- rbind(join.dia.both.2002, join.dia.both.2015)
+join.dia.both$sequence <- 'Both Droughts'
 
 #2012-2015 Only
-#All Basal Area 1999-2002
+#1999-2002 Data
+#Live Basal Area
 tpa.dia.second.all.2002 <- tpa(ca, treeType = 'live', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
                              areaDomain = ECOSUBCD %in% c('M261Ep', 'M261Eq' ,'M261Eu' ,'M261Er' ,'M261Eo' ,'M262Bb' ,'M262Ba') &
-                               DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                               DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Dead basal area 
 tpa.dia.second.mort.2002 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = DIA >= 5 & INVYR %in% c("2002", "2003", "2004", "2005", "2006") & MORTYR != '',
                               areaDomain = ECOSUBCD %in% c('M261Ep', 'M261Eq' ,'M261Eu' ,'M261Er' ,'M261Eo' ,'M262Bb' ,'M262Ba') &
-                                DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                                DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
-#Do Basal Area distrubutions by species and sizeClass
-tpa.dia.second.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'all', bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
+#Rename the dead columns for TPA
+tpa.dia.second.mort.2002 <- tpa.dia.second.mort.2002 %>% select(pltID, sizeClass, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+
+join.dia.second.2002 <- left_join(tpa.dia.second.all.2002, tpa.dia.second.mort.2002, by = c('pltID', 'sizeClass', 'YEAR','COMMON_NAME'))
+
+#Replace the NAs with 0s
+join.dia.second.2002 <- join.dia.second.2002 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+
+#2012-2015 Data
+#Live Basal Area
+tpa.dia.second.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
                                DIA >= 5,
                              areaDomain = ECOSUBCD %in% c('M261Ep', 'M261Eq' ,'M261Eu' ,'M261Er' ,'M261Eo' ,'M262Bb' ,'M262Ba') &
-                               DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                               DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Dead basal area 
 tpa.dia.second.mort.2015 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
-                                DIA >= 5 & MORTYR %notin% c("2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012"),
+                                DIA >= 5 & MORTYR %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019"),
                               areaDomain = ECOSUBCD %in% c('M261Ep', 'M261Eq' ,'M261Eu' ,'M261Er' ,'M261Eo' ,'M262Bb' ,'M262Ba') &
-                                DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+                                DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
+
+
+#Rename the dead BAA and TPA columns
+tpa.dia.second.mort.2015 <- tpa.dia.second.mort.2015 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+
+join.dia.second.2015 <- left_join(tpa.dia.second.all.2015, tpa.dia.second.mort.2015, by = c('pltID', 'YEAR','COMMON_NAME'))
+
+#Replace the NAs with 0s
+join.dia.second.2015 <- join.dia.second.2015 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+
 
 ##Combine two different live queries together
-tpa.dia.second.all.2002$time.period <- '1999-2002'
-tpa.dia.second.all.2015$time.period <- '2012-2015'
-tpa.dia.second.all <- rbind(tpa.dia.second.all.2002, tpa.dia.second.all.2015)
-tpa.dia.second.all$sequence <- '2012-2015 Only'
+join.dia.second.2002$time.period <- '1999-2002'
+join.dia.second.2015$time.period <- '2012-2015'
+join.dia.second <- rbind(join.dia.second.2002, join.dia.second.2015)
+join.dia.second$sequence <- '2012-2015 Only'
 
 ##Combine two different dead queries together for tree mortality
-tpa.dia.second.mort.2002$time.period <- '1999-2002'
-tpa.dia.second.mort.2015$time.period <- '2012-2015'
-tpa.dia.second.mort <- rbind(tpa.dia.second.mort.2002, tpa.dia.second.mort.2015)
-tpa.dia.second.mort$sequence <- '2012-2015 Only'
+# tpa.dia.second.mort.2002$time.period <- '1999-2002'
+# tpa.dia.second.mort.2015$time.period <- '2012-2015'
+# tpa.dia.second.mort <- rbind(tpa.dia.second.mort.2002, tpa.dia.second.mort.2015)
+# tpa.dia.second.mort$sequence <- '2012-2015 Only'
 
 #Combine the drought sequence for total basal area and mortality with species and DIA groups
 #Total Basal Area
-tpa.dia.all <- rbind(tpa.dia.both.all, tpa.dia.second.all)
+join.dia.all <- rbind(join.dia.both, join.dia.second)
 
 #Mortality Basal Area
-tpa.dia.mort <- rbind(tpa.dia.both.mort, tpa.dia.second.mort)
+# tpa.dia.mort <- rbind(tpa.dia.second.mort, tpa.dia.second.mort)
+join.dia.all$tree_type <- recode(.x=join.dia.all$COMMON_NAME, 'California black oak' = 'oak', 'California juniper' = 'juniper', 'California live oak' = 'oak', 'California sycamore' = 'deciduous', 'Coulter pine' = 'pine', 'chinkapin oak' = 'oak', 'Jeffrey pine' = 'pine',
+                               'bigcone Douglas-fir' = 'fir', 'bigleaf maple' = 'deciduous', 'canyon live oak' = 'oak', 'curlleaf mountain-mahogany' = 'deciduous', 'incense-cedar' = 'cedar', 'interior live oak' = 'oak', 'limber pine' = 'pine',
+                               'lodgepole pine' = 'pine', 'ponderosa pine' = 'pine', 'singleleaf pinyon' = 'pine', 'sugar pine' = 'pine', 'Utah juniper' = 'juniper', 'western juniper' = 'juniper', 'white alder' = 'deciduous', 'white fir' = 'fir', 'California laurel' = 'deciduous',
+                               'California-laurel' = 'deciduous', 'Oregon ash' = 'deciduous', 'Douglas-fir' = 'fir', 'honey mesquite' = 'deciduous', 'desert ironwood' = 'deciduous', 'California red fir' = 'fir', 'California buckeye' = 'deciduous', 'Engelmann oak' = 'oak', 'grand fir' = 'fir', 'western white pine' = 'pine',
+                               "western white pine" = 'pine', "whitebark pine" = 'pine', "mountain hemlock" = "other conifer", "gray or California foothill pine" = "pine", "foxtail pine" = 'pine', "blue oak" = 'oak', "California white oak" = 'oak', "quaking aspen" = 'deciduous',
+                               "giant sequoia" = 'other conifer', "Unknown dead conifer" = 'unknown conifer', "ash spp." = 'deciduous', "black cottonwood" = 'deciduous', "California torreya (nutmeg)" = 'deciduous', "Oregon white oak" = 'oak', "Port-Orford-cedar" = 'cedar', "Pacific dogwood" = 'deciduous')
 
+join.dia.all$BAA.dead <- join.dia.all$BAA.dead * (1/4.356)
+join.dia.all$BAA <- join.dia.all$BAA * (1/4.356)
+join.dia.all$BAA.all<- join.dia.all$BAA + join.dia.all$BAA.dead
+#Make tree type a factor so that I can fill in missing combinations
+join.dia.all$tree_type <- as.factor(join.dia.all$tree_type)
+join.dia.all$sizeClass <- as.factor(join.dia.all$sizeClass)
+join.dia.all.type <- join.dia.all %>% group_by(pltID, time.period, sequence, sizeClass, tree_type, .drop = FALSE) %>% 
+  summarize(BAA.all.sum = sum(BAA.all), BAA.live.sum = sum(BAA), BAA.dead.sum = sum(BAA.dead))
+join.dia.all.type$tree_type <- as.character(join.dia.all.type$tree_type)
+join.dia.all.type$sizeClass <- as.character(join.dia.all.type$sizeClass)
+# ungroup() %>% #Ungroup the data
+# complete(pltID, time.period, tree_type, fill = list(BAA.all.sum = 0, BAA.dead.sum = 0, BAA.live.sum = 0)) #Add the missing combinations of data
+
+#Calculate the precentage mortality
+join.dia.all.type$BAA.mort <- join.dia.all.type$BAA.dead.sum / (join.dia.all.type$BAA.all.sum) * 100
+join.dia.all.type <- join.dia.all.type %>% mutate(BAA.mort = replace(BAA.mort, is.na(BAA.mort), 0))
+summary(join.dia.all.type)
+join.dia.all.summary <- join.dia.all.type %>% #mutate(BAA.mort = replace(BAA.mort, is.na(BAA.mort), 0)) %>%
+  mutate(live = case_when(BAA.all.sum > 0 ~ 1, BAA.all.sum == 0 ~ 0), 
+         dead = case_when(BAA.mort > 0 ~ 1, BAA.mort == 0 ~ 0)) %>%
+  group_by(tree_type, time.period, sequence, sizeClass) %>% summarize(BAA.all.mean = mean(BAA.all.sum), BAA.all.sd = sd(BAA.all.sum),
+                                                           BAA.live.mean = mean(BAA.live.sum), BAA.sd = sd(BAA.live.sum),
+                                                           BAA.dead.mean = mean(BAA.dead.sum), BAA.dead.sd = sd(BAA.dead.sum),
+                                                           BAA.mort.mean = mean(BAA.mort), BAA.mort.sd = sd(BAA.mort), count = n(),
+                                                           live.count = sum(live), dead.count = sum(dead))
+
+join.dia.all.type %>% filter(tree_type == 'pine') %>% summary()
 
 #Do plots of the total basal area by sizeClass
-p2 <- ggplot() + geom_line(data = tpa.dia.all %>% 
-                       filter(COMMON_NAME %in% c('ponderosa pine', 'Coulter pine', 'singleleaf pinyon', 'Jeffrey pine', 'sugar pine', 'white fir', 'bigcone Douglas-fir')) %>% 
-                       group_by (COMMON_NAME, sizeClass, time.period, sequence) %>% summarize(TPA.mean = mean(TPA), BAA.mean = mean(BAA)), mapping = aes(x = sizeClass * 2.54, y = BAA.mean, color = time.period)) + 
+p2 <- ggplot() + geom_line(data = join.dia.all.type %>% filter(tree_type != 'oak' & tree_type != 'cedar' & 
+                                                               tree_type != 'juniper' & tree_type != 'other conifer' & 
+                                                               tree_type != 'deciduous') %>% group_by(tree_type, time.period, sequence, sizeClass) %>%
+                             summarize(BAA.mean = mean(BAA.all.sum)), 
+                       mapping = aes(x = as.numeric(sizeClass) * 2.54, y = BAA.mean, color = time.period)) + 
                        xlab('Size Class (cm)') + ylab(expression('Basal Area (m'^2*' ha'^-1*')')) + theme_bw() +
-                       facet_grid(COMMON_NAME ~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
-
+                       # scale_color_manual(values = c("black", "black"),
+                       # aesthetics = "color") +
+                       facet_grid(tree_type ~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p2
 ggsave(filename = 'SFig11_conifer_basal_area_distribution.png', height=14, width=16, units = 'cm', dpi=900)
 
 # print(sp.second.2002)
 # print(sp.second.2015)
 
 #Do plots of the total basal area by sizeClass
-p3 <- ggplot() + geom_line(data = tpa.dia.mort %>% 
-                       filter(COMMON_NAME %in% c('ponderosa pine', 'Coulter pine', 'singleleaf pinyon', 'Jeffrey pine', 'sugar pine', 'white fir', 'bigcone Douglas-fir')) %>% 
-                       group_by (COMMON_NAME, sizeClass, time.period, sequence) %>% summarize(TPA.mean = mean(TPA), BAA.mean = mean(BAA)), mapping = aes(x = sizeClass * 2.54, y = BAA.mean, color = time.period)) + 
-  xlab('Size Class (cm)') + ylab(expression('Mortality (m'^2*' ha'^-1*')')) + theme_bw() +
-  facet_grid(COMMON_NAME ~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p2 <- ggplot() + geom_line(data = join.dia.all.type %>% filter(tree_type != 'oak' & tree_type != 'cedar' & 
+                                                                 tree_type != 'juniper' & tree_type != 'other conifer' & 
+                                                                 tree_type != 'deciduous') %>% group_by(tree_type, time.period, sequence, sizeClass) %>%
+                             summarize(BAA.mean = mean(BAA.dead.sum)), 
+                           mapping = aes(x = as.numeric(sizeClass) * 2.54, y = BAA.mean, color = time.period)) + 
+  xlab('Size Class (cm)') + ylab(expression('Basal Area (m'^2*' ha'^-1*')')) + theme_bw() +
+  # scale_color_manual(values = c("black", "black"),
+  # aesthetics = "color") +
+  facet_grid(tree_type ~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p2
 
 ggsave(filename = 'SFig12_conifer_mortality_distribution.png', height=14, width=16, units = 'cm', dpi=900)
 
