@@ -187,25 +187,25 @@ sp.levels <- c("ponderosa pine", "Coulter pine", "Jeffrey pine", "sugar pine", "
                "incense-cedar","California juniper","canyon live oak", "California black oak", "interior live oak")
 
 #Convert basal area from sq ft / acre to sq meter / hectare
-all.forest$BAA.dead <- all.forest$BAA.dead * (1/4.356)
-sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]
-p1 <- ggbarplot(all.forest %>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
-                x = "time.period", y = "BAA.dead", position = position_dodge(), fill = 'COMMON_NAME', color = "sequence",
-                add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
-  theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree \nSpecies", ncol = 2)) +
-  scale_color_manual(values = c("black", "black"),
-                     aesthetics = "color") +
-  theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.76, 0.15), legend.text = element_text(size = 3), legend.title = element_text(size = 5),
-        legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
-  # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
-  # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 4, x = 2.25, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
-  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
-p1
-
-ggsave(filename = 'SFig10_species_mortality_barplot.png', height=7, width=16, units = 'cm', dpi=900)
+# all.forest$BAA.dead <- all.forest$BAA.dead * (1/4.356)
+# sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]
+# p1 <- ggbarplot(all.forest %>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+#                 x = "time.period", y = "BAA.dead", position = position_dodge(), fill = 'COMMON_NAME', color = "sequence",
+#                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
+#   theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree \nSpecies", ncol = 2)) +
+#   scale_color_manual(values = c("black", "black"),
+#                      aesthetics = "color") +
+#   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
+#         legend.position = c(0.76, 0.15), legend.text = element_text(size = 3), legend.title = element_text(size = 5),
+#         legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+#         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
+#   # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
+#   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
+#   geom_text(data = data.frame(label = "Mean \n+/- SE", y = 4, x = 2.25, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+#   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+# p1
+# 
+# ggsave(filename = 'SFig10_species_mortality_barplot.png', height=7, width=16, units = 'cm', dpi=900)
 
 # DIA.summary.all
 #Do an ANOVA and Tukey HSD by tree species
@@ -217,32 +217,52 @@ sp.dead.tHSD <- TukeyHSD(sp.aov.dead)
 sp.dead.tHSD
 
 #Testing out a separation by Species and DIA group 
-#Both Droughts
-tpa.dia.both.all.2002 <- tpa(ca, treeType = 'all', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
+#Both Droughts for 1999-2002
+#Live Basal Area
+# makeClasses(ca, interval = as.numeric(10/2.54))
+# ca.size <- makeClasses(ca$TREE$DIA, interval = 10/2.54)
+#Create a list of size classes based on the tree table
+# makeClasses(ca$TREE$DIA, interval = 10/2.54)
+# ca$TREE$DIA
+tpa.dia.both.all.2002 <- tpa(ca, treeType = 'live', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
-# tpa.dia.both.all.2002 
-# plotFIA(tpa.dia.both.all.2002 %>% filter(COMMON_NAME %in% c('ponderosa pine', 'Coulter pine', 'singleleaf pinyon', 'Jeffrey Pine')), x = sizeClass, y = TPA, grp = COMMON_NAME)
-# # tpa.both.all.2002
 # tpa.dia.both.all.2002
+# makeClasses(ca, )
 #Dead basal area 
 tpa.dia.both.mort.2002 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = DIA >= 5 & INVYR %in% c("2002", "2003", "2004", "2005", "2006"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                             DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
-# plotFIA(tpa.dia.both.mort.2002 %>% filter(COMMON_NAME %in% c('ponderosa pine', 'Coulter pine', 'singleleaf pinyon', 'Jeffrey Pine')), x = sizeClass, y = TPA, grp = COMMON_NAME)
 
-#Do Basal Area distrubutions by species and sizeClass
-tpa.dia.both.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'all', bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
+#Rename the dead columns for TPA
+tpa.dia.both.mort.2002 <- tpa.dia.both.mort.2002 %>% select(pltID, sizeClass, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+
+join.dia.both.2002 <- left_join(tpa.dia.both.all.2002, tpa.dia.both.mort.2002, by = c('pltID', 'sizeClass', 'YEAR','COMMON_NAME'))
+
+#Replace the NAs with 0s
+join.dia.both.2002 <- join.dia.both.2002 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+join.dia.both.2002
+
+#Both Droughts for 2012-2015
+#Live Basal Area
+tpa.dia.both.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'all', bySpecies = TRUE, bySizeClass = TRUE, makeClasses = 5, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
                            DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
-# plotFIA(tpa.dia.both.all.2015 %>% filter(COMMON_NAME %in% c('ponderosa pine', 'Coulter pine', 'singleleaf pinyon', 'Jeffrey Pine')), x = sizeClass * 2.54, y = TPA, grp = COMMON_NAME)
 
 #Dead basal area 
-tpa.dia.both.mort.2015 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
+tpa.dia.both.mort.2015 <- tpa(ca, treeType = 'dead', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, makeClass = 5, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
                             DIA >= 5 & MORTYR %notin% c("2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                             DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
+
+tpa.second.mort.2015 <- tpa.second.mort.2015 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+
+join.second.2015 <- left_join(tpa.second.all.2015, tpa.second.mort.2015, by = c('pltID', 'YEAR','COMMON_NAME'))
+
+#Replace the NAs with 0s
+join.second.2015 <- join.second.2015 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+# 
 
 ##Combine two different live basal area queries together
 tpa.dia.both.all.2002$time.period <- '1999-2002'
@@ -258,7 +278,7 @@ tpa.dia.both.mort$sequence <- 'Both Droughts'
 
 #2012-2015 Only
 #All Basal Area 1999-2002
-tpa.dia.second.all.2002 <- tpa(ca, treeType = 'all', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
+tpa.dia.second.all.2002 <- tpa(ca, treeType = 'live', byPlot = TRUE, bySpecies = TRUE, bySizeClass = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
                              areaDomain = ECOSUBCD %in% c('M261Ep', 'M261Eq' ,'M261Eu' ,'M261Er' ,'M261Eo' ,'M262Bb' ,'M262Ba') &
                                DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70))
 
@@ -328,8 +348,8 @@ all.forest$tree_type <- recode(.x=all.forest$COMMON_NAME, 'California black oak'
                                  'bigcone Douglas-fir' = 'fir', 'bigleaf maple' = 'deciduous', 'canyon live oak' = 'oak', 'curlleaf mountain-mahogany' = 'deciduous', 'incense-cedar' = 'cedar', 'interior live oak' = 'oak', 'limber pine' = 'pine',
                                  'lodgepole pine' = 'pine', 'ponderosa pine' = 'pine', 'singleleaf pinyon' = 'pine', 'sugar pine' = 'pine', 'Utah juniper' = 'juniper', 'western juniper' = 'juniper', 'white alder' = 'deciduous', 'white fir' = 'fir', 'California laurel' = 'deciduous',
                                  'California-laurel' = 'deciduous', 'Oregon ash' = 'deciduous', 'Douglas-fir' = 'fir', 'honey mesquite' = 'deciduous', 'desert ironwood' = 'deciduous', 'California red fir' = 'fir', 'California buckeye' = 'deciduous', 'Engelmann oak' = 'oak', 'grand fir' = 'fir', 'western white pine' = 'pine',
-                                 "western white pine" = 'pine', "whitebark pine" = 'pine', "mountain hemlock" = "hemlock", "gray or California foothill pine" = "pine", "foxtail pine" = 'pine', "blue oak" = 'oak', "California white oak" = 'oak', "quaking aspen" = 'deciduous',
-                                 "giant sequoia" = 'sequoia', "Unknown dead conifer" = 'unknown conifer', "ash spp." = 'deciduous', "black cottonwood" = 'deciduous', "California torreya (nutmeg)" = 'deciduous', "Oregon white oak" = 'oak', "Port-Orford-cedar" = 'cedar', "Pacific dogwood" = 'deciduous')
+                                 "western white pine" = 'pine', "whitebark pine" = 'pine', "mountain hemlock" = "other conifer", "gray or California foothill pine" = "pine", "foxtail pine" = 'pine', "blue oak" = 'oak', "California white oak" = 'oak', "quaking aspen" = 'deciduous',
+                                 "giant sequoia" = 'other conifer', "Unknown dead conifer" = 'unknown conifer', "ash spp." = 'deciduous', "black cottonwood" = 'deciduous', "California torreya (nutmeg)" = 'deciduous', "Oregon white oak" = 'oak', "Port-Orford-cedar" = 'cedar', "Pacific dogwood" = 'deciduous')
 
 # all.forest$tree_type <- recode(.x=all.forest$COMMON_NAME, 'California black oak' = 'other tree', 'California juniper' = 'other tree', 'California live oak' = 'other tree', 'California sycamore' = 'other tree', 'Coulter pine' = 'pine/fir', 'chinkapin oak' = 'other tree', 'Jeffrey pine' = 'pine/fir',
 #                                  'bigcone Douglas-fir' = 'pine/fir', 'bigleaf maple' = 'other tree', 'canyon live oak' = 'other tree', 'curlleaf mountain-mahogany' = 'other tree', 'incense-cedar' = 'other tree', 'interior live oak' = 'other tree', 'limber pine' = 'pine/fir', 
@@ -343,30 +363,42 @@ all.forest
 all.forest$BAA.dead <- all.forest$BAA.dead * (1/4.356)
 all.forest$BAA <- all.forest$BAA * (1/4.356)
 all.forest$BAA.all<- all.forest$BAA + all.forest$BAA.dead
-all.forest.type <- all.forest %>% group_by(pltID, time.period, sequence, tree_type) %>% summarize(BAA.all.sum = sum(BAA.all), BAA.live.sum = sum(BAA), BAA.dead.sum = sum(BAA.dead))
+#Make tree type a factor so that I can fill in missing combinations
+all.forest$tree_type <- as.factor(all.forest$tree_type)
+all.forest.type <- all.forest %>% group_by(pltID, time.period, sequence, tree_type, .drop = FALSE) %>% 
+                                  summarize(BAA.all.sum = sum(BAA.all), BAA.live.sum = sum(BAA), BAA.dead.sum = sum(BAA.dead)) #%>%
+                                  # ungroup() %>% #Ungroup the data
+                                  # complete(pltID, time.period, tree_type, fill = list(BAA.all.sum = 0, BAA.dead.sum = 0, BAA.live.sum = 0)) #Add the missing combinations of data
 
-all.forest.type$BAA.mort <- all.forest.type$BAA.dead.sum / (all.forest.type$BAA.all.sum) *100
+all.forest.type$BAA.mort <- all.forest.type$BAA.dead.sum / (all.forest.type$BAA.all.sum) * 100
+all.forest.type <- all.forest.type %>% mutate(BAA.mort = replace(BAA.mort, is.na(BAA.mort), 0))
 
-all.forest.type.summary <- all.forest.type %>% group_by(tree_type, time.period, sequence) %>% summarize(BAA.all.mean = mean(BAA.all.sum), BAA.all.sd = sd(BAA.all.sum),
-                                                                             BAA.live.mean = mean(BAA.live.sum), BAA.sd = sd(BAA.live.sum), 
-                                                                             BAA.dead.mean = mean(BAA.dead.sum), BAA.dead.sd = sd(BAA.dead.sum), 
-                                                                             BAA.mort.mean = mean(BAA.mort), BAA.mort.sd = sd(BAA.mort), count = n())
+
+all.forest.type.summary <- all.forest.type %>% #mutate(BAA.mort = replace(BAA.mort, is.na(BAA.mort), 0)) %>%
+                                                      mutate(live = case_when(BAA.all.sum > 0 ~ 1, BAA.all.sum == 0 ~ 0), 
+                                                      dead = case_when(BAA.mort > 0 ~ 1, BAA.mort == 0 ~ 0)) %>%
+                                                group_by(tree_type, time.period, sequence) %>% summarize(BAA.all.mean = mean(BAA.all.sum), BAA.all.sd = sd(BAA.all.sum),
+                                                                             BAA.live.mean = mean(BAA.live.sum), BAA.sd = sd(BAA.live.sum),
+                                                                             BAA.dead.mean = mean(BAA.dead.sum), BAA.dead.sd = sd(BAA.dead.sum),
+                                                                             BAA.mort.mean = mean(BAA.mort), BAA.mort.sd = sd(BAA.mort), count = n(),
+                                                                             live.count = sum(live), dead.count = sum(dead))
 
 # sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]
 #Die-off basal area
 p4 <- ggbarplot(all.forest.type, #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
-                x = "time.period", y = "BAA.dead.sum", position = position_dodge(), fill = 'tree_type', color = "sequence",
+                x = "time.period", y = "BAA.dead.sum", fill = 'tree_type', color = "sequence", 
+                position = position_dodge(),
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
   theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree \nType", ncol = 2)) +
   scale_color_manual(values = c("black", "black"),
                      aesthetics = "color") +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.76, 0.15), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.78, 0.3), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
   # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 2.5, x = 1.6, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 1.7, x = 1.6, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
 p4
 
@@ -380,12 +412,12 @@ p5 <- ggbarplot(all.forest.type, #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.
   scale_color_manual(values = c("black", "black"),
                      aesthetics = "color") +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.5, 0.5), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.5, 0.35), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
   # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 11, x = 1.6, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 7.9, x = 1.4, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
 p5
 
@@ -399,12 +431,12 @@ p6 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summar
   scale_color_manual(values = c("black", "black"),
                      aesthetics = "color") +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.76, 0.15), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.76, 0.1), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
   # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 2.5, x = 1.6, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 2.85, x = 1.45, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
 p6
 
@@ -423,10 +455,9 @@ p7 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summar
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
   # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 2.5, x = 1.6, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 19, x = 1.45, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
 p7
-
 
 ggsave(filename = 'SFig16_total_basal_area.png', height=7, width=16, units = 'cm', dpi=900)
 
@@ -434,3 +465,53 @@ ggsave(filename = 'SFig16_total_basal_area.png', height=7, width=16, units = 'cm
 #                              group_by (COMMON_NA, sizeClass, time.period, sequence) %>% summarize(TPA.mean = mean(TPA), BAA.mean = mean(BAA)), mapping = aes(x = sizeClass * 2.54, y = BAA.mean, color = time.period)) + 
 #   xlab('Size Class (cm)') + ylab(expression('Basal Area (m'^2*' ha'^-1*')')) + theme_bw() +
 #   facet_grid(COMMON_NAME ~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+
+
+
+
+#Proportion Mortality
+p8 <- ggbarplot(all.forest.type %>% filter(tree_type != 'other conifer' & tree_type != "deciduous"), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+                x = "time.period", y = "BAA.mort", fill = 'tree_type', color = "sequence", 
+                position = position_dodge(),
+                add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
+  theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree \nType", ncol = 2)) +
+  scale_color_manual(values = c("black", "black"),
+                     aesthetics = "color") + xlab('Mortality (%)') +
+  theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
+        legend.position = c(0.78, 0.3), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
+  # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
+  # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 16.5, x = 1.6, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p8
+
+ggsave(filename = 'SFig17_percent_dead_by_tree_type.png', height=7, width=16, units = 'cm', dpi=900)
+
+#Mortality percentage across the whole landscape
+p9 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+                x = "time.period", y = "BAA.mort", position = position_dodge(), color = "sequence",
+                add = "mean_se" , error.plot = "errorbar", alpha = 0.8) + 
+  theme_bw() + guides(color = 'none', fill = 'none') +
+  scale_color_manual(values = c("black", "black"),
+                     aesthetics = "color") +
+  theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
+        legend.position = c(0.76, 0.1), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
+  # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
+  # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 14, x = 1.45, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2012-2015 Only')))
+p9
+
+ggsave(filename = 'SFig18_total_percent_dead.png', height=7, width=16, units = 'cm', dpi=900)
+
+
+#Tukey Post Hoc analysis of dead basal area by tree species type
+type.aov.dead <- aov(data = all.forest.type %>% filter(tree_type %in% c('pine', 'oak', 'fir')), BAA.mort ~ time.period * sequence * tree_type)
+summary(type.aov.dead)
+
+type.dead.tHSD <- TukeyHSD(type.aov.dead) 
+type.dead.tHSD
