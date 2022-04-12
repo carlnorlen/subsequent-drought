@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 4, 2022
+#Date Edited: April 11, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load

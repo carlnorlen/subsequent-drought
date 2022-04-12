@@ -1,11 +1,15 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 1, 2022
+#Date Edited: April 11, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
-       'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr')
+       'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr', 'gstat',
+       'sp', 'rgdal', 'raster', 'sf', 'spdep')
+
+#Install a package
+# install.packages("spatialEco")
 
 #Load packages
 lapply(p,require,character.only=TRUE)
@@ -13,10 +17,13 @@ lapply(p,require,character.only=TRUE)
 #Set working directory
 setwd('C:/Users/can02/mystuff/subsequent-drought')
 
+#Increase the memory limit for R. Helps with spatially explicit analyses.
+memory.limit(32000)
+
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
 all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-
+all.ca
 #Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 
@@ -24,7 +31,7 @@ all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
                      (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2012-2015 Only',
                      (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1999-2002 Only')) 
-
+all.ca %>% dplyr::select(dNDMI_2004)
 #Select columns of data
 all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
@@ -41,11 +48,48 @@ all.ca.2ndDrought <- dplyr::select(all.ca, c(system.index, NDMI_2012, dNDMI_2017
 all.ca.2ndDrought$drought <- '2012-2015'
 
 #Rename the columns
-colnames(all.ca.2ndDrought) <- c('pixel.id', 'NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence','drought')
+colnames(all.ca.2ndDrought) <- c('pixel.id', 'NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
 
 #Combine all the data in one data frame
 all.ca.combined <- rbind(all.ca.1stDrought, all.ca.2ndDrought)
 
+#Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
+#Setting variable for ESPG 5070, proj4 crs
+c <- crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+
+#Read in a raster of general WGS 84 crs in PROJ4 code format
+wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
+
+# all.ca.combined$xy
+# spdf <- sp::SpatialPointsDataFrame(xy, data=all.ca.combined)
+# my.sf.point <- st_as_sf(x = all.ca.combined, 
+#                                     coords = c("longitude", "latitude"),
+#                                     crs = c)
+#Set the coordinates for the data frame
+coordinates(all.ca.combined) <- ~longitude + latitude
+crs(all.ca.combined) <- wg
+# dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
+
+
+# crs(all.ca.combined)
+#Exploring test for spatial autocorrelation
+gridDim <- 300
+
+
+# vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
+v = variogram(dNDMI~1, all.ca.combined)
+# crs(v) <- c
+# v.fit = fit.variogram(v, vgm(1, "Sph", 100, 1))
+v
+#   variogram(dNDMI~PET_4yr, data=all.ca.combined, 
+#                    cutoff=0.5*gridDim)
+# warnings()
+# as.data.frame(v)
+p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003))
+# sp::spplot(all.ca.combined, c('dNDMI'))
+p_test
+ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
+all.ca.combined
 #Translate the region code to text
 all.ca.combined$region[all.ca.combined$USFS == 261] <- "Sierra Nevada"
 all.ca.combined$region[all.ca.combined$USFS == 262] <- "Southern California"
