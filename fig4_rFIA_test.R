@@ -21,6 +21,7 @@ setwd('C:/Users/can02/mystuff/subsequent-drought')
 fiaCA <- 'D:\\Large_Files\\FIA\\SQLite_FIADB_CA\\2019_CSV' #Downloaedd from FIA DataMart
 dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 # fiaCA <- file.path(sql_dir, 'FIADB_CA.db')
+ref <- getFIA(states = 'ref', tables = c('FOREST_TYPE', 'FOREST_TYPE_GROUP'), dir = fiaCA)
 ca <- readFIA(fiaCA)
 # ca <- getFIA(states = 'CA', dir = 'D:\\Large_Files\\FIA\\SQLite_FIADB_CA\\2019_CSV')
 # summary(ca)
@@ -29,14 +30,17 @@ ca <- readFIA(fiaCA)
 #Create a notin operator
 `%notin%` <- Negate(`%in%`)
 
+#Possible way to deal with non-conifer forests
+forest.names <- ca$REF_FOREST_TYPE
+forest.names$FORTYPCD <- forest.names$VALUE
 ##Both Droughts regions estimates
 #Doing a combined estimated of the Basal Area for Both Droughts during 1999-2002
 #Total basal area and tpa estimates by species
 tpa.both.all.2002 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
-tpa.both.all.2002$COMMON_NAME
-
+# forest_type = left_join(tpa.both.all.2002, forest.names, by = c('FORTYPCD'))
+# forest_type
 #Dead basal area 
 tpa.both.mort.2002 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE, treeDomain = DIA >= 5 & INVYR %in% c("2002", "2003", "2004", "2005", "2006"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
@@ -177,6 +181,28 @@ all.forest.type.summary <- all.forest.type %>% #mutate(BAA.mort = replace(BAA.mo
                                                                              BAA.mort.mean = mean(BAA.mort), BAA.mort.sd = sd(BAA.mort), count = n(),
                                                                              live.count = sum(live), dead.count = sum(dead))
 
+#Calculate the conifer fraction to eliminate forest with no conifers from the sample
+all.summary <- all.forest %>% group_by(time.period, sequence, pltID) %>% summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100)
+conifer.summary <- all.forest %>% filter(tree_type %in% c('pine', 'fir', 'juniper', 'cedar', 'other conifer')) %>% 
+                                  group_by(time.period, sequence, pltID) %>% summarize(BAA.all.conifer = sum(BAA.all), BAA.live.conifer = sum(BAA), BAA.dead.conifer = sum(BAA.dead))
+join.summary <- left_join(all.summary, conifer.summary, by = c('pltID', 'time.period', 'sequence'))
+plots <- join.summary %>% filter(conifer.frac >= 5) %>% ungroup() %>% pull(pltID) %>% unique()
+plots
+all.forest.type %>% filter(pltID %in% plots)
+conifer.forest.type.summary <- all.forest.type %>% filter(pltID %in% plots) %>% #mutate(BAA.mort = replace(BAA.mort, is.na(BAA.mort), 0)) %>%
+  mutate(live = case_when(BAA.all.sum > 0 ~ 1, BAA.all.sum == 0 ~ 0), 
+         dead = case_when(BAA.mort > 0 ~ 1, BAA.mort == 0 | is.na(BAA.mort) ~ 0)) %>%
+  group_by(tree_type, time.period, sequence) %>% summarize(BAA.all.mean = mean(BAA.all.sum), BAA.all.sd = sd(BAA.all.sum),
+                                                           BAA.live.mean = mean(BAA.live.sum), BAA.sd = sd(BAA.live.sum),
+                                                           BAA.dead.mean = mean(BAA.dead.sum), BAA.dead.sd = sd(BAA.dead.sum),
+                                                           BAA.mort.mean = mean(BAA.mort), BAA.mort.sd = sd(BAA.mort), count = n(),
+                                                           live.count = sum(live), dead.count = sum(dead))
+
+
+#Replace the NAs with 0s
+join.summary <- join.summary %>% mutate(BAA.all.conifer = replace(BAA.all.conifer, is.na(BAA.all.conifer), 0))
+join.summary$conifer.frac <- join.summary$BAA.all.conifer / join.summary$BAA.all * 100
+join.summary
 #Create labels for the bar chart (a)
 p1_texta <- data.frame(label = c("a", "b", "b", "a"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
@@ -194,7 +220,7 @@ p1_textb <- data.frame(label = c("n = 74", "n = 47", "n = 279", "n = 252"),
 )
 
 #Summary of Total Dead Basal Area
-p1 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+p1 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period, sequence, pltID) %>% summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
                 x = "time.period", y = "BAA.dead.sum", position = position_dodge(), color = "sequence", fill = 'gray',
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, 
                 ylab = expression('Mortality (m'^2*' ha'^-1*')'), 
@@ -205,11 +231,13 @@ p1 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summar
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
         legend.position = c(0.76, 0.1), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
-        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0.5,0.5,0.5,5), "pt")) +
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0,0,2.5,0), "pt"),
+        panel.spacing = unit(20, "pt")) +
+  scale_x_discrete(labels = c("1st Exposure", "2nd Exposure")) +
   geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   geom_text(data = data.frame(label = "Mean \n+/- SE", y = 2.88, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
-  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only'))) 
 p1
 
 #Create a tree_type factor variable and sort it to make the plots
@@ -233,7 +261,7 @@ p2_texta <- data.frame(label = c("a", "ab", "bc", "c", "c", "bc", "bc", "bc", "c
 )
 
 #Die-off Mortality as a % of basal area
-p2 <- ggbarplot(all.forest.type %>% filter(tree_type != 'other conifer' & tree_type != 'deciduous'), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+p2 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'other conifer' & tree_type != 'deciduous'), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
                 x = "time.period", y = "BAA.dead.sum", fill = 'tree_type.f', 
                 color = "sequence", 
                 position = position_dodge(), add = "mean_se" , error.plot = "errorbar", alpha = 0.8, 
@@ -246,7 +274,8 @@ p2 <- ggbarplot(all.forest.type %>% filter(tree_type != 'other conifer' & tree_t
         legend.position = c(0.66, 0.28), legend.text = element_text(size = 8), legend.title = element_text(size = 10),
         legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), strip.background = element_blank(),
-        strip.text.x = element_blank(), plot.margin = unit(c(0.5,0.5,0.5,0), "pt")) +
+        strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,0), "pt"), panel.spacing = unit(20, "pt")) +
+  scale_x_discrete(labels = c("1st Exposure", "2nd Exposure")) +
   geom_text(data = p2_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   # geom_text(data = data.frame(label = "Mean \n+/- SE", y = 1.7, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
@@ -255,16 +284,17 @@ p2
 
 # ggbarplot(order)
 #Combine the two figure panels into one	  
-f1 <- ggarrange(p1, p2, ncol = 1, labels = "auto", align = "v", nrow = 2, heights = c(1, 0.95), common.legend = FALSE)
+f1 <- ggarrange(p1, p2, ncol = 1, align = "v", labels = c("a)", "c)"), nrow = 2, heights = c(1, 0.95), common.legend = FALSE)
 f1
 
 ggsave(filename = 'Fig4_FIA_mortality_by_tree_type.png', height=14, width=16, units = 'cm', dpi=900)
 
 #ANOVA and Tukey HSD for basal area die-off by sequence and time period
-aov.dead <- aov(data = all.forest %>% group_by(time.period, sequence, pltID) %>% 
-                                      summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), 
-                                                BAA.dead.sum = sum(BAA.dead), 
-                                                BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), BAA.dead.sum ~ time.period * sequence)
+aov.dead <- aov(data = join.summary %>% filter(conifer.frac >= 10), #group_by(time.period, sequence, pltID) %>% 
+                                      # summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), 
+                                      #           BAA.dead.sum = sum(BAA.dead), 
+                                      #           BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), 
+                       BAA.dead.sum ~ time.period * sequence)
 summary(aov.dead)
 
 #Tukey HSD
@@ -272,7 +302,7 @@ dead.tHSD <- TukeyHSD(aov.dead)
 dead.tHSD
 
 #ANOVA and Tukey HSD for basal are die-off by forest type, sequence, ane time period
-type.aov.dead <- aov(data = all.forest.type %>% filter(tree_type %in% c('pine', 'oak', 'fir', 'juniper', 'cedar')), BAA.dead.sum ~ time.period * sequence * tree_type)
+type.aov.dead <- aov(data = all.forest.type %>% filter(pltID %in% plots & tree_type %in% c('pine', 'oak', 'fir', 'juniper', 'cedar')), BAA.dead.sum ~ time.period * sequence * tree_type)
 summary(type.aov.dead)
 
 type.dead.tHSD <- TukeyHSD(type.aov.dead) 
@@ -295,7 +325,7 @@ p3_textb <- data.frame(label = c("n = 74", "n = 47", "n = 279", "n = 252"),
 )
 
 #Summary of Total Basal Area
-p3 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summarize(BAA.all.sum = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
+p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period, sequence, pltID) %>% summarize(BAA.all.sum = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), #%>% filter(COMMON_NAME %in% sp.both.2002[! sp.both.2002 %in% c('curlleaf mountain-mahogany', 'California live oak')]), #, (sequence == 'Both Droughts' & drought == '1999-2002') | (sequence == '2012-2015 Only' & drought == '2012-2015')), 
                 x = "time.period", y = "BAA.all.sum", position = position_dodge(), color = "sequence", fill = 'gray',
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, ylab = expression('Basal Area (m'^2*' ha'^-1*')')) + 
   theme_bw() + guides(color = 'none', fill = 'none') +
@@ -308,10 +338,10 @@ p3 <- ggbarplot(all.forest %>% group_by(time.period, sequence, pltID) %>% summar
   geom_text(data = p3_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   geom_text(data = data.frame(label = "Mean \n+/- SE", y = 20.2, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
-# p3
+p3
 
 #Total Basal Area
-p4 <- ggbarplot(all.forest.type %>% filter(tree_type != 'other conifer' & tree_type != 'deciduous'),
+p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'other conifer' & tree_type != 'deciduous'),
                 x = "time.period", y = "BAA.all.sum", position = position_dodge(), fill = 'tree_type.f', color = "sequence",
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, ylab = expression('Basal Area (m'^2*' ha'^-1*')'), 
                 xlab = "Time Period") +  
@@ -335,7 +365,7 @@ f2
 ggsave(filename = 'SFig6_basal_area_boxplot.png', height=14, width=16, units = 'cm', dpi=900)
 
 #ANOVA and Tukey HSD for total basal area sequence and time period
-aov.all <- aov(data = all.forest %>% group_by(time.period, sequence, pltID) %>% 
+aov.all <- aov(data = all.forest %>% filter(pltID %in% plots) %>% group_by(time.period, sequence, pltID) %>% 
                   summarize(BAA.all.sum = sum(BAA.all), BAA.live = sum(BAA), 
                             BAA.dead.sum = sum(BAA.dead), 
                             BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), BAA.all.sum ~ time.period * sequence)
@@ -346,11 +376,13 @@ all.tHSD <- TukeyHSD(aov.all)
 all.tHSD
 
 #ANOVA and Tukey HSD for basal are die-off by forest type, sequence, ane time period
-type.aov.dead <- aov(data = all.forest.type %>% filter(tree_type %in% c('pine', 'oak', 'fir', 'juniper', 'cedar')), BAA.dead.sum ~ time.period * sequence * tree_type)
-summary(type.aov.dead)
+type.aov.all <- aov(data = all.forest.type %>% filter(pltID %in% plots & tree_type %in% c('pine', 'oak', 'fir', 'juniper', 'cedar')), BAA.all.sum ~ time.period * sequence * tree_type)
+summary(type.aov.all)
 
-type.dead.tHSD <- TukeyHSD(type.aov.dead) 
-type.dead.tHSD
+type.all.tHSD <- TukeyHSD(type.aov.all) 
+type.all.tHSD
+
+
 
 
 
