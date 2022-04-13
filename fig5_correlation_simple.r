@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 11, 2022
+#Date Edited: April 12, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -29,8 +29,8 @@ all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 
 #Adding a drought sequence column to the data set
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
-                     (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2012-2015 Only',
-                     (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1999-2002 Only')) 
+                     (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2nd Drought Only',
+                     (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1st Drought Only')) 
 all.ca %>% dplyr::select(dNDMI_2004)
 #Select columns of data
 all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
@@ -67,7 +67,8 @@ wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
 #                                     crs = c)
 #Set the coordinates for the data frame
 coordinates(all.ca.combined) <- ~longitude + latitude
-crs(all.ca.combined) <- wg
+#Does the WGS 1984 projection actually work?
+# crs(all.ca.combined) <- wg
 # dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
 
 
@@ -77,16 +78,16 @@ gridDim <- 300
 
 
 # vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
-v = variogram(dNDMI~1, all.ca.combined)
+crs(all.ca.combined) <- crs("+proj=longlat")
+all.ca.5070 <- spTransform(all.ca.combined, c)
+v = variogram(dNDMI~1, all.ca.combined, cutoff = 1)
 # crs(v) <- c
-# v.fit = fit.variogram(v, vgm(1, "Sph", 100, 1))
-v
-#   variogram(dNDMI~PET_4yr, data=all.ca.combined, 
-#                    cutoff=0.5*gridDim)
-# warnings()
-# as.data.frame(v)
-p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003))
-# sp::spplot(all.ca.combined, c('dNDMI'))
+
+sp::spplot(all.ca.combined, c('dNDMI'))
+crs(all.ca.combined)
+p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
+          xlab('Distance (km)') + ylab('Semivariance')
+
 p_test
 ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
 all.ca.combined
@@ -186,8 +187,8 @@ dataset.under$drought.f <- as.numeric(dataset.under$drought.f)
 #Filter the data into subsets for modeling
 all.ca.both.1999 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '1999-2002' & !is.na(sequence))
 all.ca.both.2012 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '2012-2015' & !is.na(sequence)) 
-all.ca.second.1999 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '1999-2002' & !is.na(sequence))
-all.ca.second.2012 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '2012-2015' & !is.na(sequence))
+all.ca.second.1999 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002' & !is.na(sequence))
+all.ca.second.2012 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '2012-2015' & !is.na(sequence))
 
 # #Linear Models for dNDMI ~ Pr-ET
 #Models for Both Droughts
@@ -224,7 +225,7 @@ r2.text <- data.frame(
                     as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = r2.c)))),
                     as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = r2.d))))
             ),
-            sequence = c('Both Droughts', 'Both Droughts', '2012-2015 Only', '2012-2015 Only'),
+            sequence = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
             drought = c('1999-2002', '2012-2015', '1999-2002', '2012-2015'),
             x = c(2500, 2500, 2500, 2500),
             y = c(-0.25, -0.25, -0.25, -0.25)
@@ -243,7 +244,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10), strip.text.y = element_text(size = 10)) + #Presentation text sizes.
   scale_fill_gradient2(limits = c(10,370), breaks = c(10,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
-  ylim(0.1, -0.3) + xlim(-2500, 3500) + facet_grid(factor(sequence, levels = c('Both Droughts', '2012-2015 Only')) ~ drought)
+  ylim(0.1, -0.3) + xlim(-2500, 3500) + facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought)
 
 #Add a shared legend in a customized position on the figure
 p3 + theme(

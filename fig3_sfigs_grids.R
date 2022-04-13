@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 11, 2022
+#Date Edited: April 12, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -77,52 +77,54 @@ second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>
 second.socal / second.count
 
 #Add columns for labeling plots.
-all.ca.spi48$both <- '1999-2002'
-all.ca.spi48$second <- '2012-2015'
+all.ca.spi48$both <- '1st Response'#'1999-2002'
+all.ca.spi48$second <- '2nd Response'#'2012-2015'
 
 #Plot dNDMI 2004 with SPI48 2002 by SPI48 2015 grid
 p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2004.mean, group = dNDMI_2004.mean)) +
 	  geom_bin2d(mapping = aes(group = dNDMI_2004.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
-	  ylab(NULL) +  xlab(NULL) + 
+	  ylab(expression(atop(NA,atop(textstyle("2nd Drought Severity"), textstyle("(SPI48 2012-2015)"))))) +  xlab('1st Drought Severity\n(SPI48 1999-2002)') + 
   # geom_vline(xintercept = 0, size = 0.25) + 
   # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
-    guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black"), alpha = "none") +
+    guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black", reverse = T), alpha = "none") +
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
           axis.title.y = element_text(size = 10), plot.title = element_text(size = 10, hjust = 0.5), legend.background = element_rect(colour = NA, fill = NA), 
-          legend.justification = c(1, 0), legend.position = c(0.89, 0.6), legend.text = element_text(size = 6), 
-          legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 10)) +  
+          legend.justification = c(1, 0), legend.position = c(0.93, 0.65), legend.text = element_text(size = 6), 
+          legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 10),
+          plot.margin = unit(c(0,0,0,0), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
-    facet_wrap(~ both)
+    facet_wrap(~ both) + 
+    annotate(geom="text", x=-1.15, y=-0.5, label="Less\nSevere", color="black", size = 1.5) + 
+    annotate(geom="text", x=1.9, y=-0.5, label="More\nSevere", color="black", size = 1.5) +
+    annotate(geom="text", x = -2.5, y = -3.2, label="Less\nPrecipitation", size = 2) + 
+    annotate(geom="text", x = -2.5, y = -0.25, label ="More\nPrecipitation", size = 2) 
 
 #Plot dNDMI 2017 with SPI48 2002 by SPI48 2015 grid
 p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2017.mean, group = dNDMI_2017.mean)) +
 	  geom_bin2d(mapping = aes(group = dNDMI_2017.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
-	  ylab(NULL) +  xlab(NULL) +  
+	  ylab(NULL) +  xlab('1st Drought Severity\n(SPI48 1999-2002)') +  
   # geom_vline(xintercept = 0, size = 0.25) + 
   # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
     guides(fill = "none", alpha = "none") +  
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
-          axis.title.y = element_text(size = 10), strip.text = element_text(size = 10)) +  
+          axis.title.y = element_blank(), strip.text = element_text(size = 10), plot.margin = unit(c(0,0,0,20), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
-  annotate("text", x = 1, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -0.25, y = -0.75, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
   annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second) 
 
 #Combine the two figure panels into one	  
-f1 <- ggarrange(p1, p2, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend = FALSE)
-
-#Add shared Y label and x-label
-annotate_figure(f1, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), 
-                    bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5)) 
+f1 <- ggarrange(p1, p2, ncol = 2, nrow = 1, widths = c(1, 0.9), labels = c('a)', 'b)'), align = 'h', common.legend = FALSE)
+f1
 
 #Save the figure as a png
-ggsave(filename = 'Fig3_spi48_dNDMI_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
+ggsave(filename = 'Fig3_spi48_dNDMI_SPI48_grid_scatter.png', device = 'png', height=7, width=15, units = 'cm', dpi=900)
 
 #Plot 2004 ADS mortality proportion for SPI48 2002 versus SPI48 2015
 p3 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = ADS_2004.prop, group = ADS_2004.prop)) +

@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 4, 2022
+#Date Updated: April 12, 2022
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
@@ -97,7 +97,7 @@ all.ca.spi48 <- all.ca %>%
 #Map Showing SPI 48 month Drought mask for 2002 and 2015 droughts
 p1 <- ggplot() +
 	  ggR(img = spi48.300m.both.mask, layer = 1, maxpixels = 1e10, geom_raster = TRUE, ggLayer = TRUE, forceCat = TRUE) +
-	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100"), breaks = c("1", "2", "3"), name = expression('SPI48'<= -1.5*''), 
+	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100"), breaks = c("1", "2", "3"), name = expression(atop(NA,atop(textstyle('Severe Drought'),textstyle('(SPI48'<= -1.5*')')))), 
 	                    labels = c("1st Drought \nOnly", "2nd Drought \nOnly", "Both \nDroughts"), na.value = NA) +
 	  geom_sf(data = ca_20m, color='black', size = 0.2, fill=NA) +
 	  geom_sf(data = usfs.sierra.union, color='dark gray', size = 0.6,  fill='dark gray', alpha = 0.4) +
@@ -110,13 +110,13 @@ p1 <- ggplot() +
       pad_x = unit(0.1, "cm"), pad_y = unit(0.1, "cm"),
       style = north_arrow_minimal) + theme_bw() + guides(fill = guide_legend(title.position = "top")) +
 	  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
-	  legend.key = element_rect(fill = NA), legend.text=element_text(size=8), legend.title = element_text(size=8))
+	  legend.key = element_rect(fill = NA), legend.text=element_text(size=8), legend.title = element_text(size=8),  plot.margin = unit(c(0,0,0,10), "pt")) 
 
 #Add annotations to map of SPI48 exposure
 p2 <- p1 + 
     theme(
     legend.justification = c(1, 0),
-    legend.position = c(0.85, 0.65),
+    legend.position = c(0.88, 0.6),
     legend.text = element_text(size = 6),
     legend.title = element_text(size = 8),
     legend.direction = "vertical") +
@@ -130,7 +130,7 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   geom_bin2d(mapping = aes(group = count, alpha = ..count..), binwidth = c(0.1, 0.1)) + theme_bw() + 
   theme(legend.position="bottom", legend.text = element_text(size=6)) + 
   ylim(-3.5, 0) + xlim(-3, 2) +
-  ylab('SPI48 1999-2002') +  xlab('SPI48 2012-2015') + 
+  ylab('2nd Drought (SPI48 2012-2015)') +  xlab('1st Drought (SPI48 1999-2002)') + 
   # geom_vline(xintercept = 0, size = 0.5) + 
   # geom_hline(yintercept = 0, size = 0.5) +
   geom_vline(xintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
@@ -139,7 +139,8 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
         axis.title.y = element_text(size = 10), legend.background = element_rect(colour = NA, fill = NA), 
         legend.justification = c(1, 0), legend.position = c(0.99, 0.6), legend.text = element_text(size = 6), 
-        legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 12)) +  
+        legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 12),
+        plot.margin = unit(c(0,0,0,10), "pt")) +  
   scale_fill_gradient2(name = "Grid Cells", limits = c(0,2950), midpoint = 1475, low = "cornflowerblue", 
                        mid = "yellow", high = "red", na.value = 'transparent') +
   scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
@@ -147,6 +148,8 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
 #Add annotations and move the legend into the corner of the figure.
 p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly") +
   annotate("text", x = -2.4, y = -3, label = "Both \nDroughts") + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly") + 
+  annotate(geom="text", x = -2.8, y = -3.45, label="Less\nPrecipitation", size = 2.5) + 
+  annotate(geom="text", x = -2.8, y = -0.0, label ="More\nPrecipitation", size = 2.5) +
   theme(
     legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
     legend.justification = c(1, 0),
@@ -156,7 +159,10 @@ p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + anno
     legend.direction = "horizontal") 
 
 #Combine the two figures into one plot, add letters to label sub-plots
-f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'), heights = c(1,1), widths = c(1, 1.5))
+f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, heights = c(1,1), widths = c(1, 1.5), labels = c('a)', 'b)')) #,  plot.margin = unit(c(0,3,0,0), "pt")
+
+# annotate_figure(f1, top = textGrob(label = "(a)", hjust = -0.5, gp = gpar(col = "black", fontsize = 12))) #, 
+#                     # top = textGrob(label = "(a)", rhjust = 0.5, gp = gpar(col = "black", fontsize = 12)))
 
 #Save the figure as a .png file
 ggsave(filename = 'Fig1_both_droughts_SPI48_300m_map.png', height=10, width= 20, units = 'cm', dpi=900)
