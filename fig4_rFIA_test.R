@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 11, 2022
+#Date Edited: April 14, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -21,7 +21,7 @@ setwd('C:/Users/can02/mystuff/subsequent-drought')
 fiaCA <- 'D:\\Large_Files\\FIA\\SQLite_FIADB_CA\\2019_CSV' #Downloaedd from FIA DataMart
 dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 # fiaCA <- file.path(sql_dir, 'FIADB_CA.db')
-ref <- getFIA(states = 'ref', tables = c('FOREST_TYPE', 'FOREST_TYPE_GROUP'), dir = fiaCA)
+# ref <- getFIA(states = 'ref', tables = c('FOREST_TYPE', 'FOREST_TYPE_GROUP'), dir = fiaCA)
 ca <- readFIA(fiaCA)
 # ca <- getFIA(states = 'CA', dir = 'D:\\Large_Files\\FIA\\SQLite_FIADB_CA\\2019_CSV')
 # summary(ca)
@@ -186,6 +186,8 @@ all.summary <- all.forest %>% group_by(time.period, sequence, pltID) %>% summari
 conifer.summary <- all.forest %>% filter(tree_type %in% c('pine', 'fir', 'juniper', 'cedar', 'other conifer')) %>% 
                                   group_by(time.period, sequence, pltID) %>% summarize(BAA.all.conifer = sum(BAA.all), BAA.live.conifer = sum(BAA), BAA.dead.conifer = sum(BAA.dead))
 join.summary <- left_join(all.summary, conifer.summary, by = c('pltID', 'time.period', 'sequence'))
+join.summary$conifer.frac <- join.summary$BAA.all.conifer / join.summary$BAA.all * 100
+
 plots <- join.summary %>% filter(conifer.frac >= 5) %>% ungroup() %>% pull(pltID) %>% unique()
 plots
 all.forest.type %>% filter(pltID %in% plots)
@@ -208,14 +210,14 @@ p1_texta <- data.frame(label = c("a", "b", "b", "a"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(3.5, 0.9, 0.55, 3.05),
+                       y     = c(4.25, 1.0, 0.6, 3.15),
                        x     = c(1, 2, 1, 2)
 )
 
 #Letters to indicate sample sizes
-p1_textb <- data.frame(label = c("n = 74", "n = 47", "n = 279", "n = 252"),
+p1_textb <- data.frame(label = c("n = 58", "n = 39", "n = 259", "n = 241"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
-                       y     = c(3.2, 0.6, 0.25, 2.75),
+                       y     = c(3.95, 0.7, 0.3, 2.85),
                        x     = c(1, 2, 1, 2)
 )
 
@@ -224,19 +226,19 @@ p1 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
                 x = "time.period", y = "BAA.dead.sum", position = position_dodge(), color = "sequence", fill = 'gray',
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, 
                 ylab = expression('Mortality (m'^2*' ha'^-1*')'), 
-                xlab = "Time Period", order = c("1999-2002", "2012-2015")) + 
+                xlab = "Drought Exposure", order = c("1999-2002", "2012-2015")) + 
   theme_bw() + guides(color = 'none') +
   scale_color_manual(values = c("black", "black"),
-                     aesthetics = "color") +
+                     aesthetics = "color") + labs(tag = 'b)') +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
         legend.position = c(0.76, 0.1), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
-        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0,0,2.5,0), "pt"),
-        panel.spacing = unit(20, "pt")) +
-  scale_x_discrete(labels = c("1st Exposure", "2nd Exposure")) +
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0,0,2.5,5), "pt"),
+        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
+  scale_x_discrete(labels = c("1st (1999-2002)", "2nd (2012-2015)")) +
   geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 2.88, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 3.5, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only'))) 
 p1
 
@@ -246,16 +248,16 @@ all.forest.type$tree_type.f <- factor(all.forest.type$tree_type.f, levels= c('pi
 # all.forest.type <- all.forest.type %>% mutate(tree_type.f = as.factor(tree.type.f(levels = c('pine', 'fir', 'oak', 'juniper', 'cedar'))))
 
 #Add text to the plot
-p2_texta <- data.frame(label = c("a", "ab", "bc", "c", "c", "bc", "bc", "bc", "c", "c",
-                                 "bc", "c", "c", "c", "c","a", "a", "bc", "c", "bc"),
+p2_texta <- data.frame(label = c("a", "bc", "cd", "d", "d", "cd", "cd", "cd", "d", "d",
+                                 "cd", "d", "d", "d", "d","b", "b", "cd", "d", "cd"),
                        sequence   = c('Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 
                                       'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(2, 1.05, 0.55, 0.3, 0.18, 0.4, 0.26, 0.24, 0.3, 0.12, 
-                                 0.24, 0.2, 0.12, 0.12, 0.12, 1.3, 1.33, 0.25, 0.12, 0.35),
+                       y     = c(2.5, 1.3, 0.55, 0.4, 0.28, 0.5, 0.28, 0.22, 0.4, 0.14, 
+                                 0.24, 0.2, 0.14, 0.14, 0.16, 1.4, 1.43, 0.27, 0.14, 0.37),
                        x     = c(0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38,
                                  0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38)
 )
@@ -266,16 +268,17 @@ p2 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
                 color = "sequence", 
                 position = position_dodge(), add = "mean_se" , error.plot = "errorbar", alpha = 0.8, 
                 ylab = expression('Mortality (m'^2*' ha'^-1*')'), 
-                xlab = "Time Period", order = c("1999-2002", "2012-2015")) +
-  theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree Type", ncol = 1)) +
-  scale_color_manual(values = c("black", "black"), aesthetics = "color") +
+                xlab = "Drought Exposure", order = c("1999-2002", "2012-2015")) +
+  theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree Type", label.position = "bottom", title.position="top", title.hjust = 0.5)) +
+  scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag = 'd)') +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.66, 0.28), legend.text = element_text(size = 8), legend.title = element_text(size = 10),
-        legend.direction = "vertical", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        legend.position = c(0.99, 0.62), legend.text = element_text(size = 8), legend.title = element_text(size = 10),
+        legend.direction = "horizontal", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), strip.background = element_blank(),
-        strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,0), "pt"), panel.spacing = unit(20, "pt")) +
-  scale_x_discrete(labels = c("1st Exposure", "2nd Exposure")) +
+        strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), panel.spacing = unit(20, "pt"),
+        plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
+  scale_x_discrete(labels = c("1st (1999-2002)", "2nd (2012-2015)")) +
   geom_text(data = p2_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   # geom_text(data = data.frame(label = "Mean \n+/- SE", y = 1.7, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
@@ -290,7 +293,7 @@ f1
 ggsave(filename = 'Fig4_FIA_mortality_by_tree_type.png', height=14, width=16, units = 'cm', dpi=900)
 
 #ANOVA and Tukey HSD for basal area die-off by sequence and time period
-aov.dead <- aov(data = join.summary %>% filter(conifer.frac >= 10), #group_by(time.period, sequence, pltID) %>% 
+aov.dead <- aov(data = join.summary %>% filter(pltID %in% plots), #group_by(time.period, sequence, pltID) %>% 
                                       # summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), 
                                       #           BAA.dead.sum = sum(BAA.dead), 
                                       #           BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), 
@@ -313,14 +316,14 @@ p3_texta <- data.frame(label = c("a", "a", "b", "b"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(25, 20, 35, 35.5),
+                       y     = c(29, 21, 37.5, 37),
                        x     = c(1, 2, 1, 2)
 )
 
 #Letters to indicate sample sizes
-p3_textb <- data.frame(label = c("n = 74", "n = 47", "n = 279", "n = 252"),
+p3_textb <- data.frame(label = c("n = 58", "n = 39", "n = 259", "n = 241"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
-                       y     = c(22, 17, 32, 32.5),
+                       y     = c(26, 18, 34.5, 34),
                        x     = c(1, 2, 1, 2)
 )
 
@@ -329,37 +332,53 @@ p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
                 x = "time.period", y = "BAA.all.sum", position = position_dodge(), color = "sequence", fill = 'gray',
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, ylab = expression('Basal Area (m'^2*' ha'^-1*')')) + 
   theme_bw() + guides(color = 'none', fill = 'none') +
-  scale_color_manual(values = c("black", "black"), aesthetics = "color") +
+  scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag = 'b)') +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
         legend.position = c(0.76, 0.15), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
-        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10)) +
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(2.5,0,0,5), "pt"), 
+        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
   geom_text(data = p3_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   geom_text(data = p3_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 20.2, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 21.2, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
 p3
+
+#Create a data frame for adding the panel 4 text.
+p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "acd", "ab", "b", "b", "bc",
+                                 "c", "d", "b", "b", "c", "c", "d", "b", "b", "b"),
+                       sequence   = c('Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 
+                                      'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only',
+                                      '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only',
+                                      '2nd Drought Only', '2nd Drought Only'),
+                       # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
+                       #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
+                       y     = c(11.5, 6.3, 7.55, 2.8, 2.28, 9.0, 3.28, 0.22, 0.4, 0.14, 
+                                 0.24, 0.2, 0.14, 0.14, 0.16, 1.4, 1.43, 0.27, 0.14, 0.37),
+                       x     = c(0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38,
+                                 0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38)
+)
 
 #Total Basal Area
 p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'other conifer' & tree_type != 'deciduous'),
                 x = "time.period", y = "BAA.all.sum", position = position_dodge(), fill = 'tree_type.f', color = "sequence",
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, ylab = expression('Basal Area (m'^2*' ha'^-1*')'), 
-                xlab = "Time Period") +  
+                xlab = "Drought Exposure") +  
   theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree Type",  label.position = "bottom", title.position="top", title.hjust = 0.5)) +
-  scale_color_manual(values = c("black", "black"), aesthetics = "color") +
+  scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag =("d)")) +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), 
         legend.position = c(0.2, 0.8), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "horizontal",axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
-        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0.5,0.5,0.5,0.5), "pt"),
-        strip.background = element_blank(), strip.text.x = element_blank()) +
-  # geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
-  # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  # geom_text(data = data.frame(label = "Mean \n+/- SE", y = 7.9, x = 1.4, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+        axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), 
+        strip.background = element_blank(), strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), 
+        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
+  scale_x_discrete(labels = c("1st (1999-2002)", "2nd (2012-2015)")) +
+  geom_text(data = p4_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
 p4
 
-f2 <- ggarrange(p3, p4, ncol = 1, labels = "auto", align = "v", nrow = 2, heights = c(1, 0.95), common.legend = FALSE)
+f2 <- ggarrange(p3, p4, ncol = 1, labels = c('a)', 'c)'), align = "v", nrow = 2, heights = c(1, 0.95), common.legend = FALSE)
 f2
 
 ggsave(filename = 'SFig6_basal_area_boxplot.png', height=14, width=16, units = 'cm', dpi=900)

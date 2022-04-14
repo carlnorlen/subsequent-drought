@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 12, 2022
+#Date Updated: April 14, 2022
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
@@ -110,7 +110,7 @@ p1 <- ggplot() +
       pad_x = unit(0.1, "cm"), pad_y = unit(0.1, "cm"),
       style = north_arrow_minimal) + theme_bw() + guides(fill = guide_legend(title.position = "top")) +
 	  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
-	  legend.key = element_rect(fill = NA), legend.text=element_text(size=8), legend.title = element_text(size=8),  plot.margin = unit(c(0,0,0,10), "pt")) 
+	  legend.key = element_rect(fill = NA), legend.text=element_text(size=8), legend.title = element_text(size=8),  plot.margin = unit(c(0,5,0,10), "pt")) 
 
 #Add annotations to map of SPI48 exposure
 p2 <- p1 + 
@@ -130,7 +130,7 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   geom_bin2d(mapping = aes(group = count, alpha = ..count..), binwidth = c(0.1, 0.1)) + theme_bw() + 
   theme(legend.position="bottom", legend.text = element_text(size=6)) + 
   ylim(-3.5, 0) + xlim(-3, 2) +
-  ylab('2nd Drought (SPI48 2012-2015)') +  xlab('1st Drought (SPI48 1999-2002)') + 
+  ylab('Severity of 2nd Drought (SPI48 2012-2015)') +  xlab('Severity of 1st Drought (SPI48 1999-2002)') + 
   # geom_vline(xintercept = 0, size = 0.5) + 
   # geom_hline(yintercept = 0, size = 0.5) +
   geom_vline(xintercept = -1.5, size = 1, color = 'black', linetype='dashed') +
@@ -140,7 +140,7 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
         axis.title.y = element_text(size = 10), legend.background = element_rect(colour = NA, fill = NA), 
         legend.justification = c(1, 0), legend.position = c(0.99, 0.6), legend.text = element_text(size = 6), 
         legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 12),
-        plot.margin = unit(c(0,0,0,10), "pt")) +  
+        plot.margin = unit(c(10,0,10,10), "pt")) +  
   scale_fill_gradient2(name = "Grid Cells", limits = c(0,2950), midpoint = 1475, low = "cornflowerblue", 
                        mid = "yellow", high = "red", na.value = 'transparent') +
   scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
@@ -159,7 +159,7 @@ p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + anno
     legend.direction = "horizontal") 
 
 #Combine the two figures into one plot, add letters to label sub-plots
-f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, heights = c(1,1), widths = c(1, 1.5), labels = c('a)', 'b)')) #,  plot.margin = unit(c(0,3,0,0), "pt")
+f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, align = 'h', heights = c(1,1), widths = c(1, 1.5), labels = c('a)', 'b)')) #,  plot.margin = unit(c(0,3,0,0), "pt")
 
 # annotate_figure(f1, top = textGrob(label = "(a)", hjust = -0.5, gp = gpar(col = "black", fontsize = 12))) #, 
 #                     # top = textGrob(label = "(a)", rhjust = 0.5, gp = gpar(col = "black", fontsize = 12)))

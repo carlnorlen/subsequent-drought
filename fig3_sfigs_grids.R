@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 12, 2022
+#Date Edited: April 14, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -77,14 +77,14 @@ second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>
 second.socal / second.count
 
 #Add columns for labeling plots.
-all.ca.spi48$both <- '1st Response'#'1999-2002'
-all.ca.spi48$second <- '2nd Response'#'2012-2015'
+all.ca.spi48$both <- 'Response to 1st Exposure '#'1999-2002'
+all.ca.spi48$second <- 'Response to 2nd Exposure'#'2012-2015'
 
 #Plot dNDMI 2004 with SPI48 2002 by SPI48 2015 grid
 p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2004.mean, group = dNDMI_2004.mean)) +
 	  geom_bin2d(mapping = aes(group = dNDMI_2004.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
-	  ylab(expression(atop(NA,atop(textstyle("2nd Drought Severity"), textstyle("(SPI48 2012-2015)"))))) +  xlab('1st Drought Severity\n(SPI48 1999-2002)') + 
+	  ylab(expression(atop(NA,atop(textstyle("Severity of 2nd Drought"), textstyle("(SPI48 2012-2015)"))))) +  xlab('Severity of 1st Drought\n(SPI48 1999-2002)') + 
   # geom_vline(xintercept = 0, size = 0.25) + 
   # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
@@ -92,13 +92,13 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
     guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black", reverse = T), alpha = "none") +
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
           axis.title.y = element_text(size = 10), plot.title = element_text(size = 10, hjust = 0.5), legend.background = element_rect(colour = NA, fill = NA), 
-          legend.justification = c(1, 0), legend.position = c(0.93, 0.65), legend.text = element_text(size = 6), 
+          legend.justification = c(1, 0), legend.position = c(0.895, 0.67), legend.text = element_text(size = 6), 
           legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 10),
           plot.margin = unit(c(0,0,0,0), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
     facet_wrap(~ both) + 
-    annotate(geom="text", x=-1.15, y=-0.5, label="Less\nSevere", color="black", size = 1.5) + 
-    annotate(geom="text", x=1.9, y=-0.5, label="More\nSevere", color="black", size = 1.5) +
+    annotate(geom="text", x=-1.15, y=-0.5, label="Less\nSevere", color="black", size = 2) + 
+    annotate(geom="text", x=1.9, y=-0.5, label="More\nSevere", color="black", size = 2) +
     annotate(geom="text", x = -2.5, y = -3.2, label="Less\nPrecipitation", size = 2) + 
     annotate(geom="text", x = -2.5, y = -0.25, label ="More\nPrecipitation", size = 2) 
 
@@ -106,7 +106,7 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
 p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2017.mean, group = dNDMI_2017.mean)) +
 	  geom_bin2d(mapping = aes(group = dNDMI_2017.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
-	  ylab(NULL) +  xlab('1st Drought Severity\n(SPI48 1999-2002)') +  
+	  ylab(NULL) +  xlab('Severity of 1st Drought\n(SPI48 1999-2002)') +  
   # geom_vline(xintercept = 0, size = 0.25) + 
   # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
