@@ -345,16 +345,16 @@ p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
 p3
 
 #Create a data frame for adding the panel 4 text.
-p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "acd", "ab", "b", "b", "bc",
-                                 "c", "d", "b", "b", "c", "c", "d", "b", "b", "b"),
+p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "ad", "ab", "ab", "ab", "b",
+                                 "c", "d", "b", "b", "b", "c", "d", "b", "b", "b"),
                        sequence   = c('Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 
                                       'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(11.5, 6.3, 7.55, 2.8, 2.28, 9.0, 3.28, 0.22, 0.4, 0.14, 
-                                 0.24, 0.2, 0.14, 0.14, 0.16, 1.4, 1.43, 0.27, 0.14, 0.37),
+                       y     = c(11.3, 6.3, 7.55, 3.75, 2.25, 8.7, 3.8, 5.3, 5.2, 1.5, 
+                                 17, 12.1, 3.3, 2.8, 3.5, 19, 11.2, 3.7, 2.25, 3.8),
                        x     = c(0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38,
                                  0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38)
 )
@@ -368,7 +368,7 @@ p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag =("d)")) +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), 
-        legend.position = c(0.2, 0.8), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.3, 0.85), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "horizontal",axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), 
         strip.background = element_blank(), strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), 

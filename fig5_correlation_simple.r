@@ -1,12 +1,12 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 12, 2022
+#Date Edited: April 14, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr', 'gstat',
-       'sp', 'rgdal', 'raster', 'sf', 'spdep')
+       'sp', 'rgdal', 'raster', 'sf', 'elsa', 'terra')
 
 #Install a package
 # install.packages("spatialEco")
@@ -53,44 +53,6 @@ colnames(all.ca.2ndDrought) <- c('pixel.id', 'NDMI', 'dNDMI', 'dET', 'dBiomass',
 #Combine all the data in one data frame
 all.ca.combined <- rbind(all.ca.1stDrought, all.ca.2ndDrought)
 
-#Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
-#Setting variable for ESPG 5070, proj4 crs
-c <- crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
-
-#Read in a raster of general WGS 84 crs in PROJ4 code format
-wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
-
-# all.ca.combined$xy
-# spdf <- sp::SpatialPointsDataFrame(xy, data=all.ca.combined)
-# my.sf.point <- st_as_sf(x = all.ca.combined, 
-#                                     coords = c("longitude", "latitude"),
-#                                     crs = c)
-#Set the coordinates for the data frame
-coordinates(all.ca.combined) <- ~longitude + latitude
-#Does the WGS 1984 projection actually work?
-# crs(all.ca.combined) <- wg
-# dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
-
-
-# crs(all.ca.combined)
-#Exploring test for spatial autocorrelation
-gridDim <- 300
-
-
-# vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
-crs(all.ca.combined) <- crs("+proj=longlat")
-all.ca.5070 <- spTransform(all.ca.combined, c)
-v = variogram(dNDMI~1, all.ca.combined, cutoff = 1)
-# crs(v) <- c
-
-sp::spplot(all.ca.combined, c('dNDMI'))
-crs(all.ca.combined)
-p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
-          xlab('Distance (km)') + ylab('Semivariance')
-
-p_test
-ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
-all.ca.combined
 #Translate the region code to text
 all.ca.combined$region[all.ca.combined$USFS == 261] <- "Sierra Nevada"
 all.ca.combined$region[all.ca.combined$USFS == 262] <- "Southern California"
@@ -244,7 +206,8 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10), strip.text.y = element_text(size = 10)) + #Presentation text sizes.
   scale_fill_gradient2(limits = c(10,370), breaks = c(10,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
-  ylim(0.1, -0.3) + xlim(-2500, 3500) + facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought)
+  ylim(0.1, -0.3) + xlim(-2500, 3500) + facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought,
+                                                   labeller = labeller(drought = c('1999-2002'='1st Exposure', '2012-2015'='2nd Exposure')))
 
 #Add a shared legend in a customized position on the figure
 p3 + theme(
@@ -261,6 +224,54 @@ p3 + theme(
 
 #Save the figure as a .png file
 ggsave(filename = 'Fig5_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
+
+#Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
+#Setting variable for ESPG 5070, proj4 crs
+# c <- crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+# 
+# #Read in a raster of general WGS 84 crs in PROJ4 code format
+# wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
+
+# all.ca.combined$xy
+# spdf <- sp::SpatialPointsDataFrame(xy, data=all.ca.combined)
+# my.sf.point <- st_as_sf(x = all.ca.combined,
+#                                     coords = c("longitude", "latitude"),
+#                                     crs = c)
+# install.packages("Rcpp")
+# library("elsa")
+# library("terra")
+#Set the coordinates for the data frame
+coordinates(all.ca.combined) <- ~longitude + latitude
+#Does the WGS 1984 projection actually work?
+# crs(all.ca.combined) <- wg
+# dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
+
+
+# crs(all.ca.combined)
+#Exploring test for spatial autocorrelation
+gridDim <- 300
+
+
+# vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
+crs(all.ca.combined) <- crs("+proj=longlat")
+# all.ca.5070 <- spTransform(all.ca.combined, c)
+# v = variogram(dNDMI~1, all.ca.combined, cutoff = 1)
+#Calculate a variogram
+v <- elsa::Variogram(all.ca.combined, zcol = 'dNDMI', width = 300, cutoff = 10000)
+plot(v)
+# crs(v) <- c
+#Calculate a variogram
+co <- elsa::correlogram(all.ca.combined, zcol = 'dNDMI', width = 300, cutoff = 10000)
+
+#Do a spatial plot of the data
+sp::spplot(all.ca.combined, c('dNDMI'))
+crs(all.ca.combined)
+p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
+          xlab('Distance (km)') + ylab('Semivariance')
+
+p_test
+ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
+all.ca.combined
 
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
