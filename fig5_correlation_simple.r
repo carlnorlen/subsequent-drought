@@ -6,11 +6,11 @@
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr', 'gstat',
-       'sp', 'rgdal', 'raster', 'sf', 'elsa', 'terra')
+       'sp', 'rgdal', 'raster', 'sf', 'elsa', 'terra', 'nlme', 'glmmfields')
 
 #Install a package
-# install.packages("spatialEco")
-
+# install.packages("glmmfields")
+# library('nlme')
 #Load packages
 lapply(p,require,character.only=TRUE)
 
@@ -18,8 +18,9 @@ lapply(p,require,character.only=TRUE)
 setwd('C:/Users/can02/mystuff/subsequent-drought')
 
 #Increase the memory limit for R. Helps with spatially explicit analyses.
+# memory.limit()
 memory.limit(32000)
-
+# memory.limit()
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
 all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
@@ -31,7 +32,7 @@ all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
                      (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2nd Drought Only',
                      (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1st Drought Only')) 
-all.ca %>% dplyr::select(dNDMI_2004)
+# all.ca %>% dplyr::select(dNDMI_2004)
 #Select columns of data
 all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
@@ -65,7 +66,7 @@ all.ca.combined <- all.ca.combined %>% mutate(ADS.cat = case_when(
 #Make drought sequence into dummy categorical variables for statistical analysis
 all.ca.sample <- all.ca.combined %>% mutate(sequence.f = case_when(
                                    sequence == 'Both Droughts' ~ 0, 
-                                   sequence == '2012-2015 Only' ~ 1))
+                                   sequence == '2nd Drought Only' ~ 1))
 
 #Make years into dummy variables for statistical analysis
 all.ca.sample <- all.ca.sample %>% mutate(drought.f = case_when(
@@ -89,8 +90,8 @@ all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% co
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
 #Convert dummy variable to factors
-all.ca.sample$sequence.f <- factor(all.ca.sample$sequence.f)
-all.ca.sample$drought.f <- factor(all.ca.sample$drought.f)
+all.ca.sample$sequence.f <- all.ca.sample$sequence.f
+all.ca.sample$drought.f <- all.ca.sample$drought.f
 
 #Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.f)
@@ -227,7 +228,7 @@ ggsave(filename = 'Fig5_regression_faceted_plot.png', device = 'png', height=16,
 
 #Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
 #Setting variable for ESPG 5070, proj4 crs
-# c <- crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
 # 
 # #Read in a raster of general WGS 84 crs in PROJ4 code format
 # wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
@@ -241,31 +242,72 @@ ggsave(filename = 'Fig5_regression_faceted_plot.png', device = 'png', height=16,
 # library("elsa")
 # library("terra")
 #Set the coordinates for the data frame
-coordinates(all.ca.combined) <- ~longitude + latitude
+coordinates(all.ca.sample) <- ~longitude + latitude
+raster::crs(all.ca.sample) <- raster::crs("+proj=longlat")
 #Does the WGS 1984 projection actually work?
 # crs(all.ca.combined) <- wg
 # dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
+all.ca.sample
+m.gls <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr, data = all.ca.sample %>% filter(!is.na(sequence.f)))
+summary(all.ca.sample)
+m.glm <- glm(formula = dNDMI ~ drought.f * sequence.f + PET_4yr + biomass + tmax_4yr, data = all.ca.sample %>% filter(!is.na(sequence.f)))
 
 
+m.glm.sp <- glmmfields::glmmfields(dNDMI ~ drought.f * sequence.f + PET_4yr,
+                       data = all.ca.sample %>% filter(!is.na(sequence.f)), family = 'ln',
+                       lat = "latitude", lon = "longitude", nknots = 12, iter = 500, chains = 1,
+                       prior_intercept = student_t(3, 0, 10), 
+                       prior_beta = student_t(3, 0, 3),
+                       prior_sigma = half_t(3, 0, 3),
+                       prior_gp_theta = half_t(3, 0, 10),
+                       prior_gp_sigma = half_t(3, 0, 3),
+                       seed = 123 # passed to rstan::sampling()
+)
+plot(resid(m.glm))
+plot(resid(m.gls))
+summary(m.glm)
+summary(m.gls)
+vario2 <- nlme::Variogram(m.gls, resType = "pearson")
+plot(vario2, smooth = TRUE, ylim = c(0, 1.2))
 # crs(all.ca.combined)
 #Exploring test for spatial autocorrelation
-gridDim <- 300
+# gridDim <- 300
 
 
 # vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
-crs(all.ca.combined) <- crs("+proj=longlat")
+raster::crs(all.ca.combined) <- raster::crs("+proj=longlat")
+raster::crs(all.ca.combined)
 # all.ca.5070 <- spTransform(all.ca.combined, c)
 # v = variogram(dNDMI~1, all.ca.combined, cutoff = 1)
 #Calculate a variogram
-v <- elsa::Variogram(all.ca.combined, zcol = 'dNDMI', width = 300, cutoff = 10000)
+all.ca.combined
+
+socal_dir <- "D:\\Large_Files\\socal"
+dndmi.2004 <- raster::raster(file.path(socal_dir, 'dNDMI_2004_bigger_region_300m_v4.tif'))
+raster::crs(dndmi.2004) <- c
+dndmi.2004.m <- is.na(dndmi.2004)
+dndmi.2004.mask <- raster::mask(dndmi.2004, mask = dndmi.2004.m, maskvalue = 1)
+# ca.rast <- raster::rasterFromXYZ(all.ca.combined)
+# terra::autocor(ca.rast, global = TRUE, method = 'moran')
+# terra::autocor(all.ca.combined, global = TRUE, method = 'moran')
+# elsa::Variogr
+v <- elsa::Variogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
+# g.v <- gstat::variogram(data = dndmi.2004.mask, width = 300, cutoff = 10000)
+# g.v
 plot(v)
+elsa::moran(dndmi.2004.mask, d1 = 0, d2 = 10000)
+elsa::geary(dndmi.2004.mask, d1 = 0, d2 = 10000)
+
+ggplot() + geom_line(data = as.data.frame(v), mapping = aes(x = distance, y = gamma))
 # crs(v) <- c
 #Calculate a variogram
-co <- elsa::correlogram(all.ca.combined, zcol = 'dNDMI', width = 300, cutoff = 10000)
-
+co <- elsa::correlogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
+co
+plot(co)
 #Do a spatial plot of the data
-sp::spplot(all.ca.combined, c('dNDMI'))
+sp::spplot(ca.rast, c('dNDMI'))
 crs(all.ca.combined)
+plot(ca.rast, col = 'dNDMI')
 p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
           xlab('Distance (km)') + ylab('Semivariance')
 
