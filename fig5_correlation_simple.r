@@ -5,8 +5,8 @@
 
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
-       'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr', 'gstat',
-       'sp', 'rgdal', 'raster', 'sf', 'elsa', 'terra', 'nlme', 'glmmfields')
+       'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr',
+        'nlme', 'egg')
 
 #Install a package
 # install.packages("glmmfields")
@@ -194,6 +194,13 @@ r2.text <- data.frame(
             y = c(-0.25, -0.25, -0.25, -0.25)
 )
 
+letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
+                       sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+                       drought = c('1999-2002', '2012-2015', '1999-2002',  '2012-2015'),
+                       y     = c(-0.3, -0.3, -0.3, -0.3),
+                       x     = c(-2400, -2400, -2400, -2400)
+)
+
 #Plot dNDMI versus Pr-ET by drought sequence and time period.
 p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075)) +
@@ -203,6 +210,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_text(data = r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
+  geom_text(data = letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
   labs(fill = "Grid Cells") +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10), strip.text.y = element_text(size = 10)) + #Presentation text sizes.
@@ -211,7 +219,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
                                                    labeller = labeller(drought = c('1999-2002'='1st Exposure', '2012-2015'='2nd Exposure')))
 
 #Add a shared legend in a customized position on the figure
-p3 + theme(
+p4 <- p3 + theme(
   legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
   legend.justification = c(1, 0),
   legend.position = c(0.68, 0.8),
@@ -223,97 +231,99 @@ p3 + theme(
                                title.hjust = 0.5, 
                                ticks.colour = "black"))
 
+p4
+
 #Save the figure as a .png file
 ggsave(filename = 'Fig5_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
 #Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
 #Setting variable for ESPG 5070, proj4 crs
-c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
-# 
-# #Read in a raster of general WGS 84 crs in PROJ4 code format
-# wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
+# c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+# # 
+# # #Read in a raster of general WGS 84 crs in PROJ4 code format
+# # wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
 
-# all.ca.combined$xy
-# spdf <- sp::SpatialPointsDataFrame(xy, data=all.ca.combined)
-# my.sf.point <- st_as_sf(x = all.ca.combined,
-#                                     coords = c("longitude", "latitude"),
-#                                     crs = c)
-# install.packages("Rcpp")
-# library("elsa")
-# library("terra")
-#Set the coordinates for the data frame
-coordinates(all.ca.sample) <- ~longitude + latitude
-raster::crs(all.ca.sample) <- raster::crs("+proj=longlat")
-#Does the WGS 1984 projection actually work?
-# crs(all.ca.combined) <- wg
-# dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
-all.ca.sample
-m.gls <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr, data = all.ca.sample %>% filter(!is.na(sequence.f)))
-summary(all.ca.sample)
-m.glm <- glm(formula = dNDMI ~ drought.f * sequence.f + PET_4yr + biomass + tmax_4yr, data = all.ca.sample %>% filter(!is.na(sequence.f)))
+# # all.ca.combined$xy
+# # spdf <- sp::SpatialPointsDataFrame(xy, data=all.ca.combined)
+# # my.sf.point <- st_as_sf(x = all.ca.combined,
+# #                                     coords = c("longitude", "latitude"),
+# #                                     crs = c)
+# # install.packages("Rcpp")
+# # library("elsa")
+# # library("terra")
+# #Set the coordinates for the data frame
+# coordinates(all.ca.sample) <- ~longitude + latitude
+# raster::crs(all.ca.sample) <- raster::crs("+proj=longlat")
+# #Does the WGS 1984 projection actually work?
+# # crs(all.ca.combined) <- wg
+# # dNDMI.cg <- correlogram(x = all.ca.combined, v = all.ca.combined@data[,'dNDMI'], ns = 1)
+# all.ca.sample
+# m.gls <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr, data = all.ca.sample %>% filter(!is.na(sequence.f)))
+# summary(all.ca.sample)
+# m.glm <- glm(formula = dNDMI ~ drought.f * sequence.f + PET_4yr + biomass + tmax_4yr, data = all.ca.sample %>% filter(!is.na(sequence.f)))
 
 
-m.glm.sp <- glmmfields::glmmfields(dNDMI ~ drought.f * sequence.f + PET_4yr,
-                       data = all.ca.sample %>% filter(!is.na(sequence.f)), family = 'ln',
-                       lat = "latitude", lon = "longitude", nknots = 12, iter = 500, chains = 1,
-                       prior_intercept = student_t(3, 0, 10), 
-                       prior_beta = student_t(3, 0, 3),
-                       prior_sigma = half_t(3, 0, 3),
-                       prior_gp_theta = half_t(3, 0, 10),
-                       prior_gp_sigma = half_t(3, 0, 3),
-                       seed = 123 # passed to rstan::sampling()
-)
-plot(resid(m.glm))
-plot(resid(m.gls))
-summary(m.glm)
-summary(m.gls)
-vario2 <- nlme::Variogram(m.gls, resType = "pearson")
-plot(vario2, smooth = TRUE, ylim = c(0, 1.2))
+# m.glm.sp <- glmmfields::glmmfields(dNDMI ~ drought.f * sequence.f + PET_4yr,
+                       # data = all.ca.sample %>% filter(!is.na(sequence.f)), family = 'ln',
+                       # lat = "latitude", lon = "longitude", nknots = 12, iter = 500, chains = 1,
+                       # prior_intercept = student_t(3, 0, 10), 
+                       # prior_beta = student_t(3, 0, 3),
+                       # prior_sigma = half_t(3, 0, 3),
+                       # prior_gp_theta = half_t(3, 0, 10),
+                       # prior_gp_sigma = half_t(3, 0, 3),
+                       # seed = 123 # passed to rstan::sampling()
+# )
+# plot(resid(m.glm))
+# plot(resid(m.gls))
+# summary(m.glm)
+# summary(m.gls)
+# vario2 <- nlme::Variogram(m.gls, resType = "pearson")
+# plot(vario2, smooth = TRUE, ylim = c(0, 1.2))
+# # crs(all.ca.combined)
+# #Exploring test for spatial autocorrelation
+# # gridDim <- 300
+
+
+# # vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
+# raster::crs(all.ca.combined) <- raster::crs("+proj=longlat")
+# raster::crs(all.ca.combined)
+# # all.ca.5070 <- spTransform(all.ca.combined, c)
+# # v = variogram(dNDMI~1, all.ca.combined, cutoff = 1)
+# #Calculate a variogram
+# all.ca.combined
+
+# socal_dir <- "D:\\Large_Files\\socal"
+# dndmi.2004 <- raster::raster(file.path(socal_dir, 'dNDMI_2004_bigger_region_300m_v4.tif'))
+# raster::crs(dndmi.2004) <- c
+# dndmi.2004.m <- is.na(dndmi.2004)
+# dndmi.2004.mask <- raster::mask(dndmi.2004, mask = dndmi.2004.m, maskvalue = 1)
+# # ca.rast <- raster::rasterFromXYZ(all.ca.combined)
+# # terra::autocor(ca.rast, global = TRUE, method = 'moran')
+# # terra::autocor(all.ca.combined, global = TRUE, method = 'moran')
+# # elsa::Variogr
+# v <- elsa::Variogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
+# # g.v <- gstat::variogram(data = dndmi.2004.mask, width = 300, cutoff = 10000)
+# # g.v
+# plot(v)
+# elsa::moran(dndmi.2004.mask, d1 = 0, d2 = 10000)
+# elsa::geary(dndmi.2004.mask, d1 = 0, d2 = 10000)
+
+# ggplot() + geom_line(data = as.data.frame(v), mapping = aes(x = distance, y = gamma))
+# # crs(v) <- c
+# #Calculate a variogram
+# co <- elsa::correlogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
+# co
+# plot(co)
+# #Do a spatial plot of the data
+# sp::spplot(ca.rast, c('dNDMI'))
 # crs(all.ca.combined)
-#Exploring test for spatial autocorrelation
-# gridDim <- 300
+# plot(ca.rast, col = 'dNDMI')
+# p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
+          # xlab('Distance (km)') + ylab('Semivariance')
 
-
-# vario <- automap::autofitVariogram(formula = dNDMI~PET_4yr, input_data=all.ca.combined)
-raster::crs(all.ca.combined) <- raster::crs("+proj=longlat")
-raster::crs(all.ca.combined)
-# all.ca.5070 <- spTransform(all.ca.combined, c)
-# v = variogram(dNDMI~1, all.ca.combined, cutoff = 1)
-#Calculate a variogram
-all.ca.combined
-
-socal_dir <- "D:\\Large_Files\\socal"
-dndmi.2004 <- raster::raster(file.path(socal_dir, 'dNDMI_2004_bigger_region_300m_v4.tif'))
-raster::crs(dndmi.2004) <- c
-dndmi.2004.m <- is.na(dndmi.2004)
-dndmi.2004.mask <- raster::mask(dndmi.2004, mask = dndmi.2004.m, maskvalue = 1)
-# ca.rast <- raster::rasterFromXYZ(all.ca.combined)
-# terra::autocor(ca.rast, global = TRUE, method = 'moran')
-# terra::autocor(all.ca.combined, global = TRUE, method = 'moran')
-# elsa::Variogr
-v <- elsa::Variogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
-# g.v <- gstat::variogram(data = dndmi.2004.mask, width = 300, cutoff = 10000)
-# g.v
-plot(v)
-elsa::moran(dndmi.2004.mask, d1 = 0, d2 = 10000)
-elsa::geary(dndmi.2004.mask, d1 = 0, d2 = 10000)
-
-ggplot() + geom_line(data = as.data.frame(v), mapping = aes(x = distance, y = gamma))
-# crs(v) <- c
-#Calculate a variogram
-co <- elsa::correlogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
-co
-plot(co)
-#Do a spatial plot of the data
-sp::spplot(ca.rast, c('dNDMI'))
-crs(all.ca.combined)
-plot(ca.rast, col = 'dNDMI')
-p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
-          xlab('Distance (km)') + ylab('Semivariance')
-
-p_test
-ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
-all.ca.combined
+# p_test
+# ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
+# all.ca.combined
 
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
