@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 14, 2022
+#Date Edited: April 19, 2022
 #Purpose: Work on spatial autocorrelation
 
 #Packages to load
@@ -77,6 +77,7 @@ c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 
 
 #directory for raster files
 socal_dir <- "D:\\Large_Files\\socal"
+sub_dir <- "D:\\Subsequent_Drought"
 
 #dNDMI 2004
 dndmi.2004 <- raster::raster(file.path(socal_dir, 'dNDMI_2004_bigger_region_300m_v4.tif'))
@@ -90,12 +91,32 @@ raster::crs(dndmi.2017) <- c
 dndmi.2017.m <- is.na(dndmi.2017)
 dndmi.2017.mask <- raster::mask(dndmi.2017, mask = dndmi.2017.m, maskvalue = 1)
 
+#dNDMI 2004, 30 meters
+dndmi.2004.30m.1 <- raster::raster(file.path(sub_dir, 'dNDMI_2004_bigger_region_30m-1.tif'))
+dndmi.2004.30m.2 <- raster::raster(file.path(sub_dir, 'dNDMI_2004_bigger_region_30m-2.tif'))
+dndmi.2004.30m <- raster::merge(dndmi.2004.30m.1, dndmi.2004.30m.2)
+raster::crs(dndmi.2004.30m) <- c
+dndmi.2004.30m.m <- is.na(dndmi.2004.30m, )
+dndmi.2004.30m.mask <- raster::mask(dndmi.2004.30m, mask = dndmi.2004.30m.m, maskvalue = 1)
+
+v.2004.30m <- elsa::Variogram(dndmi.2004.30m.mask, width = 300, cutoff = 10000, s = 10000)
+v.2004.30m <- gstat::variogram(dndmi.2004.30m.mask)
+png(file = 'SFig_17_dNDMI_2004_30m_semivariogram.png', width=12, height=8, units="cm", res=900)
+plot(v.2004.30m, ylab = 'Semivariance', xlab = 'Distance (m)', main = 'dNDMI 2004 30-meter Variogram')
+dev.off()
+
+#Save merged raster for later.
+writeRaster(dndmi.2004.30m, filename=file.path(sub_dir, "dNDMI_2004_bigger_region_30m.tif"), format="GTiff", overwrite=TRUE)
+
+#Save the raster mask for later
+writeRaster(dndmi.2004.30m.m, filename=file.path(sub_dir, "dNDMI_2004_bigger_region_30m_mask.tif"), format="GTiff", overwrite=TRUE)
+
 # ca.rast <- raster::rasterFromXYZ(all.ca.combined)
 # terra::autocor(ca.rast, global = TRUE, method = 'moran')
 # terra::autocor(all.ca.combined, global = TRUE, method = 'moran')
 # elsa::Variogr
 v.2004 <- elsa::Variogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
-
+# v.2004.30m 
 png(file = 'SFig_17_dNDMI_2004_semivariogram.png', width=12, height=8, units="cm", res=900)
 plot(v.2004, ylab = 'Semivariance', xlab = 'Distance (m)', main = 'dNDMI 2004 Variogram')
 dev.off()
