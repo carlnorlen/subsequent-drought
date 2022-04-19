@@ -231,7 +231,7 @@ p1 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
   scale_color_manual(values = c("black", "black"),
                      aesthetics = "color") + labs(tag = 'b)') +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.76, 0.1), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.76, 0.1), legend.text = element_text(size = 6, angle = 45), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0,0,2.5,5), "pt"),
         panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold"),
@@ -275,7 +275,7 @@ p2 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag = 'd)') +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.97, 0.62), legend.text = element_text(size = 8), legend.title = element_text(size = 10),
+        legend.position = c(0.45, 0.55), legend.text = element_text(size = 6, angle = 45, vjust = 0.8), legend.title = element_text(size = 10),
         legend.direction = "horizontal", axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), strip.background = element_blank(),
         strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), panel.spacing = unit(20, "pt"),
@@ -337,7 +337,7 @@ p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
   theme_bw() + guides(color = 'none', fill = 'none') +
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag = 'b)') +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.76, 0.15), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.76, 0.15), legend.text = element_text(size = 6, angle = 45), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(2.5,0,0,5), "pt"), 
         panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold"),
@@ -373,7 +373,7 @@ p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag =("d)")) +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), 
-        legend.position = c(0.3, 0.85), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
+        legend.position = c(0.3, 0.75), legend.text = element_text(size = 6, angle = 45, vjust = 0.8), legend.title = element_text(size = 8),
         legend.direction = "horizontal",axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), 
         strip.background = element_blank(), strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), 

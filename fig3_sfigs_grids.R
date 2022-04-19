@@ -93,7 +93,7 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
           axis.title.y = element_text(size = 10), plot.title = element_text(size = 10, hjust = 0.5), legend.background = element_rect(colour = NA, fill = NA), 
           legend.justification = c(1, 0), legend.position = c(0.895, 0.67), legend.text = element_text(size = 6), 
-          legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 10),
+          legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 10, face = 'bold'),
           plot.margin = unit(c(0,0,0,0), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
     facet_wrap(~ both) + 
@@ -113,7 +113,7 @@ p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
     guides(fill = "none", alpha = "none") +  
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
-          axis.title.y = element_blank(), strip.text = element_text(size = 10), plot.margin = unit(c(0,0,0,20), "pt")) +  
+          axis.title.y = element_blank(), strip.text = element_text(size = 10, face = 'bold'), plot.margin = unit(c(0,0,0,20), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
   annotate("text", x = -0.25, y = -0.75, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
   annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
