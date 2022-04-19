@@ -1,10 +1,11 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 14, 2022
+#Date Updated: April 19, 2022
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
-p <- c('ggalt', 'ggpubr', 'viridis', 'tidyr', 'dplyr', 'ggmap', 'ggplot2', 'magrittr', 'raster', 'rgdal', 'sp', 'sf', 'RStoolbox', 'gtools', 'tigris', 'patchwork', 'rlist', 'ggspatial', 'svglite')
+p <- c('ggalt', 'ggpubr', 'viridis', 'tidyr', 'dplyr', 'ggmap', 'ggplot2', 'magrittr', 'raster', 'rgdal', 'sp', 
+       'sf', 'RStoolbox', 'gtools', 'tigris', 'patchwork', 'rlist', 'ggspatial', 'svglite', 'grid')
 lapply(p,require,character.only=TRUE)
 
 setwd('C:/Users/can02/mystuff/subsequent-drought')
@@ -116,7 +117,7 @@ p1 <- ggplot() +
 p2 <- p1 + 
     theme(
     legend.justification = c(1, 0),
-    legend.position = c(0.88, 0.6),
+    legend.position = c(0.89, 0.6),
     legend.text = element_text(size = 6),
     legend.title = element_text(size = 8),
     legend.direction = "vertical") +
@@ -141,15 +142,20 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
         legend.justification = c(1, 0), legend.position = c(0.99, 0.6), legend.text = element_text(size = 6), 
         legend.title = element_text(size = 8), legend.direction = "horizontal", strip.text = element_text(size = 12),
         plot.margin = unit(c(10,0,10,10), "pt")) +  
-  scale_fill_gradient2(name = "Grid Cells", limits = c(0,2950), midpoint = 1475, low = "cornflowerblue", 
+  scale_fill_gradient2(name = "Total Area\n(# Grid Cells)", limits = c(0,2950), midpoint = 1475, low = "cornflowerblue", 
                        mid = "yellow", high = "red", na.value = 'transparent') +
+  coord_cartesian(clip = 'off') + #Turn off clipping
   scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
 
 #Add annotations and move the legend into the corner of the figure.
 p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly") +
   annotate("text", x = -2.4, y = -3, label = "Both \nDroughts") + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly") + 
-  annotate(geom="text", x = -2.8, y = -3.45, label="Less\nPrecipitation", size = 2.5) + 
-  annotate(geom="text", x = -2.8, y = -0.0, label ="More\nPrecipitation", size = 2.5) +
+  annotation_custom(grob = textGrob(label = "Drier", hjust = 0, gp = gpar(fontface = 'bold', fontsize = 8)),
+    ymin = -3.5, ymax = -3.5,      # Vertical position of the textGrob
+    xmin = -3.1, xmax = -3.1) +     # Horizontal position
+  annotation_custom(grob = textGrob(label = "Wetter", hjust = 0, gp = gpar(fontface = 'bold', fontsize = 8)),
+                  ymin = -3.5, ymax = -3.5,      # Vertical position of the textGrob
+                  xmin = 1.75, xmax = 1.75 ) +     # Horizontal position
   theme(
     legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
     legend.justification = c(1, 0),
@@ -160,9 +166,6 @@ p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + anno
 
 #Combine the two figures into one plot, add letters to label sub-plots
 f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, align = 'h', heights = c(1,1), widths = c(1, 1.5), labels = c('a)', 'b)')) #,  plot.margin = unit(c(0,3,0,0), "pt")
-
-# annotate_figure(f1, top = textGrob(label = "(a)", hjust = -0.5, gp = gpar(col = "black", fontsize = 12))) #, 
-#                     # top = textGrob(label = "(a)", rhjust = 0.5, gp = gpar(col = "black", fontsize = 12)))
 
 #Save the figure as a .png file
 ggsave(filename = 'Fig1_both_droughts_SPI48_300m_map.png', height=10, width= 20, units = 'cm', dpi=900)

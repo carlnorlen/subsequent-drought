@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 14, 2022
+#Date Edited: April 19, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -77,8 +77,8 @@ second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>
 second.socal / second.count
 
 #Add columns for labeling plots.
-all.ca.spi48$both <- 'Response to 1st Exposure '#'1999-2002'
-all.ca.spi48$second <- 'Response to 2nd Exposure'#'2012-2015'
+all.ca.spi48$both <- 'Response to 1st Period'#'1999-2002'
+all.ca.spi48$second <- 'Response to 2nd Period'#'2012-2015'
 
 #Plot dNDMI 2004 with SPI48 2002 by SPI48 2015 grid
 p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2004.mean, group = dNDMI_2004.mean)) +
@@ -97,10 +97,10 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
           plot.margin = unit(c(0,0,0,0), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
     facet_wrap(~ both) + 
-    annotate(geom="text", x=-1.15, y=-0.5, label="Less\nSevere", color="black", size = 2) + 
-    annotate(geom="text", x=1.9, y=-0.5, label="More\nSevere", color="black", size = 2) +
-    annotate(geom="text", x = -2.5, y = -3.2, label="Less\nPrecipitation", size = 2) + 
-    annotate(geom="text", x = -2.5, y = -0.25, label ="More\nPrecipitation", size = 2) 
+    annotate(geom="text", x=-1.15, y=-0.5, label="Less\nDie-off", color="black", size = 2) + 
+    annotate(geom="text", x=1.9, y=-0.5, label="More\nDie-off", color="black", size = 2) +
+    annotate(geom="text", x = -2.9, y = -3.5, label="bold(Drier)", size = 2, parse = TRUE) + 
+    annotate(geom="text", x = 1.75, y = -3.5, label ="bold(Wetter)", size = 2, parse = TRUE) 
 
 #Plot dNDMI 2017 with SPI48 2002 by SPI48 2015 grid
 p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2017.mean, group = dNDMI_2017.mean)) +

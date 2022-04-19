@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 14, 2022
+#Date Edited: April 19, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -226,7 +226,7 @@ p1 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
                 x = "time.period", y = "BAA.dead.sum", position = position_dodge(), color = "sequence", fill = 'gray',
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, 
                 ylab = expression('Mortality (m'^2*' ha'^-1*')'), 
-                xlab = "Drought Exposure", order = c("1999-2002", "2012-2015")) + 
+                xlab = NULL, order = c("1999-2002", "2012-2015")) + 
   theme_bw() + guides(color = 'none') +
   scale_color_manual(values = c("black", "black"),
                      aesthetics = "color") + labs(tag = 'b)') +
@@ -234,12 +234,14 @@ p1 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
         legend.position = c(0.76, 0.1), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0,0,2.5,5), "pt"),
-        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
-  scale_x_discrete(labels = c("1st (1999-2002)", "2nd (2012-2015)")) +
+        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold"),
+        strip.text.x = element_text(size = 10, face = 'bold')) +
+  scale_x_discrete(labels = c("Mortality During\n1st Period", "Mortality During\n2nd Period")) +
   geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   geom_text(data = data.frame(label = "Mean \n+/- SE", y = 3.5, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
-  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only'))) 
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')), 
+             labeller = as_labeller(c('Both Droughts' = "Exposed to Both Droughts", '2nd Drought Only' = "Exposed to 2nd Drought Only"))) 
 p1
 
 #Create a tree_type factor variable and sort it to make the plots
@@ -268,21 +270,22 @@ p2 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
                 color = "sequence", 
                 position = position_dodge(), add = "mean_se" , error.plot = "errorbar", alpha = 0.8, 
                 ylab = expression('Mortality (m'^2*' ha'^-1*')'), 
-                xlab = "Drought Exposure", order = c("1999-2002", "2012-2015")) +
+                xlab = NULL, order = c("1999-2002", "2012-2015")) +
   theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree Type", label.position = "bottom", title.position="top", title.hjust = 0.5)) +
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag = 'd)') +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.99, 0.62), legend.text = element_text(size = 8), legend.title = element_text(size = 10),
-        legend.direction = "horizontal", axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        legend.position = c(0.97, 0.62), legend.text = element_text(size = 8), legend.title = element_text(size = 10),
+        legend.direction = "horizontal", axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), strip.background = element_blank(),
         strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), panel.spacing = unit(20, "pt"),
         plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
-  scale_x_discrete(labels = c("1st (1999-2002)", "2nd (2012-2015)")) +
+  scale_x_discrete(labels = c("Mortality During\n1st Period", "Mortality During\n2nd Period")) +
   geom_text(data = p2_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   # geom_text(data = data.frame(label = "Mean \n+/- SE", y = 1.7, x = 1.5, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
-  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')), 
+             labeller = as_labeller(c('Both Droughts' = "Exposed to Both Droughts", '2nd Drought Only' = "Exposed to 2nd Drought Only"))) 
 p2
 
 # ggbarplot(order)
@@ -337,11 +340,13 @@ p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
         legend.position = c(0.76, 0.15), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(2.5,0,0,5), "pt"), 
-        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
+        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold"),
+        strip.text.x = element_text(size = 10, face = 'bold')) +
   geom_text(data = p3_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   geom_text(data = p3_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
   geom_text(data = data.frame(label = "Mean \n+/- SE", y = 21.2, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
-  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
+  facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')),
+             labeller = as_labeller(c('Both Droughts' = "Exposed to Both Droughts", '2nd Drought Only' = "Exposed to 2nd Drought Only")))
 p3
 
 #Create a data frame for adding the panel 4 text.
@@ -363,17 +368,17 @@ p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "ad", "ab", "ab", "
 p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'other conifer' & tree_type != 'deciduous'),
                 x = "time.period", y = "BAA.all.sum", position = position_dodge(), fill = 'tree_type.f', color = "sequence",
                 add = "mean_se" , error.plot = "errorbar", alpha = 0.8, ylab = expression('Basal Area (m'^2*' ha'^-1*')'), 
-                xlab = "Drought Exposure") +  
+                xlab = NULL, order = c('1999-2002', '2012-2015')) +  
   theme_bw() + guides(color = 'none', fill = guide_legend(title = "Tree Type",  label.position = "bottom", title.position="top", title.hjust = 0.5)) +
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag =("d)")) +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), 
         legend.position = c(0.3, 0.85), legend.text = element_text(size = 6), legend.title = element_text(size = 8),
-        legend.direction = "horizontal",axis.text.x = element_text(size = 8), axis.title.x = element_text(size = 10),
+        legend.direction = "horizontal",axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), 
         strip.background = element_blank(), strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), 
         panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
-  scale_x_discrete(labels = c("1st (1999-2002)", "2nd (2012-2015)")) +
+  scale_x_discrete(labels = c("Mortality During\n1st Period", "Mortality During\n2nd Period")) +
   geom_text(data = p4_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
 p4

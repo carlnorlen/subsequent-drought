@@ -6,7 +6,7 @@
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr',
-        'nlme', 'egg')
+        'nlme')
 
 #Install a package
 # install.packages("glmmfields")
