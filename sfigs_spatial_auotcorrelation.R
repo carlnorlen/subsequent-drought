@@ -71,15 +71,84 @@ all.ca.sample <- all.ca.sample %>% mutate(drought.f = case_when(
                                     drought == '1999-2002' ~ 0, 
                                     drought == '2012-2015' ~ 1))
 
-#Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
-#Setting variable for ESPG 5070, proj4 crs
-c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
-
 #directory for raster files
 socal_dir <- "D:\\Large_Files\\socal"
 sub_dir <- "D:\\Subsequent_Drought"
 
+#Do a spatial plot of the data
+# sp::spplot(ca.rast, c('dNDMI'))
+# crs(all.ca.combined)
+# plot(ca.rast, col = 'dNDMI')
+# p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
+          # xlab('Distance (km)') + ylab('Semivariance')
+
+# p_test
+# ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
+# all.ca.combined
+
+
+
+
+#Make the data a spatial data frame
+# summary(all.ca.sample)
+all.ca.filter <- all.ca.sample %>% filter(!is.na(sequence.f)) #Filter out NA values
+
+coordinates(all.ca.filter) <- ~ latitude + longitude
+raster::crs(all.ca.filter) <- raster::crs("+proj=longlat")
+
+#Check for spatial autocorrelation
+data.spatialCor.lm <- lm(dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, all.ca.filter)
+
+png(file = 'SFig_21_analysis_of_model.png', width=12, height=12, units="cm", res=900)
+par(mfrow = c(2, 2))
+plot(data.spatialCor.lm, which = 1:4)
+dev.off()
+
+data.spatialCor$Resid <- rstandard(data.spatialCor.lm)
+# coordinates(data.spatialCor) <- ~LAT + LONG  #effectively convert the data into a spatial data frame
+bubble(data.spatialCor, "Resid")
+
+#Do the GLS model without incorporating the lats and longs
+data.spatialCor.gls <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter, method = "REML")
+data.spatialCor.gls
+summary(data.spatialCor.gls)
+plot(data.spatialCor.gls)
+
+#Do an nlme semi-variogram
+# plot(nlme:::Variogram(data.spatialCor.gls, form = ~latitude + longitude, resType = "response", maxDist = 10))
+png(file = 'SFig_17_gstat_semivariogram_300m.png', width=12, height=8, units="cm", res=900)
+plot(gstat::variogram(residuals(data.spatialCor.gls, "normalized") ~
+    1, data = all.ca.filter, cutoff = 10), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
+dev.off()
+
+#Check different ways to correct for spatial autocorrelation
+data.spatialCor.glsExp <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
+                              correlation = corExp(form = ~latitude + longitude, nugget = TRUE),
+                              method = "REML")
+data.spatialCor.glsGaus <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
+                               correlation = corGaus(form = ~latitude + longitude, nugget = TRUE),
+                               method = "REML")
+data.spatialCor.glsLin <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
+                              correlation = corLin(form = ~latitude + longitude, nugget = TRUE),
+                              method = "REML")
+data.spatialCor.glsRatio <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
+                                correlation = corRatio(form = ~latitude + longitude, nugget = TRUE),
+                                method = "REML")
+data.spatialCor.glsSpher <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
+                                correlation = corSpher(form = ~latitude + longitude, nugget = TRUE),
+                                method = "REML")
+
+#Compare the AIC values for the different models
+AIC(data.spatialCor.gls, data.spatialCor.glsExp, data.spatialCor.glsGaus,
+    data.spatialCor.glsLin, data.spatialCor.glsRatio,
+    data.spatialCor.glsSpher)
+
+#Raster based spatial autocorrelation, Is it even working?
 #dNDMI 2004
+#Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
+#Setting variable for ESPG 5070, proj4 crs
+c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
+
 dndmi.2004 <- raster::raster(file.path(socal_dir, 'dNDMI_2004_bigger_region_300m_v4.tif'))
 raster::crs(dndmi.2004) <- c
 dndmi.2004.m <- is.na(dndmi.2004)
@@ -145,37 +214,3 @@ co.2017 <- elsa::correlogram(dndmi.2017.mask, width = 300, cutoff = 10000, s = 1
 png(file = 'SFig_20_dNDMI_2017_correlogram.png', width=12, height=8, units="cm", res=900)
 plot(co.2017, ylab = "Moran's I", xlab = 'Distance (m)', main = 'dNDMI 2017 Correlogram')
 dev.off()
-
-
-#Do a spatial plot of the data
-# sp::spplot(ca.rast, c('dNDMI'))
-# crs(all.ca.combined)
-# plot(ca.rast, col = 'dNDMI')
-# p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
-          # xlab('Distance (km)') + ylab('Semivariance')
-
-# p_test
-# ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
-# all.ca.combined
-
-
-data.spatialCor.lm <- lm(dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, all.ca.sample)
-
-png(file = 'SFig_21_analysis_of_model.png', width=12, height=12, units="cm", res=900)
-par(mfrow = c(2, 2))
-plot(data.spatialCor.lm, which = 1:4)
-dev.off()
-
-#Make the data a spatial data frame
-coordinates(all.ca.sample) <- ~ latitude + longitude
-raster::crs(all.ca.sample) <- raster::crs("+proj=longlat")
-
-data.spatialCor.gls <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.sample, method = "REML")
-data.spatialCor.gls
-plot(data.spatialCor.gls)
-
-#Do an nlme semi-variogram
-plot(nlme:::Variogram(data.spatialCor.gls, form = ~latitude + longitude, resType = "response", maxDist = 10))
-
-plot(gstat::variogram(residuals(data.spatialCor.gls, "normalized") ~
-    1, data = all.ca.sample, cutoff = 6))
