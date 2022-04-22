@@ -6,7 +6,7 @@
 #Packages to load
 p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer','gt', 'gtsummary', 
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr', 'gstat',
-       'sp', 'rgdal', 'raster', 'sf', 'elsa', 'nlme')
+       'sp', 'rgdal', 'raster', 'sf', 'elsa', 'nlme', 'ggspatial')
 
 #Install a package
 #Load packages
@@ -104,9 +104,14 @@ par(mfrow = c(2, 2))
 plot(data.spatialCor.lm, which = 1:4)
 dev.off()
 
-data.spatialCor$Resid <- rstandard(data.spatialCor.lm)
+all.ca.filter$Resid <- rstandard(data.spatialCor.lm)
+all.ca.filter %>% summary()
 # coordinates(data.spatialCor) <- ~LAT + LONG  #effectively convert the data into a spatial data frame
-bubble(data.spatialCor, "Resid")
+# bubble(all.ca.filter, "Resid")
+ggplot() + coord_sf() + 
+p_map <- geom_point(data = as.data.frame(all.ca.filter), mapping = aes(y = latitude, x = longitude, color = Resid), alpha = 0.2, size = 0.1) +
+scale_color_viridis_c()
+ggsave(filename = 'SFig_spatial_model_residuals.png', height=15, width= 10, units = 'cm', dpi=900)
 
 #Do the GLS model without incorporating the lats and longs
 data.spatialCor.gls <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter, method = "REML")
@@ -118,16 +123,70 @@ plot(data.spatialCor.gls)
 # plot(nlme:::Variogram(data.spatialCor.gls, form = ~latitude + longitude, resType = "response", maxDist = 10))
 png(file = 'SFig_17_gstat_semivariogram_300m.png', width=12, height=8, units="cm", res=900)
 plot(gstat::variogram(residuals(data.spatialCor.gls, "normalized") ~
-    1, data = all.ca.filter, cutoff = 10), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
+    1, data = all.ca.filter, cutoff = 5), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
+dev.off()
+summary(all.ca.filter)
+#Do an lme model with random effects for location
+all.ca.filter.lme <- lme(fixed = dNDMI ~  drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, 
+                         data = as.data.frame(all.ca.filter),
+                         random = ~ 1 | pixel.id, #Trying out the random effects, this is within subjects, there are two periods for each pixel
+                         method = "ML")
+summary(all.ca.filter.lme)
+
+png(file = 'SFig_gstat_lme_semivariogram_300m.png', width=12, height=8, units="cm", res=900)
+plot(gstat::variogram(residuals(all.ca.filter.lme, type = "normalized") ~
+                        1, data = all.ca.filter, cutoff = 5), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
 dev.off()
 
+
+
+# all.ca.filter.gls.corGaus <- gls(model = dNDMI ~  drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, 
+#                          data = as.data.frame(all.ca.filter),
+#                          correlation = corGaus(form = ~ latitude + longitude | drought.f, nugget = TRUE),
+#                          method = "REML")
+# summary(all.ca.filter.gls.corGaus)
+
+#Apply the spatial model to the data
+all.ca.filter.corGaus <- lme(fixed = dNDMI ~  drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, 
+                             data = as.data.frame(all.ca.filter),
+                             na.action = na.omit,
+                             random = ~ 1 | pixel.id, #Trying out the random effects, this is within subjects, there are two periods for each pixel
+                             correlation = corExp(form = ~ latitude + longitude | pixel.id / drought.f), #Add spatial correlation
+                             method = "REML")
+summary(all.ca.filter.corGaus)
+
+# Initialize(object = corGaus, data = as.data.frame(all.ca.filter))
+all.ca.filter$Resid.lme <- residuals(all.ca.filter.lme)
+all.ca.filter %>% summary()
+
+
+# coordinates(data.spatialCor) <- ~LAT + LONG  #effectively convert the data into a spatial data frame
+# bubble(all.ca.filter, "Resid")
+p_map <- ggplot() + coord_sf() + 
+         geom_point(data = as.data.frame(all.ca.filter), mapping = aes(y = latitude, x = longitude, color = Resid.lme), alpha = 0.2, size = 0.1) +
+         scale_color_viridis_c()
+
+p_map
+
+ggsave(filename = 'SFig_lme_model_residuals.png', height=15, width= 10, units = 'cm', dpi=900)
+
+#Do a Gstat variogram with lme random effects added
+p.lme <- plot(gstat::variogram(residuals(all.ca.filter.lme, type = "normalized") ~
+                        1, data = all.ca.filter, cutoff = 5), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
+
+ggsave(filename = 'SFig_lme_semiveriogram.png', height=15, width= 10, units = 'cm', dpi=900)
+
 #Check different ways to correct for spatial autocorrelation
+cs1Exp <- corExp(1, form = ~ east + north)
+cs1Exp <- Initialize(cs1Exp, spdata)
+corMatrix(cs1Exp)[1:10, 1:4]
+
 data.spatialCor.glsExp <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-                              correlation = corExp(form = ~latitude + longitude, nugget = TRUE),
+                              correlation = corExp(form = ~latitude + longitude | drought.f / sequence.f, nugget = TRUE),
                               method = "REML")
 data.spatialCor.glsGaus <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-                               correlation = corGaus(form = ~latitude + longitude, nugget = TRUE),
-                               method = "REML")
+                               correlation = corGaus(form = ~latitude + longitude),
+                               method = "ML")
 data.spatialCor.glsLin <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
                               correlation = corLin(form = ~latitude + longitude, nugget = TRUE),
                               method = "REML")
