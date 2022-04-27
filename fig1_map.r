@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 19, 2022
+#Date Updated: April 26, 2022
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
@@ -101,7 +101,7 @@ p1 <- ggplot() +
 	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100"), breaks = c("1", "2", "3"), name = expression(atop(NA,atop(textstyle('Severe Drought'),textstyle('(SPI48'<= -1.5*')')))), 
 	                    labels = c("1st Drought \nOnly", "2nd Drought \nOnly", "Both \nDroughts"), na.value = NA) +
 	  geom_sf(data = ca_20m, color='black', size = 0.2, fill=NA) +
-	  geom_sf(data = usfs.sierra.union, color='dark gray', size = 0.6,  fill='dark gray', alpha = 0.4) +
+	  geom_sf(data = usfs.sierra.union, color='black', size = 0.6,  fill='black', alpha = 0.2) +
 	  geom_sf(data = usfs.socal.union, color='black', size = 0.6,  fill='black', alpha = 0.2) +
 	  coord_sf() +
     xlab('Longitude') + ylab('Latitude') +
@@ -131,7 +131,7 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   geom_bin2d(mapping = aes(group = count, alpha = ..count..), binwidth = c(0.1, 0.1)) + theme_bw() + 
   theme(legend.position="bottom", legend.text = element_text(size=6)) + 
   ylim(-3.5, 0) + xlim(-3, 2) +
-  ylab('Severity of 2nd Drought (SPI48 2012-2015)') +  xlab('Severity of 1st Drought (SPI48 1999-2002)') + 
+  ylab('SPI48 During 2nd Period (2012-2015)') +  xlab('SPI48 During 1st Period (1999-2002)') + 
   # geom_vline(xintercept = 0, size = 0.5) + 
   # geom_hline(yintercept = 0, size = 0.5) +
   geom_vline(xintercept = -1.5, size = 1, color = 'black', linetype='dashed') +

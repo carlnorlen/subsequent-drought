@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 4, 2022
+#Date Edited: April 26, 2022
 #Purpose: Create a chart showing the relationship between annual NDVI from Landsat and ET from flux towers
 
 p <- c('dplyr','tidyr','ggplot2','ggpubr','viridis','segmented', 'patchwork','RColorBrewer', 'broom', 'svglite', 'ggpmisc')
@@ -40,8 +40,11 @@ site10 <- read.csv(file.path(dir_output, "Soaproot_Annual_EClos_Hinojo.csv"), he
 flux.sites <- rbind(site1, site2, site3, site4, site5, site6, site7, site8, site9, site10)
 
 #Add site labels for the flux tower sites
+flux.sites$veg.type <- recode(.x=flux.sites$ID, 'Grassland US-SCg' = 'non-forest', 'OakPine Forest US-SCf' = 'forest', 'Desert US-SCd' = 'non-forest', 'Sierran Mixed Conifer US-CZ3' = 'forest', 'PinyonJuniper US-SCw' = 'forest', 'OakPine Woodland US-CZ1' = 'forest', 'Coastal Sage US-SCs' = 'non-forest',
+							  'Subalpine Forest US-CZ4' = 'forest', 'Ponderosa Pine Forest US-CZ2' = 'forest', 'Desert Chaparral US-SCc' = 'non-forest')
+
 flux.sites$Site <- recode(.x=flux.sites$ID, 'Grassland US-SCg' = 'US-SCg', 'OakPine Forest US-SCf' = 'US-SCf', 'Desert US-SCd' = 'US-SCd', 'Sierran Mixed Conifer US-CZ3' = 'US-CZ3', 'PinyonJuniper US-SCw' = 'US-SCw', 'OakPine Woodland US-CZ1' = 'US-CZ1', 'Coastal Sage US-SCs' = 'US-SCs',
-							  'Subalpine Forest US-CZ4' = 'US-CZ4', 'Ponderosa Pine Forest US-CZ2' = 'US-CZ2', 'Desert Chaparral US-SCc' = 'US-SCc')
+                              'Subalpine Forest US-CZ4' = 'US-CZ4', 'Ponderosa Pine Forest US-CZ2' = 'US-CZ2', 'Desert Chaparral US-SCc' = 'US-SCc')
 
 #Remove years with missing data and when data wasn't working
 flux.sites <- subset(flux.sites, n_days >= 300 & ET > 0)
@@ -86,32 +89,38 @@ nlsFit.forest
 
 #### Create scatter plot with exponential fit
 sites.join$Site <- factor(sites.join$Site)
-p1 <- ggplot(data = sites.join, mapping = aes(x = NDVI.mean, y = ET)) + 
-	  scale_shape_manual(values=1:10) + theme_bw() +
-	  geom_point(mapping = aes(color = Site, shape = Site), size = 2) + 
-	  geom_smooth(method = nls, method.args = list(formula = y ~ alpha*exp(x*beta), start = start), se=FALSE, color = 'black') + 
-	  stat_cor(aes(label = paste(..rr.label.., expression('ET = 125.5345 * e'^'(2.6148 * NDVI)'), sep = "~`,`~")), size = 3.5, color = 'black', r.accuracy = 0.001, p.accuracy = 0.001) +
-	  theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) +
-	  xlab('NDVI') + ylab(expression('ET (mm yr'^-1*')'))
-
-#Add the legend to the bottom of the figure
-f1 <- ggarrange(p1, ncol = 1, nrow = 1, common.legend = TRUE, legend = 'bottom')
-
-#Save the figure as a .PNG file
-ggsave(filename = 'SupFig8_NDVI_ET_scaling.png', height=10, width=12, units = 'cm', dpi=900)
 
 #### Create scatter plot with exponential fit for just forested sites
-p2 <- ggplot(data = sites.join %>% filter(Site %in% c('US-CZ1', 'US-CZ2', 'US-CZ3', 'US-CZ4', 'US-SCw', 'US-SCf')), 
-             mapping = aes(x = NDVI.mean, y = ET)) + 
+p1 <- ggplot() + 
   scale_shape_manual(values=1:10) + theme_bw() +
-  geom_point(mapping = aes(color = Site, shape = Site), size = 2) + 
-  geom_smooth(method = nls, method.args = list(formula = y ~ alpha*exp(x*beta), start = start), se=FALSE, color = 'black') + 
-  stat_cor(aes(label = paste(..rr.label.., expression('ET = 132.223 * e'^'(2.579 * NDVI)'), sep = "~`,`~")), size = 3.5, color = 'black', r.accuracy = 0.001, p.accuracy = 0.001) +
+  scale_color_manual(values = c('dark green', 'black'), labels = c('Forest', 'Shrub/Grass')) + 
+  guides(color = 'none') +
+  geom_point(data = sites.join, #%>% filter(Site %in% c('US-CZ1', 'US-CZ2', 'US-CZ3', 'US-CZ4', 'US-SCw', 'US-SCf')), 
+             mapping = aes(x = NDVI.mean, y = ET, color = veg.type, shape = Site), size = 2) + 
+  #Add the full ET line
+  geom_smooth(data = sites.join, 
+              mapping = aes(x = NDVI.mean, y = ET), linetype = 'dashed',
+              method = nls, method.args = list(formula = y ~ alpha*exp(x*beta), start = start), se=FALSE, color = 'black') + 
+  geom_text_npc(data = data.frame(label = "All Ecosystems:", y = 0.96, x = 0.02), mapping = aes(npcx=x, npcy=y, label = label), 
+                size = 3.5, color = 'black') +
+  stat_cor(data = sites.join, label.x.npc = 0.24, label.y.npc = 1,
+           aes(x = NDVI.mean, y = ET, label = paste(..rr.label.., expression('ET = 125.5345 * e'^'(2.6148 * NDVI)'), sep = "~`,`~")), 
+           size = 3.5, color = 'black', r.accuracy = 0.001, p.accuracy = 0.001) +
+  #Add the forest only ET line
+  geom_smooth(data = sites.join %>% filter(veg.type == 'forest'), 
+              mapping = aes(x = NDVI.mean, y = ET), linetype = 'dotdash',
+              method = nls, method.args = list(formula = y ~ alpha*exp(x*beta), start = start), se=FALSE, color = 'dark green') + 
+  geom_text_npc(data = data.frame(label = "Forest Only:", y = 0.82, x = 0.02), mapping = aes(npcx=x, npcy=y, label = label), 
+                size = 3.5, color = 'dark green') +
+  stat_cor(data = sites.join %>% filter(veg.type == 'forest'), label.x.npc = 0.18, label.y.npc = 0.85,
+           aes(x = NDVI.mean, y = ET, label = paste(..rr.label.., expression('ET = 132.223 * e'^'(2.579 * NDVI)'), sep = "~`,`~")), 
+           size = 3.5, r.accuracy = 0.001, p.accuracy = 0.001, color = 'dark green') +
   theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) +
   xlab('NDVI') + ylab(expression('ET (mm yr'^-1*')'))
+p1
 
 #Add the legend to the bottom of the figure
-f2 <- ggarrange(p2, ncol = 1, nrow = 1, common.legend = TRUE, legend = 'bottom')
-f2
+f1 <- ggarrange(p1, ncol = 1, nrow = 1, common.legend = TRUE, legend = 'right')
+f1
 #Save the figure as a .PNG file
-ggsave(filename = 'SupFig9_Forest_NDVI_ET_scaling.png', height=10, width=12, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig9_Forest_NDVI_ET_scaling.png', height=10, width=16, units = 'cm', dpi=900)

@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 19, 2022
+#Date Updated: April 26, 2022
 #Purpose: Create Figure 2 time series for publication
 
 #Load required scripts for teh script
@@ -59,12 +59,16 @@ p1 <- ggplot() +
   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
   geom_line(data = time.series, mapping = aes(x = time_start, y = tpa_low_area, color = drought, linetype = drought), size = 0.5, na.rm = TRUE) + 
-  theme_bw() + guides(color = guide_legend(title = 'Drought Sequence', nrow = 2, title.position = 'top'), linetype = "none") +
+  theme_bw() + guides(color = guide_legend(title = 'Drought\nSequence', nrow = 2, title.position = 'top'), linetype = "none") +
   scale_linetype_manual(values=c("solid", "twodash")) +
   geom_hline(yintercept = 0, linetype='dashed') +
-  scale_color_manual(values=c("#E66100", "#5D3A9B"), labels = c('Both \nDroughts', '2nd Drought \nOnly')) +
-  theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10, margin = margin(t=0,b=0,r=0,l=0)), axis.title.x = element_blank(), legend.position = c(0.2, 0.6), legend.background = element_rect(colour = NA, fill = NA),
-        legend.key = element_rect(fill = NA), axis.text.x = element_blank(), plot.margin = unit(c(0,0,5,0), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) + 
+  scale_color_manual(values=c("#E66100", "#5D3A9B"), labels = c('Both\nDroughts', '2nd Drought\nOnly')) +
+  theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10, margin = margin(t=0,b=0,r=0,l=0)), 
+        axis.title.x = element_blank(), legend.position = c(0.15, 0.6), legend.background = element_rect(colour = NA, fill = NA),
+        legend.key = element_rect(fill = NA), axis.text.x = element_blank(), plot.margin = unit(c(0,0,5,0), "pt"), 
+        legend.title = element_text(size = 8), legend.text = element_text(size = 6)) + 
+  annotate("text", x = as.Date('2000-10-01'), y = 30, label = "1st\nPeriod", size = 2.5, fontface = 2) +
+  annotate("text", x = as.Date('2013-10-01'), y = 30, label = "2nd\nPeriod", size = 2.5, fontface = 2)
   ylab(expression(atop(NA, atop(textstyle('Percent with'),textstyle('Die-off (ADS)')))))
 
 #Create a dNDMI time series
@@ -82,8 +86,8 @@ p2 <- ggplot() +
 	  theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10, margin = margin(t=0,b=0,r=0,l=0)), axis.title.x=element_blank(), legend.position = 'none', 
 	  axis.text.x=element_blank(), plot.margin = unit(c(0,0,5,0), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
 	  ylab('Die-off\n(dNDMI)') + geom_text(data = data.frame(label = "95% CI", x = as.Date('2018-12-31'), y = -0.019, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) +
-    annotate("text", x = as.Date('1992-10-01'), y = -0.043, label = "More Die-off", size = 2) +
-    annotate("text", x = as.Date('1992-10-01'), y = 0.043, label = "Less Die-off", size = 2)
+     annotate("text", x = as.Date('1992-10-01'), y = -0.043, label = "More Die-off", size = 2, fontface = 2) +
+    annotate("text", x = as.Date('1992-10-01'), y = 0.043, label = "Less Die-off", size = 2, fontface = 2)
 
 #Create a Pr-ET time series graph
 p3 <- ggplot() +
@@ -101,8 +105,8 @@ p3 <- ggplot() +
 	  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), legend.position = 'none', 
 	  axis.title.y = element_text(size = 10, margin = margin(t=0,b=0,r=0,l=0)), plot.margin = unit(c(0,0,0,0), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
 	  xlab('Year') + ylab(expression(atop(NA, atop(textstyle('Pr-ET'),textstyle(paste('(mm ',yr^{-1},')')))))) + 
-    annotate("text", x = as.Date('1992-10-01'), y = 1100, label = "Water Surplus", size = 2) +
-    annotate("text", x = as.Date('1992-10-01'), y = -100, label = "Water Deficit", size = 2)
+    annotate("text", x = as.Date('1992-10-01'), y = 1100, label = "Water Surplus", size = 2, fontface = 2) +
+    annotate("text", x = as.Date('1992-10-01'), y = -100, label = "Water Deficit", size = 2, fontface = 2)
 
 f1 <- ggarrange(p1, p2, p3, ncol = 1, nrow = 3, common.legend = FALSE, heights = c(0.9, 0.9,1), align = "v", labels = c('a)', 'b)', 'c)'))
 f1
