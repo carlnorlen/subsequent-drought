@@ -68,7 +68,7 @@ p1 <- ggplot() +
         legend.key = element_rect(fill = NA), axis.text.x = element_blank(), plot.margin = unit(c(0,0,5,0), "pt"), 
         legend.title = element_text(size = 8), legend.text = element_text(size = 6)) + 
   annotate("text", x = as.Date('2000-10-01'), y = 30, label = "1st\nPeriod", size = 2.5, fontface = 2) +
-  annotate("text", x = as.Date('2013-10-01'), y = 30, label = "2nd\nPeriod", size = 2.5, fontface = 2)
+  annotate("text", x = as.Date('2013-10-01'), y = 30, label = "2nd\nPeriod", size = 2.5, fontface = 2) +
   ylab(expression(atop(NA, atop(textstyle('Percent with'),textstyle('Die-off (ADS)')))))
 
 #Create a dNDMI time series

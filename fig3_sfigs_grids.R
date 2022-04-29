@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 19, 2022
+#Date Edited: April 27, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -77,16 +77,14 @@ second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>
 second.socal / second.count
 
 #Add columns for labeling plots.
-all.ca.spi48$both <- 'Response to 1st Period'#'1999-2002'
-all.ca.spi48$second <- 'Response to 2nd Period'#'2012-2015'
+all.ca.spi48$both <- 'Response During 1st Period'#'1999-2002'
+all.ca.spi48$second <- 'Response During 2nd Period'#'2012-2015'
 
 #Plot dNDMI 2004 with SPI48 2002 by SPI48 2015 grid
 p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2004.mean, group = dNDMI_2004.mean)) +
 	  geom_bin2d(mapping = aes(group = dNDMI_2004.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
-	  ylab(expression(atop(NA,atop(textstyle("Severity of 2nd Drought"), textstyle("(SPI48 2012-2015)"))))) +  xlab('Severity of 1st Drought\n(SPI48 1999-2002)') + 
-  # geom_vline(xintercept = 0, size = 0.25) + 
-  # geom_hline(yintercept = 0, size = 0.25) +
+	  ylab("SPI48 During 2nd Period") +  xlab('SPI48 During 1st Period') + 
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
   geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
     guides(fill = guide_colorbar(barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5, ticks.colour = "black", reverse = T), alpha = "none") +
@@ -106,7 +104,7 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
 p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dNDMI_2017.mean, group = dNDMI_2017.mean)) +
 	  geom_bin2d(mapping = aes(group = dNDMI_2017.mean), binwidth = c(0.1, 0.1)) + theme_bw() + 
 	  ylim(-3.5, 0) + xlim(-3, 2) +
-	  ylab(NULL) +  xlab('Severity of 1st Drought\n(SPI48 1999-2002)') +  
+	  ylab(NULL) +  xlab('SPI48 During 1st Period') +  
   # geom_vline(xintercept = 0, size = 0.25) + 
   # geom_hline(yintercept = 0, size = 0.25) +
   geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
