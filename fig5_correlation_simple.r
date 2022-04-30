@@ -159,10 +159,10 @@ all.ca.both.1999.lm <- lm(data = all.ca.both.1999, dNDMI ~ PET_4yr) # 1999-2002 
 all.ca.both.2012.lm <- lm(data = all.ca.both.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
 
 #Trying out a log transformation for the Pr-ET data
-all.ca.combined.log.lm <- lm(data = all.ca.combined, dNDMI ~ log(PET_4yr +(min(PET_4yr)*-1 + 0.001)))
-summary(all.ca.combined.log.lm)
-all.ca.combined.lm <- lm(data = all.ca.combined, dNDMI ~ PET_4yr)
-summary(all.ca.combined.lm)
+# all.ca.combined.log.lm <- lm(data = all.ca.combined, dNDMI ~ log(PET_4yr +(min(PET_4yr)*-1 + 0.001)))
+# summary(all.ca.combined.log.lm)
+# all.ca.combined.lm <- lm(data = all.ca.combined, dNDMI ~ PET_4yr)
+# summary(all.ca.combined.lm)
 
 #Models for 2012-2015 Only
 all.ca.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
@@ -254,55 +254,115 @@ p4
 #Save the figure as a .png file
 ggsave(filename = 'Fig5_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
+#Just the Biomass vs dNDMI models
+# all.ca.both.1999 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '1999-2002' & !is.na(sequence))
+# all.ca.both.2012 <- all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '2012-2015' & !is.na(sequence)) 
+# all.ca.second.1999 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002' & !is.na(sequence))
+# all.ca.second.2012 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '2012-2015' & !is.na(sequence))
+
+# #Linear Models for dNDMI ~ Pr-ET
+#Models for Both Droughts
+biomass.both.1999.lm <- lm(data = all.ca.both.1999, dNDMI ~ biomass) # 1999-2002 Model
+biomass.both.2012.lm <- lm(data = all.ca.both.2012, dNDMI ~ biomass) # 2012-2015 Model
+
+#Trying out a log transformation for the Pr-ET data
+# all.ca.combined.log.lm <- lm(data = all.ca.combined, dNDMI ~ log(PET_4yr +(min(PET_4yr)*-1 + 0.001)))
+# summary(all.ca.combined.log.lm)
+# all.ca.combined.lm <- lm(data = all.ca.combined, dNDMI ~ PET_4yr)
+# summary(all.ca.combined.lm)
+
+#Models for 2012-2015 Only
+biomass.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ biomass) # 1999-2002 Model
+# all.ca.second.1999.log.lm <- lm(data = all.ca.second.1999, dNDMI ~ I(1/(PET_4yr +(min(PET_4yr)*-1 + 0.001))))
+# summary(all.ca.second.1999.log.lm)
+
+biomass.second.2012.lm <- lm(data = all.ca.second.2012, dNDMI ~ biomass) # 2012-2015 Model
+# summary(all.ca.second.2012.lm)
+# all.ca.second.2012.log.lm <- lm(data = all.ca.second.2012, dNDMI ~ PET_4yr)
+# summary(all.ca.second.2012.log.lm)
+
+#Calculate the sgemented model
+# all.ca.both.1999.seg <- segmented(all.ca.both.1999.lm)
+# all.ca.second.2012.seg <- segmented(all.ca.second.2012.lm)
+# 
+# #Add predicted dNDMI values
+# all.ca.both.1999$dNDMI_predict = predict(all.ca.both.1999.seg)
+# all.ca.both.2012$dNDMI_predict = predict(all.ca.both.2012.lm )
+# all.ca.second.1999$dNDMI_predict = predict(all.ca.second.1999.lm)
+# all.ca.second.2012$dNDMI_predict = predict(all.ca.second.2012.seg)
+
+#Recombine the data frames with the model fitted dNDMI as a column
+# all.ca.models <- rbind(all.ca.both.1999, all.ca.both.2012, all.ca.second.1999, all.ca.second.2012)
+
+#R-Squared values for the four models
+bio.r2.a  <- format(summary(biomass.both.1999.lm)$r.squared, digits = 3) #I could switch this back to segmented
+bio.r2.b <- format(summary(biomass.both.2012.lm)$r.squared, digits = 3)
+bio.r2.c <- format(summary(biomass.second.1999.lm)$r.squared, digits = 2)
+bio.r2.d <- format(summary(biomass.second.2012.lm)$r.squared, digits = 3)
+
+
 #Plot dNDMI versus Biomass by drought sequence and time period.                        color = c('1999-2002-Both Droughts', '2012-2015-Both Droughts', '1999-2002-2nd Drought Only', '2012-2015-Both Droughts')
 #Add the letter labels for teh sub-plots.
-# letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
-#                           sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
-#                           drought = c('1999-2002', '2012-2015', '1999-2002',  '2012-2015'),
-#                           y     = c(-0.3, -0.3, -0.3, -0.3),
-#                           x     = c(25, 25, 25, 25)
-# )
-# 
-# p5 <- ggscatter(all.ca.models, x = "biomass", y = "dNDMI", point = FALSE) +
-#   geom_bin2d(binwidth = c(6.5, 0.0075)) +
-#   # geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
-#   # geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, mapping = aes(color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T))) +
-#   # stat_cor(aes(label = paste(..rr.label..), color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T)), 
-#   #          label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
-#   geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, color = 'black') +
-#   stat_cor(aes(label = paste(..rr.label..)), color = 'black', label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
-#   theme_bw() +
-#   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Live Aboveground Biomass (Mg ha'^-1*')')) +
-#   geom_vline(xintercept = 0) +
-#   geom_hline(yintercept = 0) +
-#   # geom_text(data = label.text, mapping = aes(label = label, color = color), size = 3.5, x = 300, y = -0.3 ) +
-#   geom_text(data = letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
-#   labs(fill = "Grid Cells") +
-#   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
-#         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) + #Presentation text sizes.
-#   scale_fill_gradient2(limits = c(5,380), breaks = c(5,100,200,300), midpoint = 190, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
-#   ylim(0.1, -0.3) + xlim(0, 475) +
-#   facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought,
-#              labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',
-#                                       'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only')))
-# 
-# #Add a shared legend in a customized position on the figure
-# p6 <- p5 + theme(
-#   legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
-#   legend.justification = c(1, 0),
-#   legend.position = c(0.75, 0.8),
-#   legend.text = element_text(size = 10),
-#   legend.title = element_text(size = 10),
-#   legend.direction = "vertical") +
-#   guides(
-#     fill = guide_colorbar(barwidth = 1, barheight = 3,
-#                                title.position = "top", 
-#                                title.hjust = 0.5, 
-#                                ticks.colour = "black"))
-# 
-# p6
-# 
-# ggsave(filename = 'SupFig7_biomass_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
+bio.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
+                          sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+                          drought = c('1999-2002', '2012-2015', '1999-2002',  '2012-2015'),
+                          y     = c(-0.3, -0.3, -0.3, -0.3),
+                          x     = c(25, 25, 25, 25)
+)
+
+bio.r2.text <- data.frame(
+  label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 =bio.r2.a)))), 
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = bio.r2.b)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = bio.r2.c)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = bio.r2.d))))
+  ),
+  sequence = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+  drought = c('1999-2002', '2012-2015', '1999-2002', '2012-2015'),
+  x = c(425, 425, 425, 425),
+  y = c(-0.25, -0.25, -0.25, -0.25)
+)
+
+p5 <- ggscatter(all.ca.sample %>% filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only'), x = "biomass", y = "dNDMI", point = FALSE) +
+  geom_bin2d(binwidth = c(6.5, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
+  # geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
+  # geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, mapping = aes(color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T))) +
+  # stat_cor(aes(label = paste(..rr.label..), color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T)),
+  #          label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
+  geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, color = 'black') +
+  # stat_cor(aes(label = paste(..rr.label..)), color = 'black', label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
+  theme_bw() + guides(alpha = FALSE) +
+  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Live Aboveground Biomass (Mg ha'^-1*')')) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  geom_text(data = bio.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
+  geom_text(data = bio.letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
+  labs(fill = "Grid Cells") +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
+        plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) + #Presentation text sizes.
+  scale_fill_gradient2(limits = c(0,380), breaks = c(5,100,200,300), midpoint = 190, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
+  scale_alpha(range = c(1, 1), limits = c(5, 370), na.value = 0.4) +
+  ylim(0.1, -0.3) + xlim(0, 475) +
+  facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought,
+             labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',
+                                      'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only')))
+
+#Add a shared legend in a customized position on the figure
+p6 <- p5 + theme(
+  legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
+  legend.justification = c(1, 0),
+  legend.position = c(0.75, 0.8),
+  legend.text = element_text(size = 10),
+  legend.title = element_text(size = 10),
+  legend.direction = "vertical") +
+  guides(
+    fill = guide_colorbar(barwidth = 1, barheight = 3,
+                               title.position = "top",
+                               title.hjust = 0.5,
+                               ticks.colour = "black"))
+
+p6
+
+ggsave(filename = 'SFig13_biomass_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
