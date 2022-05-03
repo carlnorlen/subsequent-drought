@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 29, 2022
+#Date Edited: May 2, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -47,13 +47,13 @@ tpa.both.mort.2002 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE
                             DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Combine multiple inventory years into one plot estimate
-tpa.both.mort.2002 <- tpa.both.mort.2002 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+tpa.both.mort.2002 <- tpa.both.mort.2002 %>% dplyr::select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% dplyr::rename(BAA.dead = BAA, TPA.dead = TPA)
 
 join.both.2002 <- left_join(tpa.both.all.2002, tpa.both.mort.2002, by = c('pltID', 'YEAR','COMMON_NAME'))
 join.both.2002
 
 #Replace the NAs with 0s
-join.both.2002 <- join.both.2002 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+join.both.2002 <- join.both.2002 %>% dplyr::mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
 # # join.both.2002 %>% select('pltID') %>% unique()
 
 #Doing a combined estimated of the Basal Area for Both Droughts during 2012-2015
@@ -70,12 +70,12 @@ tpa.both.mort.2015 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE
 #Combine multiple inventory years into one plot estimate
 # tpa.both.mort.sum.2015 <- tpa.both.mort.2015 %>% group_by(pltID, YEAR, COMMON_NAME) %>% summarize(BAA.dead = sum(BAA))
 # tpa.both.all.sum.2015 <- tpa.both.all.2015 %>% group_by(pltID, YEAR, COMMON_NAME) %>% summarize(BAA = sum(BAA))
-tpa.both.mort.2015 <- tpa.both.mort.2015 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+tpa.both.mort.2015 <- tpa.both.mort.2015 %>% dplyr::select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% dplyr::rename(BAA.dead = BAA, TPA.dead = TPA)
 
 join.both.2015 <- left_join(tpa.both.all.2015, tpa.both.mort.2015, by = c('pltID', 'YEAR','COMMON_NAME'))
 
 #Replace the NAs with 0s
-join.both.2015 <- join.both.2015 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+join.both.2015 <- join.both.2015 %>% dplyr::mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
 
 #Combine the 1999-2002 and 2012-2015 plots values
 join.both.2002$time.period <- '1999-2002'
@@ -101,12 +101,12 @@ tpa.second.mort.2002 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TR
 #Combine multiple inventory years into one plot estimate
 # tpa.second.mort.sum.2002 <- tpa.second.mort.2002 %>% group_by(pltID, YEAR, COMMON_NAME) %>% summarize(BAA.dead = sum(BAA))
 # tpa.second.all.sum.2002 <- tpa.second.all.2002 %>% group_by(pltID, YEAR, COMMON_NAME) %>% summarize(BAA = sum(BAA))
-tpa.second.mort.2002 <- tpa.second.mort.2002 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+tpa.second.mort.2002 <- tpa.second.mort.2002 %>% dplyr::select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% dplyr::rename(BAA.dead = BAA, TPA.dead = TPA)
 
 join.second.2002 <- left_join(tpa.second.all.2002, tpa.second.mort.2002, by = c('pltID', 'YEAR','COMMON_NAME'))
 join.second.2002
 #Replace the NAs with 0s
-join.second.2002 <- join.second.2002 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+join.second.2002 <- join.second.2002 %>% dplyr::mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
 
 #Doing a combined estimated of the Basal Area for Both Droughts during 2012-2015
 #Total basal area and tpa estimates by species
@@ -118,19 +118,19 @@ tpa.second.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRU
 
 #Dead basal area 
 tpa.second.mort.2015 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
-                              DIA >= 5 &MORTYR %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019"),
+                              DIA >= 5 & MORTYR %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019"),
                           areaDomain = ECOSUBCD %in% c('M261Ep', 'M261Eq' ,'M261Eu' ,'M261Er' ,'M261Eo' ,'M262Bb' ,'M262Ba') &
                             DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Combine multiple inventory years into one plot estimate
 # tpa.second.mort.sum.2015 <- tpa.second.mort.2015 %>% group_by(pltID, YEAR, COMMON_NAME) %>% summarize(BAA.dead = sum(BAA))
 # tpa.second.all.sum.2015 <- tpa.second.all.2015 %>% group_by(pltID, YEAR, COMMON_NAME) %>% summarize(BAA = sum(BAA))
-tpa.second.mort.2015 <- tpa.second.mort.2015 %>% select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% rename(BAA.dead = BAA, TPA.dead = TPA)
+tpa.second.mort.2015 <- tpa.second.mort.2015 %>% dplyr::select(pltID, YEAR, COMMON_NAME, BAA, TPA) %>% dplyr::rename(BAA.dead = BAA, TPA.dead = TPA)
 
 join.second.2015 <- left_join(tpa.second.all.2015, tpa.second.mort.2015, by = c('pltID', 'YEAR','COMMON_NAME'))
 
 #Replace the NAs with 0s
-join.second.2015 <- join.second.2015 %>% mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
+join.second.2015 <- join.second.2015 %>% dplyr::mutate(BAA.dead = replace(BAA.dead, is.na(BAA.dead), 0))
 
 #Combine the 1999-2002 and 2012-2015 plots values
 join.second.2002$time.period <- '1999-2002'
@@ -276,7 +276,7 @@ p2 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag = 'd)') +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), legend.justification = c(1, 0),
-        legend.position = c(0.45, 0.55), legend.text = element_text(size = 6, angle = 45, vjust = 0.8), legend.title = element_text(size = 10),
+        legend.position = c(0.45, 0.55), legend.text = element_text(size = 8, angle = 45, vjust = 0.8), legend.title = element_text(size = 10),
         legend.direction = "horizontal", axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), strip.background = element_blank(),
         strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), panel.spacing = unit(20, "pt"),
@@ -355,7 +355,7 @@ p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
   scale_color_manual(values = c("black", "black"), aesthetics = "color") + labs(tag =("d)")) +
   scale_fill_discrete(labels = c("pine" = "Pine", "fir" = "Fir", "juniper" = "Juniper", "oak" = "Oak", "cedar" = "Cedar")) +
   theme(legend.background = element_rect(colour = NA, fill = NA), 
-        legend.position = c(0.3, 0.75), legend.text = element_text(size = 6, angle = 45, vjust = 0.8), legend.title = element_text(size = 8),
+        legend.position = c(0.3, 0.75), legend.text = element_text(size = 8, angle = 45, vjust = 0.8), legend.title = element_text(size = 8),
         legend.direction = "horizontal",axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), 
         strip.background = element_blank(), strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), 

@@ -186,18 +186,78 @@ p.var.prop.lm <- ggplot() +
 p.var.prop.lm
 ggsave(filename = 'SFig_variogram_lm_sampled_residuals.png', height=8, width= 12, units = 'cm', dpi=900)
 
+#Add the data
+#Filter the data into subsets for modeling
+all.ca.test.both.1999 <- all.ca.test %>% filter(sequence == 'Both Droughts' & drought == '1999-2002' & !is.na(sequence))
+all.ca.test.both.2012 <- all.ca.test %>% filter(sequence == 'Both Droughts' & drought == '2012-2015' & !is.na(sequence)) 
+all.ca.test.second.1999 <- all.ca.test %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002' & !is.na(sequence))
+all.ca.test.second.2012 <- all.ca.test %>% filter(sequence == '2nd Drought Only' & drought == '2012-2015' & !is.na(sequence))
+
+# #Linear Models for dNDMI ~ Pr-ET
+#Models for Both Droughts
+all.ca.test.both.1999.lm <- lm(data = all.ca.test.both.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.test.both.2012.lm <- lm(data = all.ca.test.both.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
+
+#Models for 2012-2015 Only
+all.ca.test.second.1999.lm <- lm(data = all.ca.test.second.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.test.second.2012.lm <- lm(data = all.ca.test.second.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
+
+#Calculate the sgemented models
+all.ca.test.both.1999.seg <- segmented(all.ca.test.both.1999.lm)
+all.ca.test.both.2012.seg <- segmented(all.ca.test.both.2012.lm)
+all.ca.test.second.1999.seg <- segmented(all.ca.test.second.1999.lm)
+all.ca.test.second.2012.seg <- segmented(all.ca.test.second.2012.lm)
+
+#Add predicted dNDMI values
+all.ca.test.both.1999$dNDMI_predict = predict(all.ca.test.both.1999.seg)
+all.ca.test.both.2012$dNDMI_predict = predict(all.ca.test.both.2012.seg )
+all.ca.test.second.1999$dNDMI_predict = predict(all.ca.test.second.1999.seg)
+all.ca.test.second.2012$dNDMI_predict = predict(all.ca.test.second.2012.seg)
+
+#Recombine the data frames with the model fitted dNDMI as a column
+all.ca.test.models <- rbind(all.ca.test.both.1999, all.ca.test.both.2012, all.ca.test.second.1999, all.ca.test.second.2012)
+
+#R-Squared values for the four models
+test.r2.a  <- format(summary(all.ca.test.both.1999.seg)$r.squared, digits = 2) #I could switch this back to segmented
+test.r2.b <- format(summary(all.ca.test.both.2012.seg)$r.squared, digits = 2)
+test.r2.c <- format(summary(all.ca.test.second.1999.seg)$r.squared, digits = 2)
+test.r2.d <- format(summary(all.ca.test.second.2012.seg)$r.squared, digits = 2) #I could switch this back to segmented
+
+#Create a data.frame of R.squared values
+test.r2.text <- data.frame(
+  label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = test.r2.a)))), 
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = test.r2.b)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = test.r2.c)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = test.r2.d))))
+  ),
+  sequence = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+  drought = c('1999-2002', '2012-2015', '1999-2002', '2012-2015'),
+  x = c(2500, 2500, 2500, 2500),
+  y = c(-0.25, -0.25, -0.25, -0.25)
+)
+
+test.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
+                          sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+                          drought = c('1999-2002', '2012-2015', '1999-2002',  '2012-2015'),
+                          y     = c(-0.3, -0.3, -0.3, -0.3),
+                          x     = c(-2400, -2400, -2400, -2400)
+)
+
+
+
+
 #Testing out the model with the points selected at random.
-p3 <- ggscatter(all.ca.test, x = "PET_4yr", y = "dNDMI", point = FALSE) +
+p1 <- ggscatter(all.ca.test.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075)) +
-  # geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
+  geom_line(data = all.ca.test.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
   # geom_smooth(method = 'lm', color = 'black', size = 2) +
-  geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
-  stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) +
+  # geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
+  # stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) +
   theme_bw() +
   ylab(label = "Die-off During Period (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
-  # geom_text(data = r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
+  geom_text(data = test.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
   geom_text(data = letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
   labs(fill = "Grid Cells") +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
@@ -209,7 +269,7 @@ p3 <- ggscatter(all.ca.test, x = "PET_4yr", y = "dNDMI", point = FALSE) +
                                       'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only')))
 
 #Add a shared legend in a customized position on the figure
-p4 <- p3 + theme(
+p2 <- p1 + theme(
   legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
   legend.justification = c(1, 0),
   legend.position = c(0.68, 0.8),
@@ -221,191 +281,6 @@ p4 <- p3 + theme(
                                title.hjust = 0.5, 
                                ticks.colour = "black"))
 
-p4
+p2
 
-ggsave(filename = 'SFig_dNDMI_PET_4yr_regression_sampled_residuals.png', height=16, width=16, units = 'cm', dpi=900)
-#Create a 150-meter variogram
-# all.ca.150m.filter <- all.ca.150m.sample %>% filter(!is.na(sequence.f)) #Filter out NA values
-# 
-# coordinates(all.ca.150m.filter) <- ~ latitude + longitude
-# raster::crs(all.ca.150m.filter) <- raster::crs("+proj=longlat")
-# 
-# #Check for spatial autocorrelation in 150 meter data
-# sample.ca <- all.ca.150m.sample %>% filter(!is.na(sequence.f)) %>% slice_sample(prop = 0.1, replace = F)
-# coordinates(sample.ca) <- ~ latitude + longitude
-# raster::crs(sample.ca) <- raster::crs("+proj=longlat")
-# 
-# sample.ca.lm <- lm(dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, sample.ca)
-# summary(sample.ca.lm)
-# #Calculate teh variogram values for the standardized linear model residuals
-# var.150m.lm <- gstat::variogram(rstandard(sample.ca.lm) ~ 1, data = sample.ca, cutoff = 6)
-
-
-# summary(all.ca.filter)
-#Do an lme model with random effects for location
-#LME random effects model doesn't work.
-# all.ca.filter.lme <- lme(fixed = dNDMI ~  drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, 
-#                          data = as.data.frame(all.ca.filter),
-#                          random = ~ 1 | pixel.id, #Trying out the random effects, this is within subjects, there are two periods for each pixel
-#                          method = "ML")
-# summary(all.ca.filter.lme)
-
-# png(file = 'SFig_gstat_lme_semivariogram_300m.png', width=12, height=8, units="cm", res=900)
-# var.lme <- gstat::variogram(residuals(all.ca.filter.lme, type = "normalized") ~ 1, data = all.ca.filter, cutoff = 6)
-# var.lme
-#Do a semi-variogram plto
-# p.var.lm <- ggplot() + geom_point(data = var.lm, mapping = aes(x = dist, y = gamma)) + #Linear model data
-#   geom_line(data = var.lm, mapping = aes(x = dist, y = gamma)) + #Linear model data
-#   # geom_point(data = var.lme, mapping = aes(x = dist, y = gamma), color = 'gray') + #Linear model data
-#   # geom_line(data = var.lme, mapping = aes(x = dist, y = gamma), color = 'gray') + #Linear model data
-#   geom_hline(yintercept = 0, linetype = 'dashed', size = 1) +
-#   # geom_vline(xintercept = 0.3, linetype = 'solid', size = 0.5, color = 'red') +
-#   theme_bw() + ylim(0,1) + xlab('Distance (km)') + ylab('Semivariance')
-# 
-# p.var.lm
-# 
-# ggsave(filename = 'SFig_variogram_lm_residuals.png', height=8, width= 12, units = 'cm', dpi=900)
-# plot(gstat::variogram(residuals(all.ca.filter.lme, type = "normalized") ~
-#                         1, data = all.ca.filter, cutoff = 5), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
-# dev.off()
-
-
-
-# all.ca.filter.gls.corGaus <- gls(model = dNDMI ~  drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, 
-#                          data = as.data.frame(all.ca.filter),
-#                          correlation = corGaus(form = ~ latitude + longitude | drought.f, nugget = TRUE),
-#                          method = "REML")
-# summary(all.ca.filter.gls.corGaus)
-
-#Apply the spatial model to the data
-# all.ca.filter.corGaus <- lme(fixed = dNDMI ~  drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, 
-#                              data = as.data.frame(all.ca.filter),
-#                              na.action = na.omit,
-#                              random = ~ 1 | pixel.id, #Trying out the random effects, this is within subjects, there are two periods for each pixel
-#                              correlation = corExp(form = ~ latitude + longitude | pixel.id / drought.f), #Add spatial correlation
-#                              method = "REML")
-# summary(all.ca.filter.corGaus)
-
-# Initialize(object = corGaus, data = as.data.frame(all.ca.filter))
-#Do a map of residual values
-# all.ca.filter$Resid.lme <- residuals(all.ca.filter.lme)
-# all.ca.filter %>% summary()
-
-
-# coordinates(data.spatialCor) <- ~LAT + LONG  #effectively convert the data into a spatial data frame
-# bubble(all.ca.filter, "Resid")
-# p_map <- ggplot() + coord_sf() + 
-#          geom_point(data = as.data.frame(all.ca.filter), mapping = aes(y = latitude, x = longitude, color = Resid.lme), alpha = 0.2, size = 0.1) +
-#          scale_color_viridis_c()
-# 
-# p_map
-
-# ggsave(filename = 'SFig_lme_model_residuals.png', height=15, width= 10, units = 'cm', dpi=900)
-# 
-# #Do a Gstat variogram with lme random effects added
-# p.lme <- plot(gstat::variogram(residuals(all.ca.filter.lme, type = "normalized") ~
-#                         1, data = all.ca.filter, cutoff = 5), xlab = 'Distance (km)', ylab = 'Semivariance', main = 'Variogram')
-# 
-# ggsave(filename = 'SFig_lme_semiveriogram.png', height=15, width= 10, units = 'cm', dpi=900)
-# 
-# #Check different ways to correct for spatial autocorrelation
-# # cs1Exp <- corExp(1, form = ~ east + north)
-# # cs1Exp <- Initialize(cs1Exp, spdata)
-# # corMatrix(cs1Exp)[1:10, 1:4]
-# 
-# # data.spatialCor.glsExp <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-# #                               correlation = corExp(form = ~latitude + longitude | drought.f / sequence.f, nugget = TRUE),
-# #                               method = "REML")
-# # data.spatialCor.glsGaus <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-# #                                correlation = corGaus(form = ~latitude + longitude),
-# #                                method = "ML")
-# # data.spatialCor.glsLin <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-# #                               correlation = corLin(form = ~latitude + longitude, nugget = TRUE),
-# #                               method = "REML")
-# # data.spatialCor.glsRatio <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-# #                                 correlation = corRatio(form = ~latitude + longitude, nugget = TRUE),
-# #                                 method = "REML")
-# # data.spatialCor.glsSpher <- gls(model = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, data = all.ca.filter,
-# #                                 correlation = corSpher(form = ~latitude + longitude, nugget = TRUE),
-# #                                 method = "REML")
-# 
-# #Compare the AIC values for the different models
-# AIC(data.spatialCor.gls, data.spatialCor.glsExp, data.spatialCor.glsGaus,
-#     data.spatialCor.glsLin, data.spatialCor.glsRatio,
-#     data.spatialCor.glsSpher)
-# 
-# #Raster based spatial autocorrelation, Is it even working?
-# #dNDMI 2004
-# #Testing out a spatial data.frame to check for spatial autocorrelation with a semivariogram
-# #Setting variable for ESPG 5070, proj4 crs
-# #directory for raster files
-# socal_dir <- "D:\\Large_Files\\socal"
-# sub_dir <- "D:\\Subsequent_Drought"
-# 
-# c <- raster::crs("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
-# 
-# dndmi.2004 <- raster::raster(file.path(socal_dir, 'dNDMI_2004_bigger_region_300m_v4.tif'))
-# raster::crs(dndmi.2004) <- c
-# dndmi.2004.m <- is.na(dndmi.2004)
-# dndmi.2004.mask <- raster::mask(dndmi.2004, mask = dndmi.2004.m, maskvalue = 1)
-# 
-# #dNDMI 2017
-# dndmi.2017 <- raster::raster(file.path(socal_dir, 'dNDMI_2017_bigger_region_300m_v4.tif'))
-# raster::crs(dndmi.2017) <- c
-# dndmi.2017.m <- is.na(dndmi.2017)
-# dndmi.2017.mask <- raster::mask(dndmi.2017, mask = dndmi.2017.m, maskvalue = 1)
-# 
-# #dNDMI 2004, 30 meters
-# dndmi.2004.30m.1 <- raster::raster(file.path(sub_dir, 'dNDMI_2004_bigger_region_30m-1.tif'))
-# dndmi.2004.30m.2 <- raster::raster(file.path(sub_dir, 'dNDMI_2004_bigger_region_30m-2.tif'))
-# dndmi.2004.30m <- raster::merge(dndmi.2004.30m.1, dndmi.2004.30m.2)
-# raster::crs(dndmi.2004.30m) <- c
-# dndmi.2004.30m.m <- is.na(dndmi.2004.30m, )
-# dndmi.2004.30m.mask <- raster::mask(dndmi.2004.30m, mask = dndmi.2004.30m.m, maskvalue = 1)
-# 
-# v.2004.30m <- elsa::Variogram(dndmi.2004.30m.mask, width = 300, cutoff = 10000, s = 10000)
-# v.2004.30m <- gstat::variogram(dndmi.2004.30m.mask)
-# png(file = 'SFig_17_dNDMI_2004_30m_semivariogram.png', width=12, height=8, units="cm", res=900)
-# plot(v.2004.30m, ylab = 'Semivariance', xlab = 'Distance (m)', main = 'dNDMI 2004 30-meter Variogram')
-# dev.off()
-# 
-# #Save merged raster for later.
-# writeRaster(dndmi.2004.30m, filename=file.path(sub_dir, "dNDMI_2004_bigger_region_30m.tif"), format="GTiff", overwrite=TRUE)
-# 
-# #Save the raster mask for later
-# writeRaster(dndmi.2004.30m.m, filename=file.path(sub_dir, "dNDMI_2004_bigger_region_30m_mask.tif"), format="GTiff", overwrite=TRUE)
-# 
-# # ca.rast <- raster::rasterFromXYZ(all.ca.combined)
-# # terra::autocor(ca.rast, global = TRUE, method = 'moran')
-# # terra::autocor(all.ca.combined, global = TRUE, method = 'moran')
-# # elsa::Variogr
-# v.2004 <- elsa::Variogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
-# # v.2004.30m 
-# png(file = 'SFig_17_dNDMI_2004_semivariogram.png', width=12, height=8, units="cm", res=900)
-# plot(v.2004, ylab = 'Semivariance', xlab = 'Distance (m)', main = 'dNDMI 2004 Variogram')
-# dev.off()
-# 
-# # p1 <- ggplot() + geom_line(data = v.2004, mapping = aes(x = distance, y = gamma)) + ylab('Semivariance') + xlab('Distance (m)')
-# # # crs(v) <- c
-# #Calculate a variogram
-# co.2004 <- elsa::correlogram(dndmi.2004.mask, width = 300, cutoff = 10000, s = 10000)
-# 
-# png(file = 'SFig_18_dNDMI_2004_correlogram.png', width=12, height=8, units="cm", res=900)
-# plot(co.2004, ylab = "Moran's I", xlab = 'Distance (m)', main = 'dNDMI 2004 Correlogram')
-# dev.off()
-# 
-# #2017 autocorrelation
-# v.2017 <- elsa::Variogram(dndmi.2017.mask, width = 300, cutoff = 10000, s = 10000)
-# 
-# png(file = 'SFig_19_dNDMI_2017_semivariogram.png', width=12, height=8, units="cm", res=900)
-# plot(v.2017, ylab = 'Semivariance', xlab = 'Distance (m)', main = 'dNDMI 2017 Variogram')
-# dev.off()
-# 
-# # p1 <- ggplot() + geom_line(data = v.2004, mapping = aes(x = distance, y = gamma)) + ylab('Semivariance') + xlab('Distance (m)')
-# # # crs(v) <- c
-# #Calculate a variogram
-# co.2017 <- elsa::correlogram(dndmi.2017.mask, width = 300, cutoff = 10000, s = 10000)
-# 
-# png(file = 'SFig_20_dNDMI_2017_correlogram.png', width=12, height=8, units="cm", res=900)
-# plot(co.2017, ylab = "Moran's I", xlab = 'Distance (m)', main = 'dNDMI 2017 Correlogram')
-# dev.off()
+ggsave(filename = 'SFig15_dNDMI_PET_4yr_regression_sampled_residuals.png', height=16, width=16, units = 'cm', dpi=900)

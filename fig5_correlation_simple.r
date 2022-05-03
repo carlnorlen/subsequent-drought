@@ -158,40 +158,30 @@ all.ca.second.2012 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & 
 all.ca.both.1999.lm <- lm(data = all.ca.both.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
 all.ca.both.2012.lm <- lm(data = all.ca.both.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
 
-#Trying out a log transformation for the Pr-ET data
-# all.ca.combined.log.lm <- lm(data = all.ca.combined, dNDMI ~ log(PET_4yr +(min(PET_4yr)*-1 + 0.001)))
-# summary(all.ca.combined.log.lm)
-# all.ca.combined.lm <- lm(data = all.ca.combined, dNDMI ~ PET_4yr)
-# summary(all.ca.combined.lm)
-
 #Models for 2012-2015 Only
 all.ca.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ PET_4yr) # 1999-2002 Model
-all.ca.second.1999.log.lm <- lm(data = all.ca.second.1999, dNDMI ~ I(1/(PET_4yr +(min(PET_4yr)*-1 + 0.001))))
-summary(all.ca.second.1999.log.lm)
-
 all.ca.second.2012.lm <- lm(data = all.ca.second.2012, dNDMI ~ PET_4yr) # 2012-2015 Model
-summary(all.ca.second.2012.lm)
-all.ca.second.2012.log.lm <- lm(data = all.ca.second.2012, dNDMI ~ PET_4yr)
-summary(all.ca.second.2012.log.lm)
 
-#Calculate the sgemented model
+#Calculate the sgemented models
 all.ca.both.1999.seg <- segmented(all.ca.both.1999.lm)
+all.ca.both.2012.seg <- segmented(all.ca.both.2012.lm)
+all.ca.second.1999.seg <- segmented(all.ca.second.1999.lm)
 all.ca.second.2012.seg <- segmented(all.ca.second.2012.lm)
 
 #Add predicted dNDMI values
 all.ca.both.1999$dNDMI_predict = predict(all.ca.both.1999.seg)
-all.ca.both.2012$dNDMI_predict = predict(all.ca.both.2012.lm )
-all.ca.second.1999$dNDMI_predict = predict(all.ca.second.1999.lm)
+all.ca.both.2012$dNDMI_predict = predict(all.ca.both.2012.seg )
+all.ca.second.1999$dNDMI_predict = predict(all.ca.second.1999.seg)
 all.ca.second.2012$dNDMI_predict = predict(all.ca.second.2012.seg)
 
 #Recombine the data frames with the model fitted dNDMI as a column
 all.ca.models <- rbind(all.ca.both.1999, all.ca.both.2012, all.ca.second.1999, all.ca.second.2012)
 
 #R-Squared values for the four models
-r2.a  <- format(summary(all.ca.both.1999.lm)$r.squared, digits = 3) #I could switch this back to segmented
-r2.b <- format(summary(all.ca.both.2012.lm)$r.squared, digits = 2)
-r2.c <- format(summary(all.ca.second.1999.lm)$r.squared, digits = 1)
-r2.d <- format(summary(all.ca.second.2012.lm)$r.squared, digits = 3) #I could switch this back to segmented
+r2.a  <- format(summary(all.ca.both.1999.seg)$r.squared, digits = 2) #I could switch this back to segmented
+r2.b <- format(summary(all.ca.both.2012.seg)$r.squared, digits = 2)
+r2.c <- format(summary(all.ca.second.1999.seg)$r.squared, digits = 2)
+r2.d <- format(summary(all.ca.second.2012.seg)$r.squared, digits = 2) #I could switch this back to segmented
 
 #Create a data.frame of R.squared values
 r2.text <- data.frame(
@@ -216,9 +206,9 @@ letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
 #Plot dNDMI versus Pr-ET by drought sequence and time period.
 p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
-  # geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
+  geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
   # geom_smooth(method = 'lm', color = 'black', size = 2) +
-  geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
+  # geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
   # stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) + 
   theme_bw() + guides(alpha = FALSE) +
   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
@@ -363,6 +353,157 @@ p6 <- p5 + theme(
 p6
 
 ggsave(filename = 'SFig13_biomass_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
+
+#Do the models separate by the Region
+#Sierra Nevada
+all.ca.both.1999.sierra <- all.ca.sample %>% filter(region == 'Sierra Nevada' & sequence == 'Both Droughts' & drought == '1999-2002' & !is.na(sequence))
+all.ca.both.2012.sierra <- all.ca.sample %>% filter(region == 'Sierra Nevada' & sequence == 'Both Droughts' & drought == '2012-2015' & !is.na(sequence)) 
+all.ca.second.1999.sierra <- all.ca.sample %>% filter(region == 'Sierra Nevada' & sequence == '2nd Drought Only' & drought == '1999-2002' & !is.na(sequence))
+all.ca.second.2012.sierra <- all.ca.sample %>% filter(region == 'Sierra Nevada' & sequence == '2nd Drought Only' & drought == '2012-2015' & !is.na(sequence))
+#Southern California
+all.ca.both.1999.socal <- all.ca.sample %>% filter(region == 'Southern California' & sequence == 'Both Droughts' & drought == '1999-2002' & !is.na(sequence))
+all.ca.both.2012.socal <- all.ca.sample %>% filter(region == 'Southern California' & sequence == 'Both Droughts' & drought == '2012-2015' & !is.na(sequence)) 
+all.ca.second.1999.socal <- all.ca.sample %>% filter(region == 'Southern California' & sequence == '2nd Drought Only' & drought == '1999-2002' & !is.na(sequence))
+all.ca.second.2012.socal <- all.ca.sample %>% filter(region == 'Southern California' & sequence == '2nd Drought Only' & drought == '2012-2015' & !is.na(sequence))
+
+# #Linear Models for dNDMI ~ Pr-ET
+#Models for Both Droughts
+all.ca.both.1999.sierra.lm <- lm(data = all.ca.both.1999.sierra, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.both.2012.sierra.lm <- lm(data = all.ca.both.2012.sierra, dNDMI ~ PET_4yr) # 2012-2015 Model
+all.ca.both.1999.socal.lm <- lm(data = all.ca.both.1999.socal, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.both.2012.socal.lm <- lm(data = all.ca.both.2012.socal, dNDMI ~ PET_4yr) # 2012-2015 Model
+
+#Trying out a log transformation for the Pr-ET data
+# all.ca.combined.log.lm <- lm(data = all.ca.combined, dNDMI ~ log(PET_4yr +(min(PET_4yr)*-1 + 0.001)))
+# summary(all.ca.combined.log.lm)
+# all.ca.combined.lm <- lm(data = all.ca.combined, dNDMI ~ PET_4yr)
+# summary(all.ca.combined.lm)
+
+#Models for 2012-2015 Only
+all.ca.second.1999.sierra.lm <- lm(data = all.ca.second.1999.sierra, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.second.2012.sierra.lm <- lm(data = all.ca.second.2012.sierra, dNDMI ~ PET_4yr) # 2012-2015 Model
+all.ca.second.1999.socal.lm <- lm(data = all.ca.second.1999.socal, dNDMI ~ PET_4yr) # 1999-2002 Model
+all.ca.second.2012.socal.lm <- lm(data = all.ca.second.2012.socal, dNDMI ~ PET_4yr) # 2012-2015 Model
+
+#Calculate the sgemented model
+all.ca.both.1999.sierra.seg <- segmented(all.ca.both.1999.sierra.lm)
+all.ca.both.2012.sierra.seg <- segmented(all.ca.both.2012.sierra.lm)
+all.ca.second.1999.sierra.seg <- segmented(all.ca.second.1999.sierra.lm)
+all.ca.second.2012.sierra.seg <- segmented(all.ca.second.2012.sierra.lm)
+all.ca.both.1999.socal.seg <- segmented(all.ca.both.1999.socal.lm)
+all.ca.both.2012.socal.seg <- segmented(all.ca.both.2012.socal.lm)
+all.ca.second.1999.socal.seg <- segmented(all.ca.second.1999.socal.lm)
+all.ca.second.2012.socal.seg <- segmented(all.ca.second.2012.socal.lm)
+
+#Add predicted dNDMI values
+all.ca.both.1999.sierra$dNDMI_predict = predict(all.ca.both.1999.sierra.seg)
+all.ca.both.2012.sierra$dNDMI_predict = predict(all.ca.both.2012.sierra.seg)
+all.ca.second.1999.sierra$dNDMI_predict = predict(all.ca.second.1999.sierra.seg)
+all.ca.second.2012.sierra$dNDMI_predict = predict(all.ca.second.2012.sierra.seg)
+all.ca.both.1999.socal$dNDMI_predict = predict(all.ca.both.1999.socal.seg)
+all.ca.both.2012.socal$dNDMI_predict = predict(all.ca.both.2012.socal.seg)
+all.ca.second.1999.socal$dNDMI_predict = predict(all.ca.second.1999.socal.seg)
+all.ca.second.2012.socal$dNDMI_predict = predict(all.ca.second.2012.socal.seg)
+
+
+#Recombine the data frames with the model fitted dNDMI as a column
+all.ca.models.region <- rbind(all.ca.both.1999.sierra, all.ca.both.2012.sierra, all.ca.second.1999.sierra, all.ca.second.2012.sierra,
+                       all.ca.both.1999.socal, all.ca.both.2012.socal, all.ca.second.1999.socal, all.ca.second.2012.socal)
+
+#Add the R^2 values
+reg.r2.a  <- format(summary(all.ca.both.1999.sierra.seg)$r.squared, digits = 3) #I could switch this back to segmented
+reg.r2.b <- format(summary(all.ca.both.2012.sierra.seg)$r.squared, digits = 2)
+reg.r2.c <- format(summary(all.ca.second.1999.sierra.seg)$r.squared, digits = 1)
+reg.r2.d <- format(summary(all.ca.second.2012.sierra.seg)$r.squared, digits = 3) #I could switch this back to segmented
+reg.r2.e  <- format(summary(all.ca.both.1999.socal.seg)$r.squared, digits = 3) #I could switch this back to segmented
+reg.r2.f <- format(summary(all.ca.both.2012.socal.seg)$r.squared, digits = 2)
+reg.r2.g <- format(summary(all.ca.second.1999.socal.seg)$r.squared, digits = 1)
+reg.r2.h <- format(summary(all.ca.second.2012.socal.seg)$r.squared, digits = 3) #I could switch this back to segmented
+
+#Create a data.frame of R.squared values
+reg.r2.text <- data.frame(
+  label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 =reg.r2.a)))), 
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.b)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.c)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.d)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.e)))), 
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.f)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.g)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.h))))
+  ),
+  sequence = c('Both Droughts', 'Both Droughts', 
+               '2nd Drought Only', '2nd Drought Only',
+               'Both Droughts', 'Both Droughts', 
+               '2nd Drought Only', '2nd Drought Only'),
+  drought = c('1999-2002', '2012-2015', 
+              '1999-2002', '2012-2015',
+              '1999-2002', '2012-2015', 
+              '1999-2002', '2012-2015'),
+  region = c('Sierra Nevada', 'Sierra Nevada','Sierra Nevada','Sierra Nevada',
+             'Southern California', 'Southern California','Southern California','Southern California'),
+  x = c(2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500),
+  y = c(-0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25)
+)
+
+reg.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)",
+                                        "e)", "f)", "g)", "h)"),
+                              sequence   = c('Both Droughts', 'Both Droughts', 
+                                             '2nd Drought Only', '2nd Drought Only',
+                                             'Both Droughts', 'Both Droughts', 
+                                             '2nd Drought Only', '2nd Drought Only'),
+                              drought = c('1999-2002', '2012-2015', 
+                                          '1999-2002',  '2012-2015',
+                                          '1999-2002', '2012-2015', 
+                                          '1999-2002',  '2012-2015'),
+                              region =   c('Sierra Nevada', 'Sierra Nevada','Sierra Nevada','Sierra Nevada',
+                                                    'Southern California', 'Southern California','Southern California','Southern California'),
+                              y     = c(-0.3, -0.3, -0.3, -0.3,
+                                        -0.3, -0.3, -0.3, -0.3),
+                              x     = c(-2400, -2400, -2400, -2400,
+                                        -2400, -2400, -2400, -2400)
+)
+
+
+# summary(all.ca.models)
+p7 <- ggscatter(all.ca.models.region, x = "PET_4yr", y = "dNDMI", point = FALSE) +
+  geom_bin2d(binwidth = c(100, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
+  # geom_line(data = all.ca.models.region, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
+  # geom_smooth(method = 'lm', color = 'black', size = 2) +
+  geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
+  stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) +
+  theme_bw() + guides(alpha = FALSE) +
+  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  # geom_text(data = reg.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
+  geom_text(data = reg.letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
+  labs(fill = "Grid Cells") +
+  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
+        plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) + #Presentation text sizes.
+  scale_fill_gradient2(limits = c(0,370), breaks = c(5,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
+  scale_alpha(range = c(1, 1), limits = c(5, 370), na.value = 0.4) +
+  ylim(0.1, -0.3) + xlim(-2500, 3500) +
+  facet_grid(region + factor(sequence, levels = c('Both Droughts', '2nd Drought Only'))  ~ drought,
+             labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',
+                                      'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only',
+                                      'Sierra Nevada' = 'Sierra Nevada', 'Southern California' = 'Southern California')))
+
+#Add a shared legend in a customized position on the figure
+p8 <- p7 + theme(
+  legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
+  legend.justification = c(1, 0),
+  legend.position = c(0.68, 0.9),
+  legend.text = element_text(size = 10),
+  legend.title = element_text(size = 10),
+  legend.direction = "vertical") +
+  guides(fill = guide_colorbar(barwidth = 1, barheight = 3,
+                               title.position = "top", 
+                               title.hjust = 0.5, 
+                               ticks.colour = "black"))
+
+p8
+
+ggsave(filename = 'SFig17_PET_regression_with_region_faceted_plot.png', device = 'png', height=24, width=16, units = 'cm', dpi=900)
 
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%

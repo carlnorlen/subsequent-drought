@@ -148,7 +148,7 @@ p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, f
   scale_alpha(range = c(1, 1), limits = c(20, 2950), na.value = 0.4)
 
 #Add annotations and move the legend into the corner of the figure.
-p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly") +
+p4 <- p3 + annotate("text", x = -0.5, y = -0.5, label = "Neither \nDrought") + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly") +
   annotate("text", x = -2.4, y = -3, label = "Both \nDroughts") + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly") + 
   annotation_custom(grob = textGrob(label = "Drier", hjust = 0, gp = gpar(fontface = 'bold', fontsize = 8)),
     ymin = -3.5, ymax = -3.5,      # Vertical position of the textGrob
@@ -159,7 +159,7 @@ p4 <- p3 + annotate("text", x = 1, y = -0.5, label = "Neither \nDrought") + anno
   theme(
     legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
     legend.justification = c(1, 0),
-    legend.position = c(0.62, 0.7),
+    legend.position = c(0.92, 0.7),
     legend.text = element_text(size = 6),
     legend.title = element_text(size = 8),
     legend.direction = "horizontal") 

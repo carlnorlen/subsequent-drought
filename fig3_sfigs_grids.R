@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 27, 2022
+#Date Edited: May 2, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -95,8 +95,8 @@ p1 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002,
           plot.margin = unit(c(0,0,0,0), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
     facet_wrap(~ both) + 
-    annotate(geom="text", x=-1.15, y=-0.5, label="Less\nDie-off", color="black", size = 2) + 
-    annotate(geom="text", x=1.9, y=-0.5, label="More\nDie-off", color="black", size = 2) +
+    annotate(geom="text", x=-1, y=-0.52, label="Less\nDie-off", color="black", size = 2) + 
+    annotate(geom="text", x=1.9, y=-0.52, label="More\nDie-off", color="black", size = 2) +
     annotate(geom="text", x = -2.9, y = -3.5, label="bold(Drier)", size = 2, parse = TRUE) + 
     annotate(geom="text", x = 1.75, y = -3.5, label ="bold(Wetter)", size = 2, parse = TRUE) 
 
@@ -113,12 +113,12 @@ p2 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, 
     theme(axis.text.x = element_text(size = 8), axis.text.y = element_blank(), axis.title.x = element_text(size = 10),  
           axis.title.y = element_blank(), strip.text = element_text(size = 10, face = 'bold'), plot.margin = unit(c(0,0,0,20), "pt")) +  
 	  scale_fill_gradient2(name = "Die-off (dNDMI)", limits = c(-0.16, 0.07), midpoint = 0, low = "#D41159", mid = "lightyellow1", high = "#1A85FF") +
-  annotate("text", x = -0.25, y = -0.75, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
+  annotate("text", x = -0.5, y = -0.5, label = "Neither \nDrought", size = 3) + annotate("text", x = -2.4, y = -0.5, label = "1st Drought \nOnly", size = 3) +
   annotate("text", x = -2.4, y = -3, label = "Both \nDroughts", size = 3) + annotate("text", x = 1, y = -2, label = "2nd Drought \nOnly", size = 3) + 
   facet_wrap( ~ second) 
 
 #Combine the two figure panels into one	  
-f1 <- ggarrange(p1, p2, ncol = 2, nrow = 1, widths = c(1, 0.9), labels = c('a)', 'b)'), align = 'h', common.legend = FALSE)
+f1 <- ggarrange(p1, p2, ncol = 2, nrow = 1, widths = c(1, 0.975), labels = c('a)', 'b)'), align = 'h', common.legend = FALSE)
 f1
 
 #Save the figure as a png
