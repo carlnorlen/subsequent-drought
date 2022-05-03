@@ -73,73 +73,6 @@ all.ca.sample <- all.ca.sample %>% mutate(drought.f = case_when(
                                     drought == '2012-2015' ~ 1))
 
 
-#Do the 150 meter version of the analysis
-# all.ca.150m <- read.csv(file.path(dir_in, "Regression_all_socal_150m.csv"))
-# # all.ca
-# 
-# #Calculate the difference between SPI48 2002 and SPI48 2015
-# all.ca.150m$dSPI48 <- abs(all.ca.150m$spi48_09_2015 - all.ca.150m$spi48_09_2002)
-# 
-# #Adding a drought sequence column to the data set
-# all.ca.150m <- all.ca.150m %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
-#                                                          (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2nd Drought Only',
-#                                                          (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1st Drought Only')) 
-# # all.ca %>% dplyr::select(dNDMI_2004)
-# #Select columns of data
-# all.ca.150m.1stDrought <- dplyr::select(all.ca.150m, c(system.index, dNDMI_2004, PET_4yr_2002, tmax_4yr_2002,  biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
-# 
-# #Add the year of the 1999-2002 data
-# all.ca.150m.1stDrought$drought <- '1999-2002'
-# 
-# #Rename the columns
-# colnames(all.ca.150m.1stDrought) <- c('pixel.id','dNDMI', 'PET_4yr', 'tmax_4yr', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
-# 
-# #Select columns of the 2012-2015 data
-# all.ca.150m.2ndDrought <- dplyr::select(all.ca.150m, c(system.index,  dNDMI_2017, PET_4yr_2015, tmax_4yr_2015, biomass_2012, ADS_2017, spi48_09_2015, elevation, latitude, longitude, USFS_zone, drought.sequence))
-# 
-# #Add the year of the 2012-2015 data
-# all.ca.150m.2ndDrought$drought <- '2012-2015'
-# 
-# #Rename the columns
-# colnames(all.ca.150m.2ndDrought) <- c('pixel.id', 'dNDMI', 'PET_4yr', 'tmax_4yr', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
-# 
-# #Combine all the data in one data frame
-# all.ca.150m.combined <- rbind(all.ca.150m.1stDrought, all.ca.150m.2ndDrought)
-# 
-# #Translate the region code to text
-# all.ca.150m.combined$region[all.ca.150m.combined$USFS == 261] <- "Sierra Nevada"
-# all.ca.150m.combined$region[all.ca.150m.combined$USFS == 262] <- "Southern California"
-# 
-# #Convert the ADS data to categorical mortality or no mortality
-# all.ca.150m.combined <- all.ca.150m.combined %>% mutate(ADS.cat = case_when(
-#   (ADS) >= 5 ~ 1, #mortality
-#   (ADS) < 5 ~ 0)) #no mortality
-# 
-# #Make drought sequence into dummy categorical variables for statistical analysis
-# all.ca.150m.sample <- all.ca.150m.combined %>% mutate(sequence.f = case_when(
-#   sequence == 'Both Droughts' ~ 0, 
-#   sequence == '2nd Drought Only' ~ 1))
-# 
-# #Make years into dummy variables for statistical analysis
-# all.ca.150m.sample <- all.ca.150m.sample %>% mutate(drought.f = case_when(
-#   drought == '1999-2002' ~ 0, 
-#   drought == '2012-2015' ~ 1))
-
-
-#Do a spatial plot of the data
-# sp::spplot(ca.rast, c('dNDMI'))
-# crs(all.ca.combined)
-# plot(ca.rast, col = 'dNDMI')
-# p_test <- ggplot(data = as.data.frame(v), mapping = aes(x = dist, y = gamma)) + geom_point() + ylim(c(0, 0.003)) + theme_bw() +
-          # xlab('Distance (km)') + ylab('Semivariance')
-
-# p_test
-# ggsave(filename = 'SFig_17_dNDMI_semivariogram.png', height=8, width= 12, units = 'cm', dpi=900)
-# all.ca.combined
-
-
-
-
 #Make the data a spatial data frame
 # summary(all.ca.sample)
 all.ca.filter <- all.ca.sample %>% filter(!is.na(sequence.f)) #Filter out NA values
@@ -154,6 +87,8 @@ summary(all.ca.filter.lm)
 var.lm <- gstat::variogram(rstandard(all.ca.filter.lm) ~ 1, data = all.ca.filter, cutoff = 6)
 # dev.off()
 # var.lm %>% as.data.frame()
+#Set the random seed for the random sample
+set.seed(1234)
 
 all.ca.prop <- all.ca.sample %>% filter(!is.na(sequence.f)) %>% group_by(sequence.f) %>% slice_sample(prop = 0.05, replace = F) %>% ungroup()
 all.ca.test <- all.ca.sample %>% filter(!is.na(sequence.f)) %>% group_by(sequence.f) %>% slice_sample(prop = 0.05, replace = F) %>% ungroup()
