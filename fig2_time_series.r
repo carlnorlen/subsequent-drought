@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 26, 2022
+#Date Updated: May 10, 2022
 #Purpose: Create Figure 2 time series for publication
 
 #Load required scripts for teh script
@@ -59,8 +59,9 @@ p1 <- ggplot() +
   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
   geom_line(data = time.series, mapping = aes(x = time_start, y = tpa_low_area, color = drought, linetype = drought), size = 0.5, na.rm = TRUE) + 
-  theme_bw() + guides(color = guide_legend(title = 'Drought\nSequence', nrow = 2, title.position = 'top'), linetype = "none") +
-  scale_linetype_manual(values=c("solid", "twodash")) +
+  theme_bw() + guides(color = guide_legend(title = 'Drought\nSequence', nrow = 2, title.position = 'top'), 
+                      linetype = guide_legend(title = 'Drought\nSequence', nrow = 2, title.position = 'top')) +
+  scale_linetype_manual(values=c("solid", "twodash"), labels = c('Both\nDroughts', '2nd Drought\nOnly')) + labs(color = 'Drought\nSequence', linetype = 'Drought\nSequence') +
   geom_hline(yintercept = 0, linetype='dashed') +
   scale_color_manual(values=c("#E66100", "#5D3A9B"), labels = c('Both\nDroughts', '2nd Drought\nOnly')) +
   theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10, margin = margin(t=0,b=0,r=0,l=0)), 
@@ -85,7 +86,7 @@ p2 <- ggplot() +
     scale_color_manual(values=c("#E66100", "#5D3A9B")) + scale_y_reverse() +
 	  theme(axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10, margin = margin(t=0,b=0,r=0,l=0)), axis.title.x=element_blank(), legend.position = 'none', 
 	  axis.text.x=element_blank(), plot.margin = unit(c(0,0,5,0), "pt"), legend.title = element_text(size = 8), legend.text = element_text(size = 6)) +
-	  ylab('Die-off\n(dNDMI)') + geom_text(data = data.frame(label = "95% CI", x = as.Date('2018-12-31'), y = -0.019, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) +
+	  ylab('Die-off Severity\n(dNDMI)') + geom_text(data = data.frame(label = "95% CI", x = as.Date('2018-12-31'), y = -0.019, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) +
      annotate("text", x = as.Date('1992-10-01'), y = -0.043, label = "More Die-off", size = 2, fontface = 2) +
     annotate("text", x = as.Date('1992-10-01'), y = 0.043, label = "Less Die-off", size = 2, fontface = 2)
 

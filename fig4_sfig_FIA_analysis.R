@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 2, 2022
+#Date Edited: May 11, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -370,19 +370,23 @@ f2
 
 ggsave(filename = 'SFig6_basal_area_boxplot.png', height=14, width=16, units = 'cm', dpi=900)
 
+# all.forest %>% filter(pltID %in% plots) %>% group_by(time.period, sequence, pltID) %>% 
+#   summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), BAA.dead.sum = sum(BAA.dead), BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100)
+
 #Tree Mortality Tables
 #ANOVA and Tukey HSD for basal area die-off by sequence and time period
-aov.dead <- aov(data = join.summary %>% filter(pltID %in% plots), #group_by(time.period, sequence, pltID) %>% 
-                # summarize(BAA.all = sum(BAA.all), BAA.live = sum(BAA), 
-                #           BAA.dead.sum = sum(BAA.dead), 
-                #           BAA.mort = sum(BAA.dead) / sum(BAA.all) * 100), 
+aov.dead <- aov(data = join.summary %>% filter(pltID %in% plots), 
                 BAA.dead.sum ~ time.period * sequence)
-summary(aov.dead)
 
 #Tukey HSD
 dead.tHSD <- TukeyHSD(aov.dead)
-dead.tHSD
 
+#Do mortality percentage estimates
+aov.mort <- aov(data = join.summary %>% filter(pltID %in% plots), 
+                BAA.mort ~ time.period * sequence)
+
+#Tukey HSD
+mort.tHSD <- TukeyHSD(aov.mort)
 
 
 #Basal Area Tables
@@ -411,7 +415,7 @@ all.tHSD <- TukeyHSD(aov.all)
 all.tHSD
 
 #Combine Tukey HSD values
-all.tHSD.combine <- list(dead.tHSD, #type.basal.dead.tHSD, 
+all.tHSD.combine <- list(dead.tHSD, mort.tHSD, 
                  all.tHSD)
 
 #Create a data frame
@@ -419,16 +423,22 @@ df.all.tHSD <- as.data.frame(map_df(all.tHSD.combine, tidy))
 
 #Add a column with variable labels.
 df.all.tHSD$variable <- c('Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)',
-                          #'Mortality (m<sup>2</sup> ha<sup>-1</sup>)', 'Mortality (m^2/ha)', 'Mortality (m^2/ha)', 'Mortality (m^2/ha)', 'Mortality (m^2/ha)', 'Mortality (m^2/ha)', 'Mortality (m^2/ha)', 'Mortality (m^2/ha)',
+                        'Mortality (%)', 'Mortality (%)', 'Mortality (%)', 'Mortality (%)', 'Mortality (%)', 'Mortality (%)', 'Mortality (%)', 'Mortality (%)',
                           'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)')
 
 #Add Estimate 1 for Tukey HSD test
 #Finish updating
-df.all.tHSD$estimate.1 <- c(#Mortality
+df.all.tHSD$estimate.1 <- c(
+  #Mortality
   mean((all.forest.plot %>% filter(time.period == '2012-2015'))$BAA.dead.sum), mean((all.forest.plot %>% filter( sequence == 'Both Droughts'))$BAA.dead.sum),
   mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.dead.sum), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.dead.sum),
   mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == 'Both Droughts'))$BAA.dead.sum), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.dead.sum),
   mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == 'Both Droughts'))$BAA.dead.sum), mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == 'Both Droughts'))$BAA.dead.sum),
+  #Mortality %
+  mean((all.forest.plot %>% filter(time.period == '2012-2015'))$BAA.mort), mean((all.forest.plot %>% filter( sequence == 'Both Droughts'))$BAA.mort),
+  mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.mort), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.mort),
+  mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == 'Both Droughts'))$BAA.mort), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.mort),
+  mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == 'Both Droughts'))$BAA.mort), mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == 'Both Droughts'))$BAA.mort),
   #Basal Area
   mean((all.forest.plot %>% filter(time.period == '2012-2015'))$BAA.all.sum), mean((all.forest.plot %>% filter(sequence == 'Both Droughts'))$BAA.all.sum),
   mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.all.sum), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.all.sum),
@@ -442,6 +452,11 @@ df.all.tHSD$estimate.2 <- c(#Mortality
   mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.dead.sum), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.dead.sum),
   mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.dead.sum), mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.dead.sum),
   mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.dead.sum), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.dead.sum),
+  #Mortality %
+  mean((all.forest.plot %>% filter(time.period == '1999-2002'))$BAA.mort), mean((all.forest.plot %>% filter(sequence == '2nd Drought Only'))$BAA.mort),
+  mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.mort), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.mort),
+  mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.mort), mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.mort),
+  mean((all.forest.plot %>% filter(time.period == '2012-2015' & sequence == '2nd Drought Only'))$BAA.mort), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == 'Both Droughts'))$BAA.mort),
   #Basal Area
   mean((all.forest.plot %>% filter(time.period == '1999-2002'))$BAA.all.sum), mean((all.forest.plot %>% filter(sequence == '2nd Drought Only'))$BAA.all.sum),
   mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.all.sum), mean((all.forest.plot %>% filter(time.period == '1999-2002' & sequence == '2nd Drought Only'))$BAA.all.sum),
