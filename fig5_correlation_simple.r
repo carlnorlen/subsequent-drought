@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 16, 2022
+#Date Edited: May 17, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -487,8 +487,8 @@ all.ca.models.region <- rbind(all.ca.both.1999.sierra, all.ca.both.2012.sierra, 
 #   y = c(-0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25)
 # )
 
-reg.letter.text <- data.frame(label = c("c)", "d)", "g)", "h)",
-                                        "a)", "b)", "e)", "f)"),
+reg.letter.text <- data.frame(label = c("b)", "d)", "f)", "h)",
+                                        "a)", "c)", "e)", "g)"),
                               sequence   = c('Both Droughts', 'Both Droughts', 
                                              '2nd Drought Only', '2nd Drought Only',
                                              'Both Droughts', 'Both Droughts', 
@@ -521,7 +521,7 @@ p9 <- ggscatter(all.ca.sample %>% filter(sequence %in% c('Both Droughts', '2nd D
   scale_fill_gradient2(limits = c(0,370), breaks = c(5,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
   scale_alpha(range = c(1, 1), limits = c(5, 370), na.value = 0.4) +
   ylim(0.1, -0.3) + xlim(-2500, 3500) +
-  facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) + factor(region, levels = c('Southern California', 'Sierra Nevada'))  ~ drought,
+  facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought + factor(region, levels = c('Southern California', 'Sierra Nevada')),
              labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',
                                       'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only',
                                       'Sierra Nevada' = 'Sierra Nevada', 'Southern California' = 'Southern California')))
@@ -530,7 +530,7 @@ p9 <- ggscatter(all.ca.sample %>% filter(sequence %in% c('Both Droughts', '2nd D
 p10 <- p9 + theme(
   legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
   legend.justification = c(1, 0),
-  legend.position = c(0.7, 0.89),
+  legend.position = c(0.85, 0.78),
   legend.text = element_text(size = 10),
   legend.title = element_text(size = 10),
   legend.direction = "vertical") +
@@ -541,11 +541,14 @@ p10 <- p9 + theme(
 
 p10
 
-ggsave(filename = 'SFig17_PET_regression_with_region_faceted_plot.png', device = 'png', height=24, width=16, units = 'cm', dpi=900)
+ggsave(filename = 'SFig17_PET_regression_with_region_faceted_plot.png', device = 'png', height=16, width=24, units = 'cm', dpi=900)
+
+#Count the samples for each panel
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & region == 'Southern California') %>% count()
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & region == 'Sierra Nevada') %>% count()
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Southern California') %>% count()
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Sierra Nevada') %>% count()
+
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
   dplyr::select('PET_4yr', 'ET_4yr', 'ppt_4yr', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
