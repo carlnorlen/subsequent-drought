@@ -149,6 +149,21 @@ all.ca.test.both.2012$dNDMI_predict = predict(all.ca.test.both.2012.seg )
 all.ca.test.second.1999$dNDMI_predict = predict(all.ca.test.second.1999.seg)
 all.ca.test.second.2012$dNDMI_predict = predict(all.ca.test.second.2012.seg)
 
+#Add the segmented fits and Standard Errors
+#Fits
+all.ca.test.both.1999$dNDMI.fit = broken.line(all.ca.test.both.1999.seg)$fit
+all.ca.test.both.2012$dNDMI.fit = broken.line(all.ca.test.both.2012.seg )$fit
+all.ca.test.second.1999$dNDMI.fit = broken.line(all.ca.test.second.1999.seg)$fit
+all.ca.test.second.2012$dNDMI.fit = broken.line(all.ca.test.second.2012.seg)$fit
+
+#SE fit
+all.ca.test.both.1999$dNDMI.se.fit = broken.line(all.ca.test.both.1999.seg)$se.fit
+all.ca.test.both.2012$dNDMI.se.fit = broken.line(all.ca.test.both.2012.seg )$se.fit
+all.ca.test.second.1999$dNDMI.se.fit = broken.line(all.ca.test.second.1999.seg)$se.fit
+all.ca.test.second.2012$dNDMI.se.fit = broken.line(all.ca.test.second.2012.seg)$se.fit
+
+
+
 #Recombine the data frames with the model fitted dNDMI as a column
 all.ca.test.models <- rbind(all.ca.test.both.1999, all.ca.test.both.2012, all.ca.test.second.1999, all.ca.test.second.2012)
 
@@ -184,7 +199,8 @@ test.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
 #Testing out the model with the points selected at random.
 p1 <- ggscatter(all.ca.test.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075)) +
-  geom_line(data = all.ca.test.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
+  geom_line(data = all.ca.test.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, linetype = 'dotdash', color = 'black') +
+  geom_ribbon(data = all.ca.models, mapping = aes(x = PET_4yr, y = dNDMI.fit, ymax = dNDMI.fit + 1.96*dNDMI.se.fit, ymin = dNDMI.fit - 1.96*dNDMI.se.fit), alpha = 0.4) +
   # geom_smooth(method = 'lm', color = 'black', size = 2) +
   # geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
   # stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) +
@@ -193,7 +209,7 @@ p1 <- ggscatter(all.ca.test.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_text(data = test.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
-  geom_text(data = letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
+  geom_text(data = test.letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
   labs(fill = "Grid Cells") +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) +

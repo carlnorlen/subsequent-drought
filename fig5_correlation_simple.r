@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 10, 2022
+#Date Edited: May 16, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -283,10 +283,10 @@ biomass.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ biomass) # 1999-
 biomass.second.2012.lm <- lm(data = all.ca.second.2012, dNDMI ~ biomass) # 2012-2015 Model
 
 #R-Squared values for the four models
-bio.r2.a  <- format(summary(biomass.both.1999.lm)$r.squared, digits = 3) #I could switch this back to segmented
-bio.r2.b <- format(summary(biomass.both.2012.lm)$r.squared, digits = 3)
+bio.r2.a  <- format(summary(biomass.both.1999.lm)$r.squared, digits = 2) #I could switch this back to segmented
+bio.r2.b <- format(summary(biomass.both.2012.lm)$r.squared, digits = 2)
 bio.r2.c <- format(summary(biomass.second.1999.lm)$r.squared, digits = 2)
-bio.r2.d <- format(summary(biomass.second.2012.lm)$r.squared, digits = 3)
+bio.r2.d <- format(summary(biomass.second.2012.lm)$r.squared, digits = 2)
 
 #Add the letter labels for teh sub-plots.
 bio.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
@@ -314,7 +314,7 @@ p5 <- ggscatter(all.ca.sample %>% filter(sequence == 'Both Droughts' | sequence 
   # geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, mapping = aes(color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T))) +
   # stat_cor(aes(label = paste(..rr.label..), color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T)),
   #          label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
-  geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, color = 'black') +
+  geom_smooth(method = 'lm', formula = y ~ x, size = 2, se = TRUE, level = 0.95, linetype = 'dotdash', color = 'black') +
   # stat_cor(aes(label = paste(..rr.label..)), color = 'black', label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
   theme_bw() + guides(alpha = FALSE) +
   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Live Aboveground Biomass (Mg ha'^-1*')')) +
@@ -360,7 +360,7 @@ tmax.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
 
 p7 <- ggscatter(all.ca.sample %>% filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only'), x = "tmax_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(0.5, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
-  geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, color = 'black') +
+  geom_smooth(method = 'lm', formula = y ~ x, size = 2, linetype = 'dotdash', se = TRUE, level = 0.95, color = 'black') +
   stat_cor(aes(label = paste(..rr.label..)), color = 'black', label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
   theme_bw() + guides(alpha = FALSE) +
   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = 'Maximum Temperature (C)') +
@@ -453,42 +453,42 @@ all.ca.models.region <- rbind(all.ca.both.1999.sierra, all.ca.both.2012.sierra, 
                        all.ca.both.1999.socal, all.ca.both.2012.socal, all.ca.second.1999.socal, all.ca.second.2012.socal)
 
 #Add the R^2 values
-reg.r2.a  <- format(summary(all.ca.both.1999.sierra.seg)$r.squared, digits = 2) #I could switch this back to segmented
-reg.r2.b <- format(summary(all.ca.both.2012.sierra.seg)$r.squared, digits = 2)
-reg.r2.c <- format(summary(all.ca.second.1999.sierra.seg)$r.squared, digits = 2)
-reg.r2.d <- format(summary(all.ca.second.2012.sierra.seg)$r.squared, digits = 2) #I could switch this back to segmented
-reg.r2.e  <- format(summary(all.ca.both.1999.socal.seg)$r.squared, digits = 2) #I could switch this back to segmented
-reg.r2.f <- format(summary(all.ca.both.2012.socal.seg)$r.squared, digits = 2)
-reg.r2.g <- format(summary(all.ca.second.1999.socal.seg)$r.squared, digits = 2)
-reg.r2.h <- format(summary(all.ca.second.2012.socal.seg)$r.squared, digits = 2) #I could switch this back to segmente
+# reg.r2.a  <- format(summary(all.ca.both.1999.sierra.seg)$r.squared, digits = 2) #I could switch this back to segmented
+# reg.r2.b <- format(summary(all.ca.both.2012.sierra.seg)$r.squared, digits = 2)
+# reg.r2.c <- format(summary(all.ca.second.1999.sierra.seg)$r.squared, digits = 2)
+# reg.r2.d <- format(summary(all.ca.second.2012.sierra.seg)$r.squared, digits = 2) #I could switch this back to segmented
+# reg.r2.e  <- format(summary(all.ca.both.1999.socal.seg)$r.squared, digits = 2) #I could switch this back to segmented
+# reg.r2.f <- format(summary(all.ca.both.2012.socal.seg)$r.squared, digits = 2)
+# reg.r2.g <- format(summary(all.ca.second.1999.socal.seg)$r.squared, digits = 2)
+# reg.r2.h <- format(summary(all.ca.second.2012.socal.seg)$r.squared, digits = 2) #I could switch this back to segmente
 
 #Create a data.frame of R.squared values
-reg.r2.text <- data.frame(
-  label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 =reg.r2.a)))), 
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.b)))),
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.c)))),
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.d)))),
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.e)))), 
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.f)))),
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.g)))),
-            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.h))))
-  ),
-  sequence = c('Both Droughts', 'Both Droughts', 
-               '2nd Drought Only', '2nd Drought Only',
-               'Both Droughts', 'Both Droughts', 
-               '2nd Drought Only', '2nd Drought Only'),
-  drought = c('1999-2002', '2012-2015', 
-              '1999-2002', '2012-2015',
-              '1999-2002', '2012-2015', 
-              '1999-2002', '2012-2015'),
-  region = c('Sierra Nevada', 'Sierra Nevada','Sierra Nevada','Sierra Nevada',
-             'Southern California', 'Southern California','Southern California','Southern California'),
-  x = c(2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500),
-  y = c(-0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25)
-)
+# reg.r2.text <- data.frame(
+#   label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 =reg.r2.a)))), 
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.b)))),
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.c)))),
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.d)))),
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.e)))), 
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.f)))),
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.g)))),
+#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.h))))
+#   ),
+#   sequence = c('Both Droughts', 'Both Droughts', 
+#                '2nd Drought Only', '2nd Drought Only',
+#                'Both Droughts', 'Both Droughts', 
+#                '2nd Drought Only', '2nd Drought Only'),
+#   drought = c('1999-2002', '2012-2015', 
+#               '1999-2002', '2012-2015',
+#               '1999-2002', '2012-2015', 
+#               '1999-2002', '2012-2015'),
+#   region = c('Sierra Nevada', 'Sierra Nevada','Sierra Nevada','Sierra Nevada',
+#              'Southern California', 'Southern California','Southern California','Southern California'),
+#   x = c(2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500),
+#   y = c(-0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25)
+# )
 
-reg.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)",
-                                        "e)", "f)", "g)", "h)"),
+reg.letter.text <- data.frame(label = c("c)", "d)", "g)", "h)",
+                                        "a)", "b)", "e)", "f)"),
                               sequence   = c('Both Droughts', 'Both Droughts', 
                                              '2nd Drought Only', '2nd Drought Only',
                                              'Both Droughts', 'Both Droughts', 
@@ -507,17 +507,13 @@ reg.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)",
 
 
 # summary(all.ca.models)
-p9 <- ggscatter(all.ca.models.region, x = "PET_4yr", y = "dNDMI", point = FALSE) +
+p9 <- ggscatter(all.ca.sample %>% filter(sequence %in% c('Both Droughts', '2nd Drought Only')), x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
-  geom_line(data = all.ca.models.region, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
-  # geom_smooth(method = 'lm', color = 'black', size = 2) +
-  # geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
-  # stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) +
   theme_bw() + guides(alpha = FALSE) +
   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
-  geom_text(data = reg.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
+  # geom_text(data = reg.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
   geom_text(data = reg.letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
   labs(fill = "Grid Cells") +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
@@ -525,7 +521,7 @@ p9 <- ggscatter(all.ca.models.region, x = "PET_4yr", y = "dNDMI", point = FALSE)
   scale_fill_gradient2(limits = c(0,370), breaks = c(5,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
   scale_alpha(range = c(1, 1), limits = c(5, 370), na.value = 0.4) +
   ylim(0.1, -0.3) + xlim(-2500, 3500) +
-  facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) + region  ~ drought,
+  facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) + factor(region, levels = c('Southern California', 'Sierra Nevada'))  ~ drought,
              labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',
                                       'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only',
                                       'Sierra Nevada' = 'Sierra Nevada', 'Southern California' = 'Southern California')))
@@ -546,7 +542,10 @@ p10 <- p9 + theme(
 p10
 
 ggsave(filename = 'SFig17_PET_regression_with_region_faceted_plot.png', device = 'png', height=24, width=16, units = 'cm', dpi=900)
-
+all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & region == 'Southern California') %>% count()
+all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & region == 'Sierra Nevada') %>% count()
+all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Southern California') %>% count()
+all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Sierra Nevada') %>% count()
 #Store filtered and sampled drought sequence data as its own vector
 dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
   dplyr::select('PET_4yr', 'ET_4yr', 'ppt_4yr', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
