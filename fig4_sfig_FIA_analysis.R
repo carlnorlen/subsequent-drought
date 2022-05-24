@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 17, 2022
+#Date Edited: May 23, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -332,7 +332,7 @@ p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
 p3
 
 #Create a data frame for adding the panel 4 text.
-p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "ad", "ab", "ab", "ab", "b",
+p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "abd", "ab", "ab", "ab", "b",
                                  "c", "d", "b", "b", "b", "c", "d", "b", "b", "b"),
                        sequence   = c('Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 
                                       'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only',

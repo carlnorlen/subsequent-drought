@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 17, 2022
+#Date Edited: May 23, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -18,13 +18,13 @@ lapply(p,require,character.only=TRUE)
 setwd('C:/Users/can02/mystuff/subsequent-drought')
 
 #Increase the memory limit for R. Helps with spatially explicit analyses.
-# memory.limit()
 memory.limit(32000)
-# memory.limit()
+
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-all.ca
+# all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v24.csv"))
+
 #Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 
@@ -32,24 +32,28 @@ all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
                      (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2nd Drought Only',
                      (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1st Drought Only')) 
-# all.ca %>% dplyr::select(dNDMI_2004)
+
+#Check if PET_4yr_2009 is postive or negative
+all.ca %>% filter(drought.sequence == 'Both Droughts') %>% dplyr::select(PET_4yr_2009, PET_4yr_2002, PET_4yr_2015) %>% 
+           summarize(PET_2002.mean = mean(PET_4yr_2002), PET_2009.mean = mean(PET_4yr_2009), PET_2015.mean = mean(PET_4yr_2015))
+
 #Select columns of data
-all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
+all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, dNDMI_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
 #Add the year of the 1999-2002 data
 all.ca.1stDrought$drought <- '1999-2002'
 
 #Rename the columns
-colnames(all.ca.1stDrought) <- c('pixel.id','NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
+colnames(all.ca.1stDrought) <- c('pixel.id', 'dNDMI', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
 
 #Select columns of the 2012-2015 data
-all.ca.2ndDrought <- dplyr::select(all.ca, c(system.index, NDMI_2012, dNDMI_2017, dET_2017, dBiomass_2017, PET_4yr_2015, ppt_4yr_2015, tmax_4yr_2015, ET_4yr_2015, ET_2012, biomass_2012, ADS_2017, spi48_09_2015, elevation, latitude, longitude, USFS_zone, drought.sequence))
+all.ca.2ndDrought <- dplyr::select(all.ca, c(system.index, dNDMI_2017, PET_4yr_2015, ppt_4yr_2015, tmax_4yr_2015, ET_4yr_2015, biomass_2012, ADS_2017, spi48_09_2015, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
 #Add the year of the 2012-2015 data
 all.ca.2ndDrought$drought <- '2012-2015'
 
 #Rename the columns
-colnames(all.ca.2ndDrought) <- c('pixel.id', 'NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
+colnames(all.ca.2ndDrought) <- c('pixel.id', 'dNDMI', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
 
 #Combine all the data in one data frame
 all.ca.combined <- rbind(all.ca.1stDrought, all.ca.2ndDrought)
@@ -99,7 +103,8 @@ dataset$drought.f <- as.factor(dataset$drought.f)
 
 #Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Only
 task = makeClassifTask(data = dataset, target = "sequence.f")
-task.under <- undersample(task, rate = 0.2)
+task
+task.under = undersample(task, rate = 0.2)
 
 #The undersampled dataset
 dataset.under <- getTaskData(task.under)
@@ -231,7 +236,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   #Piecewise fit uncertainty
   geom_ribbon(data = all.ca.models, mapping = aes(x = PET_4yr, y = dNDMI.fit, ymax = dNDMI.fit + 1.96*dNDMI.se.fit, ymin = dNDMI.fit - 1.96*dNDMI.se.fit), alpha = 0.4) +
   theme_bw() + guides(alpha = FALSE) +
-  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
+  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Moisture Deficit (Pr-ET; mm 4 yr'^-1*')')) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_text(data = r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
@@ -452,41 +457,7 @@ all.ca.second.2012.socal$dNDMI_predict = predict(all.ca.second.2012.socal.seg)
 all.ca.models.region <- rbind(all.ca.both.1999.sierra, all.ca.both.2012.sierra, all.ca.second.1999.sierra, all.ca.second.2012.sierra,
                        all.ca.both.1999.socal, all.ca.both.2012.socal, all.ca.second.1999.socal, all.ca.second.2012.socal)
 
-#Add the R^2 values
-# reg.r2.a  <- format(summary(all.ca.both.1999.sierra.seg)$r.squared, digits = 2) #I could switch this back to segmented
-# reg.r2.b <- format(summary(all.ca.both.2012.sierra.seg)$r.squared, digits = 2)
-# reg.r2.c <- format(summary(all.ca.second.1999.sierra.seg)$r.squared, digits = 2)
-# reg.r2.d <- format(summary(all.ca.second.2012.sierra.seg)$r.squared, digits = 2) #I could switch this back to segmented
-# reg.r2.e  <- format(summary(all.ca.both.1999.socal.seg)$r.squared, digits = 2) #I could switch this back to segmented
-# reg.r2.f <- format(summary(all.ca.both.2012.socal.seg)$r.squared, digits = 2)
-# reg.r2.g <- format(summary(all.ca.second.1999.socal.seg)$r.squared, digits = 2)
-# reg.r2.h <- format(summary(all.ca.second.2012.socal.seg)$r.squared, digits = 2) #I could switch this back to segmente
-
-#Create a data.frame of R.squared values
-# reg.r2.text <- data.frame(
-#   label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 =reg.r2.a)))), 
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.b)))),
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.c)))),
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.d)))),
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.e)))), 
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.f)))),
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.g)))),
-#             as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = reg.r2.h))))
-#   ),
-#   sequence = c('Both Droughts', 'Both Droughts', 
-#                '2nd Drought Only', '2nd Drought Only',
-#                'Both Droughts', 'Both Droughts', 
-#                '2nd Drought Only', '2nd Drought Only'),
-#   drought = c('1999-2002', '2012-2015', 
-#               '1999-2002', '2012-2015',
-#               '1999-2002', '2012-2015', 
-#               '1999-2002', '2012-2015'),
-#   region = c('Sierra Nevada', 'Sierra Nevada','Sierra Nevada','Sierra Nevada',
-#              'Southern California', 'Southern California','Southern California','Southern California'),
-#   x = c(2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500),
-#   y = c(-0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25, -0.25)
-# )
-
+#Create Letter labels
 reg.letter.text <- data.frame(label = c("b)", "d)", "f)", "h)",
                                         "a)", "c)", "e)", "g)"),
                               sequence   = c('Both Droughts', 'Both Droughts', 
@@ -510,7 +481,7 @@ reg.letter.text <- data.frame(label = c("b)", "d)", "f)", "h)",
 p9 <- ggscatter(all.ca.sample %>% filter(sequence %in% c('Both Droughts', '2nd Drought Only')), x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
   theme_bw() + guides(alpha = FALSE) +
-  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
+  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Moisture Deficit (Pr-ET; mm 4 yr'^-1*')')) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   # geom_text(data = reg.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
