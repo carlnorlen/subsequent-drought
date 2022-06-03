@@ -123,4 +123,4 @@ p1
 f1 <- ggarrange(p1, ncol = 1, nrow = 1, common.legend = TRUE, legend = 'right')
 f1
 #Save the figure as a .PNG file
-ggsave(filename = 'SupFig9_Forest_NDVI_ET_scaling.png', height=10, width=16, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig13_Forest_NDVI_ET_scaling.png', height=10, width=16, units = 'cm', dpi=900)

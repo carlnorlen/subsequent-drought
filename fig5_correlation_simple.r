@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 23, 2022
+#Date Edited: June 2, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -8,9 +8,6 @@ p <- c('dplyr','tidyr','ggplot2','ggpubr','segmented', 'patchwork','RColorBrewer
        'webshot', 'kableExtra', 'broom', 'ggpmisc', 'relaimpo', 'mlr', 'caret', 'stats', 'purrr',
         'nlme')
 
-#Install a package
-# install.packages("glmmfields")
-# library('nlme')
 #Load packages
 lapply(p,require,character.only=TRUE)
 
@@ -68,42 +65,39 @@ all.ca.combined <- all.ca.combined %>% mutate(ADS.cat = case_when(
                                           (ADS) < 5 ~ 0)) #no mortality
 
 #Make drought sequence into dummy categorical variables for statistical analysis
-all.ca.sample <- all.ca.combined %>% mutate(sequence.f = case_when(
+all.ca.sample <- all.ca.combined %>% mutate(sequence.c = case_when(
                                    sequence == 'Both Droughts' ~ 0, 
                                    sequence == '2nd Drought Only' ~ 1))
 
 #Make years into dummy variables for statistical analysis
-all.ca.sample <- all.ca.sample %>% mutate(drought.f = case_when(
+all.ca.sample <- all.ca.sample %>% mutate(drought.c = case_when(
                                     drought == '1999-2002' ~ 0, 
                                     drought == '2012-2015' ~ 1))
 
 #Select the drought sequence samples and data columns for analysis
-dataset <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
-                             dplyr::select('PET_4yr', 'NDMI', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
+dataset <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only') %>%
+                             dplyr::select('PET_4yr', 'dNDMI', 'drought.c', 'sequence.c', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
 
 #Convert the dummy variables to a numeric format
-dataset$sequence.f <- as.numeric(dataset$sequence.f)
-dataset$drought.f <- as.numeric(dataset$drought.f)
+dataset$sequence.n <- as.numeric(dataset$sequence.c)
+dataset$drought.n <- as.numeric(dataset$drought.c)
 
 #Calculate sample size for 1999-2002 and proportion impacted by drought
 all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '1999-2002') %>% count()
+all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% count()
 
 #Calculate sample sizes for 2012-2015 and proportion impacted by drought
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
-#Convert dummy variable to factors
-all.ca.sample$sequence.f <- all.ca.sample$sequence.f
-all.ca.sample$drought.f <- all.ca.sample$drought.f
-
 #Convert dummy variables to factors
-dataset$sequence.f <- as.factor(dataset$sequence.f)
-dataset$drought.f <- as.factor(dataset$drought.f)
+dataset$sequence.f <- as.factor(dataset$sequence.c)
+dataset$drought.f <- as.factor(dataset$drought.c)
 
 #Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Only
 task = makeClassifTask(data = dataset, target = "sequence.f")
-task
+
 task.under = undersample(task, rate = 0.2)
 
 #The undersampled dataset
@@ -315,12 +309,7 @@ bio.r2.text <- data.frame(
 
 p5 <- ggscatter(all.ca.sample %>% filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only'), x = "biomass", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(6.5, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
-  # geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, color = 'black') +
-  # geom_smooth(method = 'lm', formula = y ~ x, size = 1, se = TRUE, mapping = aes(color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T))) +
-  # stat_cor(aes(label = paste(..rr.label..), color = interaction(as.factor(drought), as.factor(sequence), sep = '-', lex.order = T)),
-  #          label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
   geom_smooth(method = 'lm', formula = y ~ x, size = 2, se = TRUE, level = 0.95, linetype = 'dotdash', color = 'black') +
-  # stat_cor(aes(label = paste(..rr.label..)), color = 'black', label.x.npc = 0.75, label.y.npc = 0.9, size = 3.5, digits = 2) +
   theme_bw() + guides(alpha = FALSE) +
   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Live Aboveground Biomass (Mg ha'^-1*')')) +
   geom_vline(xintercept = 0) +
@@ -353,7 +342,7 @@ p6 <- p5 + theme(
 
 p6
 
-ggsave(filename = 'SFig13_biomass_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
+ggsave(filename = 'FigS14_biomass_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
 #Do a Tmax versus four-year Pr-ET figure
 tmax.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
@@ -399,7 +388,7 @@ p8 <- p7 + theme(
 
 p8
 
-ggsave(filename = 'SFig14_biomass_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
+ggsave(filename = 'FigS15_temperature_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
 #Do the models separate by the Region
 #Sierra Nevada
@@ -419,12 +408,6 @@ all.ca.both.1999.sierra.lm <- lm(data = all.ca.both.1999.sierra, dNDMI ~ PET_4yr
 all.ca.both.2012.sierra.lm <- lm(data = all.ca.both.2012.sierra, dNDMI ~ PET_4yr) # 2012-2015 Model
 all.ca.both.1999.socal.lm <- lm(data = all.ca.both.1999.socal, dNDMI ~ PET_4yr) # 1999-2002 Model
 all.ca.both.2012.socal.lm <- lm(data = all.ca.both.2012.socal, dNDMI ~ PET_4yr) # 2012-2015 Model
-
-#Trying out a log transformation for the Pr-ET data
-# all.ca.combined.log.lm <- lm(data = all.ca.combined, dNDMI ~ log(PET_4yr +(min(PET_4yr)*-1 + 0.001)))
-# summary(all.ca.combined.log.lm)
-# all.ca.combined.lm <- lm(data = all.ca.combined, dNDMI ~ PET_4yr)
-# summary(all.ca.combined.lm)
 
 #Models for 2012-2015 Only
 all.ca.second.1999.sierra.lm <- lm(data = all.ca.second.1999.sierra, dNDMI ~ PET_4yr) # 1999-2002 Model
@@ -512,7 +495,7 @@ p10 <- p9 + theme(
 
 p10
 
-ggsave(filename = 'SFig17_PET_regression_with_region_faceted_plot.png', device = 'png', height=16, width=24, units = 'cm', dpi=900)
+ggsave(filename = 'FigS18_PET_regression_with_region_faceted_plot.png', device = 'png', height=16, width=24, units = 'cm', dpi=900)
 
 #Count the samples for each panel
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & region == 'Southern California') %>% count()
@@ -668,8 +651,8 @@ df.tHSD.sup <- df.tHSD %>% dplyr::select(variable, contrast, estimate.1, estimat
 #Name the columns of the data frame
 colnames(df.tHSD.sup) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2','Difference', 'Low 95% CI', 'High 95% CI', 'Difference (%)', 'Low (%)', 'High (%)', 'p-value')
 
-#ANOVA and Tukey HSD comparing by time period and drought sequence
-tb3 <- kbl(df.tHSD.sup, format = 'html', caption = "Table S5: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
+#ANOVA and Tukey HSD comparing by time period and drought sequence, same as Table S3 plus % changes
+tb3 <- kbl(df.tHSD.sup, format = 'html', caption = "Table S15: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
 as_image(x = tb3, width = 10, file = "STable5_tHSD_test_results.png", zoom = 5.0) 
 
 #Filtering by drought sequence

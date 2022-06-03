@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: November 9, 2021
+#Date Updated: June 2, 2022
 #Purpose: Create supplementary maps for publication
 
 # cd /C/Users/Carl/mystuff/Goulden_Lab/Forest_Dieback/dieback/figure_set/final_figures_redo
@@ -10,10 +10,9 @@ p <- c('ggpubr', 'tidyr', 'dplyr', 'ggmap', 'ggplot2', 'magrittr', 'raster', 'rg
        'ncdf4', 'gtools', 'tigris', 'patchwork', 'rlist', 'ggspatial', 'svglite')
 # install.packages(p,repo='https://cran.r-project.org/')
 
-# install.packages(c('ggmap'),repo='https://cran.r-project.org/')
 lapply(p,require,character.only=TRUE)
 
-setwd('C:/Users/can02/mystuff/Goulden_Lab/Forest_Dieback/dieback/final_figure_set_redo')
+setwd('C:/Users/can02/mystuff/subsequent-drought')
 
 land_dir <- "D:\\Large_Files\\Landsat"
 socal_dir <- "D:\\Large_Files\\socal"
@@ -29,9 +28,6 @@ dir_usgs <- "D:\\Large_Files\\USGS\\data"
 dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 spi_dir <- "D:\\Large_Files\\WRCC\\All"
 
-#Directory for drought monitor polygons
-# dir_usdm <- "D:\\Large_Files\\Drought_Monitor\\equal_drought"
-
 #CSV version of landsat data directory
 dir_in <- "D:\\Large_Files\\Landsat"
 
@@ -44,12 +40,6 @@ wg <- crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0")
 #Increase the memory limit for R. Helps with spatially explicit analyses.
 memory.limit(32000)
 
-# # #Select USFS EcoRegions
-# usfs.regions <- st_read(file.path(dir_usfs, 'S_USA.EcomapSubsections.shp'))
-# usfs.sierra <- subset(usfs.regions, MAP_UNIT_S == 'M261Ep' | MAP_UNIT_S == 'M261Eq' | MAP_UNIT_S == 'M261Es' | MAP_UNIT_S == 'M261Eu' | MAP_UNIT_S == 'M261Er') #   | MAP_UNIT_S == 'M261Eo' 
-# usfs.sierra.union <- usfs.sierra %>% st_union()
-# usfs.socal <- subset(usfs.regions, MAP_UNIT_S == 'M262Bh' | MAP_UNIT_S == 'M262Bg' | MAP_UNIT_S == 'M262Bd' | MAP_UNIT_S == 'M262Be' | MAP_UNIT_S == 'M262Bf' | MAP_UNIT_S =='M262Bo' | MAP_UNIT_S =='M262Bi' | MAP_UNIT_S =='M262Bm' | MAP_UNIT_S == 'M262Bl' | MAP_UNIT_S =='M262Bc' | MAP_UNIT_S == 'M262Bp')
-# usfs.socal.union <- usfs.socal %>% st_union()
 #Select USFS EcoRegions
 usfs.regions <- st_read(file.path(dir_usfs, 'S_USA.EcomapSubsections.shp'))
 usfs.sierra <- subset(usfs.regions, MAP_UNIT_S == 'M261Ep' | MAP_UNIT_S == 'M261Eq' | MAP_UNIT_S == 'M261Es' | MAP_UNIT_S == 'M261Eu' | MAP_UNIT_S == 'M261Er' | MAP_UNIT_S == 'M261Eo') # | MAP_UNIT_S == 'M261Ev') #MAP_UNIT_S == 'M261Et' | 
@@ -186,29 +176,7 @@ p2 <- ggplot() +
 
 f1 <- ggarrange(p1, p2, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
 # f1
-ggsave(filename = 'SupFig1_dNDMI_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
-
-#Drought mask when excluding cross region pixels
-p4 <- ggplot() + 
-	  ggR(img = base.ca.mask, layer = 1, maxpixels = 1e12, geom_raster = FALSE, ggLayer = TRUE, forceCat = TRUE, sat = 0.0, hue = 0.4, alpha = 1.0) +  
-	  geom_sf(data = ca_20m_crop, color='black', size = 0.2, fill=NA) + 
-	  ggR(img = drought.region.all.mask, layer = 1, maxpixels = 1e10, geom_raster = TRUE, ggLayer = TRUE, forceCat = TRUE) + #Less Strict Drougth Mask Pixels, Error when only this is present.
-	  geom_sf(data = usfs.sierra.union, color='black', size = 0.3, fill='black', alpha = 0) +
-	  geom_sf(data = usfs.socal.union, color='black', size = 0.3, fill='black', alpha = 0) +
-	  coord_sf() + #guides(fill = guide_colorsteps(even.steps = TRUE, barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5)) +
-	  annotation_scale(location = "bl", height = unit(0.1, "cm"), width_hint = 0.2) + xlab(NULL) + ylab(NULL) + #xlab('Longitude') + ylab('Latitude') +
-	  annotation_north_arrow(location = "bl", which_north = "true",
-	  height = unit(1, "cm"), width = unit(1, "cm"),
-      pad_x = unit(0.1, "cm"), pad_y = unit(0.5, "cm"),
-      style = north_arrow_minimal) + 
-	  #The plot.margin order is top, right, bottom, left
-	  scale_fill_manual(values = c("1" = "#5D3A9B","2" = "#E66100"), name = 'Drought Sequence', labels = c("2012-2015 \nOnly", "Both \nDroughts"), na.value = NA, na.translate = F) +
-    theme_bw() + guides( fill = guide_legend(title.position = "top")) +
-    theme(axis.title.y = element_text(size=10), axis.text.y = element_text(size=8), axis.title.x = element_text(size=10), 
-                     axis.text.x = element_text(size=8), legend.text = element_text(size = 6), #legend.background = element_rect(colour = NA, fill = NA),
-                     legend.title = element_text(size = 7), legend.direction = "vertical", legend.position = c(0.8, 0.88))
-
-ggsave(filename = 'SupFig2_Drought_Maps.png', height=12.5, width= 8, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig7_dNDMI_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
 
 # four-year Pr-ET for 1999-2002 drought
 p5 <- ggplot() + 
@@ -248,8 +216,30 @@ p6 <- ggplot() +
 
 f3 <- ggarrange(p5, p6, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
 # f3
-ggsave(filename = 'SupFig3_PrET_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig8_PrET_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
 # ggsave(filename = 'SupFig3_Drought_Maps.svg', height=12.5, width= 16, units = 'cm', dpi=900, device = 'svg')
+
+#Drought mask when excluding cross region pixels
+p4 <- ggplot() + 
+  ggR(img = base.ca.mask, layer = 1, maxpixels = 1e12, geom_raster = FALSE, ggLayer = TRUE, forceCat = TRUE, sat = 0.0, hue = 0.4, alpha = 1.0) +  
+  geom_sf(data = ca_20m_crop, color='black', size = 0.2, fill=NA) + 
+  ggR(img = drought.region.all.mask, layer = 1, maxpixels = 1e10, geom_raster = TRUE, ggLayer = TRUE, forceCat = TRUE) + #Less Strict Drougth Mask Pixels, Error when only this is present.
+  geom_sf(data = usfs.sierra.union, color='black', size = 0.3, fill='black', alpha = 0) +
+  geom_sf(data = usfs.socal.union, color='black', size = 0.3, fill='black', alpha = 0) +
+  coord_sf() + #guides(fill = guide_colorsteps(even.steps = TRUE, barwidth = 5, barheight = 1, title.position = "top", title.hjust = 0.5)) +
+  annotation_scale(location = "bl", height = unit(0.1, "cm"), width_hint = 0.2) + xlab(NULL) + ylab(NULL) + #xlab('Longitude') + ylab('Latitude') +
+  annotation_north_arrow(location = "bl", which_north = "true",
+                         height = unit(1, "cm"), width = unit(1, "cm"),
+                         pad_x = unit(0.1, "cm"), pad_y = unit(0.5, "cm"),
+                         style = north_arrow_minimal) + 
+  #The plot.margin order is top, right, bottom, left
+  scale_fill_manual(values = c("1" = "#5D3A9B","2" = "#E66100"), name = 'Drought Sequence', labels = c("2012-2015 \nOnly", "Both \nDroughts"), na.value = NA, na.translate = F) +
+  theme_bw() + guides( fill = guide_legend(title.position = "top")) +
+  theme(axis.title.y = element_text(size=10), axis.text.y = element_text(size=8), axis.title.x = element_text(size=10), 
+        axis.text.x = element_text(size=8), legend.text = element_text(size = 6), #legend.background = element_rect(colour = NA, fill = NA),
+        legend.title = element_text(size = 7), legend.direction = "vertical", legend.position = c(0.8, 0.88))
+
+ggsave(filename = 'SupFig9_Drought_Maps.png', height=12.5, width= 8, units = 'cm', dpi=900)
 
 # Biomass for 1999-2002 drought
 p7 <- ggplot() + 
@@ -287,7 +277,7 @@ p8 <- ggplot() +
 
 f4 <- ggarrange(p7, p8, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
 # f4
-ggsave(filename = 'SupFig4_Biomass_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig10_Biomass_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
 
 # Temp for 1999-2002 drought
 p9 <- ggplot() + 
@@ -325,7 +315,7 @@ p10 <- ggplot() +
 
 f5 <- ggarrange(p9, p10, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
 # f5
-ggsave(filename = 'SupFig5_Temperature_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig11_Temperature_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
 
 # Die-off (ADS) for 1999-2002 drought
 p11 <- ggplot() + 
@@ -365,4 +355,4 @@ p12 <- ggplot() +
 # p12
 f6 <- ggarrange(p11, p12, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
 # f6
-ggsave(filename = 'SupFig6_ADS_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
+ggsave(filename = 'SupFig12_ADS_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)

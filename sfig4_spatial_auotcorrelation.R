@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 28, 2022
+#Date Edited: June 2, 2022
 #Purpose: Work on spatial autocorrelation
 
 #Packages to load
@@ -21,34 +21,38 @@ memory.limit(32000)
 # memory.limit()
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Subsequent_Drought"
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-# all.ca
+dir_in <- "D:\\Large_Files\\Landsat"
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v24.csv"))
 
 #Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 
 #Adding a drought sequence column to the data set
 all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5) & (spi48_09_2015 <= -1.5) & (dSPI48 <= 0.5) ~ 'Both Droughts', 
-                     (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2nd Drought Only',
-                     (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1st Drought Only')) 
-# all.ca %>% dplyr::select(dNDMI_2004)
+                                                         (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2nd Drought Only',
+                                                         (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1st Drought Only')) 
+
+#Check if PET_4yr_2009 is postive or negative
+all.ca %>% filter(drought.sequence == 'Both Droughts') %>% dplyr::select(PET_4yr_2009, PET_4yr_2002, PET_4yr_2015) %>% 
+  summarize(PET_2002.mean = mean(PET_4yr_2002), PET_2009.mean = mean(PET_4yr_2009), PET_2015.mean = mean(PET_4yr_2015))
+
 #Select columns of data
-all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, NDMI_1999, dNDMI_2004, dET_2004, dBiomass_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, ET_1999, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
+all.ca.1stDrought <- dplyr::select(all.ca, c(system.index, dNDMI_2004, PET_4yr_2002, ppt_4yr_2002, tmax_4yr_2002, ET_4yr_2002, biomass_1999, ADS_2004, spi48_09_2002, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
 #Add the year of the 1999-2002 data
 all.ca.1stDrought$drought <- '1999-2002'
 
 #Rename the columns
-colnames(all.ca.1stDrought) <- c('pixel.id','NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
+colnames(all.ca.1stDrought) <- c('pixel.id', 'dNDMI', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
 
 #Select columns of the 2012-2015 data
-all.ca.2ndDrought <- dplyr::select(all.ca, c(system.index, NDMI_2012, dNDMI_2017, dET_2017, dBiomass_2017, PET_4yr_2015, ppt_4yr_2015, tmax_4yr_2015, ET_4yr_2015, ET_2012, biomass_2012, ADS_2017, spi48_09_2015, elevation, latitude, longitude, USFS_zone, drought.sequence))
+all.ca.2ndDrought <- dplyr::select(all.ca, c(system.index, dNDMI_2017, PET_4yr_2015, ppt_4yr_2015, tmax_4yr_2015, ET_4yr_2015, biomass_2012, ADS_2017, spi48_09_2015, elevation, latitude, longitude, USFS_zone, drought.sequence))
 
 #Add the year of the 2012-2015 data
 all.ca.2ndDrought$drought <- '2012-2015'
 
 #Rename the columns
-colnames(all.ca.2ndDrought) <- c('pixel.id', 'NDMI', 'dNDMI', 'dET', 'dBiomass', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'ET', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
+colnames(all.ca.2ndDrought) <- c('pixel.id', 'dNDMI', 'PET_4yr', 'ppt_4yr', 'tmax_4yr', 'ET_4yr', 'biomass', 'ADS', 'spi48', 'elevation', 'latitude', 'longitude', 'USFS', 'sequence', 'drought')
 
 #Combine all the data in one data frame
 all.ca.combined <- rbind(all.ca.1stDrought, all.ca.2ndDrought)
@@ -74,7 +78,6 @@ all.ca.sample <- all.ca.sample %>% mutate(drought.f = case_when(
 
 
 #Make the data a spatial data frame
-# summary(all.ca.sample)
 all.ca.filter <- all.ca.sample %>% filter(!is.na(sequence.f)) #Filter out NA values
 
 coordinates(all.ca.filter) <- ~ latitude + longitude
@@ -82,11 +85,10 @@ raster::crs(all.ca.filter) <- raster::crs("+proj=longlat")
 
 #Check for spatial autocorrelation
 all.ca.filter.lm <- lm(dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass, all.ca.filter)
-summary(all.ca.filter.lm)
+
 #Calculate teh variogram values for the standardized linear model residuals
 var.lm <- gstat::variogram(rstandard(all.ca.filter.lm) ~ 1, data = all.ca.filter, cutoff = 6)
-# dev.off()
-# var.lm %>% as.data.frame()
+
 #Set the random seed for the random sample
 set.seed(1234)
 
@@ -119,7 +121,7 @@ p.var.prop.lm <- ggplot() +
   ylim(0,1) + xlab('Distance (km)') + ylab('Semivariance')
 
 p.var.prop.lm
-ggsave(filename = 'SFig_variogram_lm_sampled_residuals.png', height=8, width= 12, units = 'cm', dpi=900)
+ggsave(filename = 'SFig16_variogram_lm_sampled_residuals.png', height=8, width= 12, units = 'cm', dpi=900)
 
 #Add the data
 #Filter the data into subsets for modeling
@@ -234,4 +236,4 @@ p2 <- p1 + theme(
 
 p2
 
-ggsave(filename = 'SFig15_dNDMI_PET_4yr_regression_sampled_residuals.png', height=16, width=16, units = 'cm', dpi=900)
+ggsave(filename = 'SFig17_dNDMI_PET_4yr_regression_sampled_residuals.png', height=16, width=16, units = 'cm', dpi=900)
