@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: June 21, 2022
+#Date Edited: July 1, 2022
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -32,12 +32,12 @@ forest.names$FORTYPCD <- forest.names$VALUE
 ##Both Droughts regions estimates
 #Doing a combined estimated of the Basal Area for Both Droughts during 1999-2002
 #Total basal area and tpa estimates by species
-tpa.both.all.2002 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, treeDomain = INVYR %in% c("2002", "2003", "2004", "2005", "2006") & DIA >= 5,
+tpa.both.all.2002 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, treeDomain = INVYR %in% c("2003", "2004", "2005", "2006") & DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
 #Dead basal area 
-tpa.both.mort.2002 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE, treeDomain = DIA >= 5 & INVYR %in% c("2002", "2003", "2004", "2005", "2006"),
+tpa.both.mort.2002 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE, treeDomain = DIA >= 5 & INVYR %in% c("2003", "2004", "2005", "2006"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                             DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 
@@ -51,11 +51,11 @@ join.both.2002 <- join.both.2002 %>% dplyr::mutate(BAA.dead = replace(BAA.dead, 
 
 #Doing a combined estimated of the Basal Area for Both Droughts during 2012-2015
 #Total basal area and tpa estimates by species
-tpa.both.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & DIA >= 5,
+tpa.both.all.2015 <- tpa(ca, byPlot = TRUE, treeType = 'live', bySpecies = TRUE, treeDomain = INVYR %in% c("2016", "2017", "2018", "2019") & DIA >= 5,
                          areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                            DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
 #Dead basal area 
-tpa.both.mort.2015 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE, treeDomain = INVYR %in% c("2015", "2016", "2017", "2018", "2019") & 
+tpa.both.mort.2015 <- tpa(ca, byPlot = TRUE, treeType = 'dead', bySpecies = TRUE, treeDomain = INVYR %in% c("2016", "2017", "2018", "2019") & 
                             DIA >= 5 & MORTYR %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019"), #%notin% c("2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012"),
                           areaDomain = ECOSUBCD %in% c('M262Bd','M262Be','M262Bg','M262Bh','M262Bf','M262Bo','M262Bi','M262Bm','M262Bl','M262Bc','M262Bp','M261Es') &
                             DSTRBCD1 %in% c(0, 10, 11, 12, 54, 70) & COND_STATUS_CD == 1)
@@ -205,14 +205,14 @@ p1_texta <- data.frame(label = c("a", "b", "b", "a"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(4.25, 1.2, 0.65, 3.55),
+                       y     = c(4.25, 1.15, 0.65, 3.55),
                        x     = c(1, 2, 1, 2)
 )
 
 #Letters to indicate sample sizes
-p1_textb <- data.frame(label = c("n = 58", "n = 39", "n = 206", "n = 188"),
+p1_textb <- data.frame(label = c("n = 47", "n = 31", "n = 206", "n = 188"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
-                       y     = c(3.95, 0.9, 0.35, 3.35),
+                       y     = c(3.95, 0.85, 0.35, 3.25),
                        x     = c(1, 2, 1, 2)
 )
 
@@ -245,16 +245,16 @@ all.forest.type$tree_type.f <- factor(all.forest.type$tree_type.f, levels= c('pi
 # all.forest.type <- all.forest.type %>% mutate(tree_type.f = as.factor(tree.type.f(levels = c('pine', 'fir', 'oak', 'juniper', 'cedar'))))
 
 #Add text to the plot
-p2_texta <- data.frame(label = c("a", "abc", "cd", "cd", "cd", "cd", "cd", "cd", "cd", "cd",
-                                 "cd", "d", "d", "d", "d","b", "b", "cd", "d", "cd"),
+p2_texta <- data.frame(label = c("a", "bc", "cd", "cd", "cd", "cd", "cd", "cd", "cd", "cd",
+                                 "cd", "d", "d", "d", "d","ab", "ab", "cd", "d", "cd"),
                        sequence   = c('Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 
                                       'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(2.5, 1.3, 0.55, 0.4, 0.28, 0.55, 0.36, 0.22, 0.4, 0.14, 
-                                 0.24, 0.2, 0.14, 0.14, 0.16, 1.58, 1.65, 0.27, 0.14, 0.44),
+                       y     = c(2.75, 1, 0.6, 0.4, 0.28, 0.6, 0.36, 0.22, 0.4, 0.16, 
+                                 0.24, 0.2, 0.14, 0.14, 0.16, 1.58, 1.65, 0.27, 0.16, 0.44),
                        x     = c(0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38,
                                  0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38)
 )
@@ -294,14 +294,14 @@ p3_texta <- data.frame(label = c("a", "a", "b", "b"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(29, 21.8, 38, 37.5),
+                       y     = c(28, 21, 38, 37.5),
                        x     = c(1, 2, 1, 2)
 )
 
 #Letters to indicate sample sizes
-p3_textb <- data.frame(label = c("n = 58", "n = 39", "n = 206", "n = 188"),
+p3_textb <- data.frame(label = c("n = 47", "n = 31", "n = 206", "n = 188"),
                        sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
-                       y     = c(26, 18.8, 35, 34.5),
+                       y     = c(25, 18, 35, 34.5),
                        x     = c(1, 2, 1, 2)
 )
 
@@ -319,21 +319,21 @@ p3 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
         strip.text.x = element_text(size = 10, face = 'bold')) +
   geom_text(data = p3_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   geom_text(data = p3_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
-  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 21.2, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
+  geom_text(data = data.frame(label = "Mean \n+/- SE", y = 20.2, x = 1.2, sequence = 'Both Droughts'), mapping = aes(x=x, y=y, label = label), size = 2) + 
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')),
              labeller = as_labeller(c('Both Droughts' = "Exposed to Both Droughts", '2nd Drought Only' = "Exposed to 2nd Drought Only")))
 p3
 
 #Create a data frame for adding the panel 4 text.
-p4_texta <- data.frame(label = c("ad", "ab", "ab", "b", "b", "abd", "ab", "ab", "ab", "b",
-                                 "c", "d", "b", "b", "b", "c", "d", "b", "b", "b"),
+p4_texta <- data.frame(label = c("ad", "abd", "abd", "ab", "b", "abd", "abe", "abe", "ab", "ab",
+                                 "c", "d", "b", "b", "b", "c", "de", "b", "b", "b"),
                        sequence   = c('Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', 
                                       'Both Droughts', 'Both Droughts', 'Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only', '2nd Drought Only',
                                       '2nd Drought Only', '2nd Drought Only'),
                        # tree_type = c('pine/fir', 'other tree', 'pine/fir', 'other tree', 
                        #               'pine/fir', 'other tree', 'pine/fir', 'other tree'),
-                       y     = c(11.3, 6.3, 7.55, 3.75, 2.25, 8.7, 3.8, 5.3, 5.2, 1.5, 
+                       y     = c(11.1, 5.5, 7.7, 3.85, 1.7, 8.7, 5.4, 4.6, 5.7, 1.5, 
                                  17, 12.2, 3.5, 2.8, 3.6, 19.2, 11.3, 3.4, 2.25, 3.7),
                        x     = c(0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38,
                                  0.615, 0.81, 1.01, 1.2, 1.38, 1.615, 1.81, 2.01, 2.2, 2.38)
@@ -354,7 +354,7 @@ p4 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
         strip.background = element_blank(), strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), 
         panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
   scale_x_discrete(labels = c("Response During\n1st Period", "Response During\n2nd Period")) +
-  geom_text(data = p4_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
+  geom_text(data = p4_texta, mapping = aes(x = x, y = y, label = label), size = 4) +
   facet_grid(~ factor(sequence, levels = c('Both Droughts', '2nd Drought Only')))
 p4
 
@@ -442,7 +442,7 @@ df.all.tHSD.label <- df.all.tHSD %>% dplyr::select(variable, contrast, estimate.
 
 #Change the column names
 colnames(df.all.tHSD.label) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2', 'Difference', 'Low 95% CI', 'High 95% CI', 'p-value')
-
+df.all.tHSD.label
 #Combined ANOVA and Tukey HSD table
 tb1 <- kbl(df.all.tHSD.label, format = 'html', caption = "Table S3: FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
 as_image(x = tb1, width = 10, file = "STable3_FIA_tHSD_test_results.png", zoom = 5.0)
@@ -546,8 +546,9 @@ colnames(df.type.tHSD.label) <- c('Variable', 'Comparison', #'Estimate 1', 'Esti
 
 #Combined ANOVA and Tukey HSD table
 tb5 <- kbl(df.type.tHSD.label, format = 'html', caption = "Table S10: FIA ANOVA and Tukey HSD Results by Species Group", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb5, width = 10, file = "STable10_FIA_tHSD_test_results_species.png", zoom = 5.0)
 tb5
+as_image(x = tb5, width = 10, file = "STable10_FIA_tHSD_test_results_species.png", zoom = 5.0)
+
 #Analayis by Just Pine trees
 #ANOVA and Tukey HSD for basal are die-off by forest type, sequence, ane time period
 pine.aov.all <- aov(data = all.forest.type %>% filter(pltID %in% plots & tree_type %in% c('pine')), BAA.all.sum ~ time.period * sequence)

@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: June 28, 2022
+#Date Edited: July 1, 2022
 #Purpose: Create a chart showing the relationship between annual NDVI from Landsat and ET from flux towers
 
 p <- c('dplyr','tidyr','ggplot2','ggpubr','viridis','segmented', 'patchwork','RColorBrewer', 'broom', 'svglite', 'ggpmisc')
@@ -46,8 +46,8 @@ flux.sites$veg.type <- recode(.x=flux.sites$ID, 'Grassland US-SCg' = 'non-forest
 flux.sites$Site <- recode(.x=flux.sites$ID, 'Grassland US-SCg' = 'US-SCg', 'OakPine Forest US-SCf' = 'US-SCf', 'Desert US-SCd' = 'US-SCd', 'Sierran Mixed Conifer US-CZ3' = 'US-CZ3', 'PinyonJuniper US-SCw' = 'US-SCw', 'OakPine Woodland US-CZ1' = 'US-CZ1', 'Coastal Sage US-SCs' = 'US-SCs',
                               'Subalpine Forest US-CZ4' = 'US-CZ4', 'Ponderosa Pine Forest US-CZ2' = 'US-CZ2', 'Desert Chaparral US-SCc' = 'US-SCc')
 
-flux.sites$eco.type <- recode(.x=flux.sites$ID, 'Grassland US-SCg' = 'Grassland US-SCg', 'OakPine Forest US-SCf' = 'Oak Pine Forest US-SCf', 'Desert US-SCd' = 'Desert US-SCd', 'Sierran Mixed Conifer US-CZ3' = 'Sierran Mixed Conifer US-CZ3', 'PinyonJuniper US-SCw' = 'Pinyon Juniper US-SCw', 'OakPine Woodland US-CZ1' = 'Oak Pine Woodland US-CZ1', 'Coastal Sage US-SCs' = 'Coastal Sage US-SCs',
-                              'Subalpine Forest US-CZ4' = 'Subalpine Forest US-CZ4', 'Ponderosa Pine Forest US-CZ2' = 'Ponderosa Pine Forest US-CZ2', 'Desert Chaparral US-SCc' = 'Desert Chaparral US-SCc')
+flux.sites$eco.type <- recode(.x=flux.sites$ID, 'Grassland US-SCg' = 'Grassland, US-SCg', 'OakPine Forest US-SCf' = 'Oak Pine Forest, US-SCf', 'Desert US-SCd' = 'Desert, US-SCd', 'Sierran Mixed Conifer US-CZ3' = 'Sierran Mixed Conifer, US-CZ3', 'PinyonJuniper US-SCw' = 'Pinyon Juniper, US-SCw', 'OakPine Woodland US-CZ1' = 'Oak Pine Woodland, US-CZ1', 'Coastal Sage US-SCs' = 'Coastal Sage, US-SCs',
+                              'Subalpine Forest US-CZ4' = 'Subalpine Forest, US-CZ4', 'Ponderosa Pine Forest US-CZ2' = 'Ponderosa Pine Forest, US-CZ2', 'Desert Chaparral US-SCc' = 'Desert Chaparral, US-SCc')
 #Remove years with missing data and when data wasn't working
 flux.sites <- subset(flux.sites, n_days >= 300 & ET > 0)
 
@@ -95,11 +95,13 @@ sites.join$eco.type <- factor(sites.join$eco.type)
 
 #### Create scatter plot with exponential fit for just forested sites
 p1 <- ggplot() + 
-  scale_shape_manual(values=1:10) + theme_bw() +
-  scale_color_manual(values = c('dark green', 'black'), labels = c('Forest', 'Shrub/Grass')) + 
-  guides(color = 'none', shape = guide_legend(title = 'Site', ncol = 2)) +
+  scale_shape_manual(name = 'Site', values=1:10) + theme_bw() +
+  scale_color_manual(name = 'Site', values = c('black', 'black', 'black', 'black', 'dark green', 'dark green', 'dark green', 'dark green', 'dark green', 'dark green')) + #, 
+                     # labels = c('Grassland, US-SCg', 'Oak Pine Forest, US-SCf', 'Desert, US-SCd', 'Sierran Mixed Conifer, US-CZ3', 'Pinyon Juniper, US-SCw', 'Oak Pine Woodland, US-CZ1', 'Coastal Sage, US-SCs',
+                     #          'Subalpine Forest, US-CZ4', 'Ponderosa Pine Forest, US-CZ2', 'Desert Chaparral, US-SCc')) + 
+  # guides(color = guide_legend(title = 'Site', ncol = 1), shape = guide_legend(title = 'Site', ncol = 1)) +
   geom_point(data = sites.join, #%>% filter(Site %in% c('US-CZ1', 'US-CZ2', 'US-CZ3', 'US-CZ4', 'US-SCw', 'US-SCf')), 
-             mapping = aes(x = NDVI.mean, y = ET, color = veg.type, shape = eco.type), size = 2) + 
+             mapping = aes(x = NDVI.mean, y = ET, color = eco.type, shape = eco.type), size = 2) + 
   #Add the full ET line
   geom_smooth(data = sites.join, 
               mapping = aes(x = NDVI.mean, y = ET), linetype = 'dashed',
@@ -119,7 +121,7 @@ p1 <- ggplot() +
            aes(x = NDVI.mean, y = ET, label = paste(..rr.label.., expression('ET = 132.223 * e'^'(2.579 * NDVI)'), sep = "~`,`~")), 
            size = 3.5, r.accuracy = 0.001, p.accuracy = 0.001, color = 'dark green') +
   theme(axis.text.x = element_text(size = 9), axis.text.y = element_text(size = 9), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10), 
-        legend.position = c(0.22, 0.55), legend.background = element_rect(colour = NA, fill = NA), legend.title.align = 0.5,
+        legend.position = 'right', legend.background = element_rect(colour = NA, fill = NA), legend.title.align = 0.5,
         legend.key = element_rect(fill = NA), legend.title = element_text(size = 6), legend.text = element_text(size = 5)) +
   xlab('NDVI') + ylab(expression('ET (mm yr'^-1*')'))
 p1
@@ -128,4 +130,4 @@ p1
 f1 <- ggarrange(p1, ncol = 1, nrow = 1, common.legend = FALSE)
 f1
 #Save the figure as a .PNG file
-ggsave(filename = 'SupFig13_Forest_NDVI_ET_scaling.png', height=10, width=16, units = 'cm', dpi=900)
+ggsave(filename = 'SFig13_Forest_NDVI_ET_scaling.png', height=10, width=17, units = 'cm', dpi=900)
