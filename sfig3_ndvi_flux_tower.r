@@ -124,10 +124,9 @@ p1 <- ggplot() +
         legend.position = 'right', legend.background = element_rect(colour = NA, fill = NA), legend.title.align = 0.5,
         legend.key = element_rect(fill = NA), legend.title = element_text(size = 6), legend.text = element_text(size = 5)) +
   xlab('NDVI') + ylab(expression('ET (mm yr'^-1*')'))
-p1
 
 #Add the legend to the bottom of the figure
 f1 <- ggarrange(p1, ncol = 1, nrow = 1, common.legend = FALSE)
-f1
+
 #Save the figure as a .PNG file
 ggsave(filename = 'SFig13_Forest_NDVI_ET_scaling.png', height=10, width=17, units = 'cm', dpi=900)

@@ -29,6 +29,7 @@ ca <- readFIA(fiaCA)
 #Possible way to deal with non-conifer forests
 forest.names <- ca$REF_FOREST_TYPE
 forest.names$FORTYPCD <- forest.names$VALUE
+
 ##Both Droughts regions estimates
 #Doing a combined estimated of the Basal Area for Both Droughts during 1999-2002
 #Total basal area and tpa estimates by species
@@ -502,7 +503,7 @@ type.tHSD.combine <- list(type.dead.tHSD, #type.basal.dead.tHSD,
 #Create a data frame
 df.type.tHSD <- as.data.frame(map_df(type.tHSD.combine, tidy))
 print(df.type.tHSD)
-                         'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)', 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)')
+                       
 #Add a variable column
 df.type.tHSD.1 <- df.type.tHSD %>% slice(1:298) %>% mutate(variable = 'Mortality (m<sup>2</sup> ha<sup>-1</sup>)')
 df.type.tHSD.2 <- df.type.tHSD %>% slice(299:596) %>% mutate(variable = 'Basal Area (m<sup>2</sup> ha<sup>-1</sup>)')
