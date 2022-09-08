@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: May 2, 2022
+#Date Edited: September 8, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -28,13 +28,13 @@ all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5)
                                                          (spi48_09_2015 <= -1.5) & (spi48_09_2002 > spi48_09_2015) & (spi48_09_2002 > -1.5) & (dSPI48 > 0.5) ~ '2012-2015 Only',
                                                          (spi48_09_2002) <= -1.5 & (spi48_09_2002 < spi48_09_2015) & (spi48_09_2015 > -1.5) & (dSPI48 > 0.5) ~ '1999-2002 Only'))
 
-#Add Categorical ADS mortality data data (I had an error here)
+#Add Categorical ADS mortality data data 
 all.ca <- all.ca %>% mutate(ADS_2004.cat = case_when(
-  (ADS_2004) >= 5 ~ 1, #Mortality 
-  (ADS_2004) < 5 ~ 0), #No Mortality
+  (ADS_2004) >= 8 ~ 1, #Mortality 
+  (ADS_2004) < 8 ~ 0), #No Mortality
   ADS_2017.cat = case_when(
-    (ADS_2017) >= 2 ~ 1, #Mortality 
-    (ADS_2017) < 2 ~ 0)) #No Mortality
+    (ADS_2017) >= 8 ~ 1, #Mortality 
+    (ADS_2017) < 8 ~ 0)) #No Mortality
 
 #Do binning by SPI48 and Pr-ET over four years.
 all.ca.spi48 <- all.ca %>%

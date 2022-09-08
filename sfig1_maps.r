@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: June 2, 2022
+#Date Updated: September 8, 2022
 #Purpose: Create supplementary maps for publication
 
 # cd /C/Users/Carl/mystuff/Goulden_Lab/Forest_Dieback/dieback/figure_set/final_figures_redo
@@ -97,13 +97,13 @@ tmax.2015.mask <- mask(tmax.2015, mask = tmax.2015.m, maskvalue = 1)
 #ADS Die-off
 ads.2004 <- raster(file.path(socal_dir, 'ADS_2004_bigger_region_300m.tif'))
 crs(ads.2004) <- c
-ads.2004.reclass <- reclassify(ads.2004, c(-Inf,5,0,5,Inf,1), right = FALSE)
+ads.2004.reclass <- reclassify(ads.2004, c(-Inf,8,0,8,Inf,1), right = FALSE)
 ads.2004.m <- is.na(ads.2004.reclass) #is this actually a good way to mask this?
 ads.2004.mask <- mask(ads.2004.reclass, mask = ads.2004.m, maskvalue = 1)
 
 ads.2017 <- raster(file.path(socal_dir, 'ADS_2017_bigger_region_300m.tif'))
 crs(ads.2017) <- c
-ads.2017.reclass <- reclassify(ads.2017, c(-Inf,5,0,5,Inf,1), right = FALSE)
+ads.2017.reclass <- reclassify(ads.2017, c(-Inf,8,0,8,Inf,1), right = FALSE)
 ads.2017.m <- is.na(ads.2017.reclass)
 ads.2017.mask <- mask(ads.2017.reclass, mask = ads.2017.m, maskvalue = 1)
 
@@ -355,4 +355,4 @@ p12 <- ggplot() +
 # p12
 f6 <- ggarrange(p11, p12, ncol = 2, nrow = 1, common.legend = FALSE, labels = c('a', 'b'))
 # f6
-ggsave(filename = 'SupFig12_ADS_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)
+ggsave(filename = 'SFig12_ADS_Maps.png', height=12.5, width= 16, units = 'cm', dpi=900)

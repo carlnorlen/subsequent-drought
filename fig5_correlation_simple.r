@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: June 2, 2022
+#Date Edited: September 8, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -60,9 +60,10 @@ all.ca.combined$region[all.ca.combined$USFS == 261] <- "Sierra Nevada"
 all.ca.combined$region[all.ca.combined$USFS == 262] <- "Southern California"
 
 #Convert the ADS data to categorical mortality or no mortality
+#Trying the ADS Categorical with a 3 threshold
 all.ca.combined <- all.ca.combined %>% mutate(ADS.cat = case_when(
-                                          (ADS) >= 5 ~ 1, #mortality
-                                          (ADS) < 5 ~ 0)) #no mortality
+                                          (ADS) >= 8 ~ 1, #mortality
+                                          (ADS) < 8 ~ 0)) #no mortality
 
 #Make drought sequence into dummy categorical variables for statistical analysis
 all.ca.sample <- all.ca.combined %>% mutate(sequence.c = case_when(
@@ -744,13 +745,13 @@ ADS.2015.both.alive <- all.ca.sample %>% dplyr::filter(sequence == 'Both Drought
 ADS.2015.both.alive
 ADS.2015.both.dead <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' & drought == '2012-2015' & ADS.cat == 1) %>% count()
 ADS.2015.both.dead
-ADS.1999.second.alive <- all.ca.sample %>% dplyr::filter(sequence == '2012-2015 Only' & drought == '1999-2002' & ADS.cat == 0) %>% count()
+ADS.1999.second.alive <- all.ca.sample %>% dplyr::filter(sequence == '2nd Drought Only' & drought == '1999-2002' & ADS.cat == 0) %>% count()
 ADS.1999.second.alive
-ADS.1999.second.dead <- all.ca.sample %>% dplyr::filter(sequence == '2012-2015 Only' & drought == '1999-2002' & ADS.cat == 1) %>% count()
+ADS.1999.second.dead <- all.ca.sample %>% dplyr::filter(sequence == '2nd Drought Only' & drought == '1999-2002' & ADS.cat == 1) %>% count()
 ADS.1999.second.dead
-ADS.2015.second.alive <- all.ca.sample %>% dplyr::filter(sequence == '2012-2015 Only' & drought == '2012-2015' & ADS.cat == 0) %>% count()
+ADS.2015.second.alive <- all.ca.sample %>% dplyr::filter(sequence == '2nd Drought Only' & drought == '2012-2015' & ADS.cat == 0) %>% count()
 ADS.2015.second.alive
-ADS.2015.second.dead <- all.ca.sample %>% dplyr::filter(sequence == '2012-2015 Only' & drought == '2012-2015' & ADS.cat == 1) %>% count()
+ADS.2015.second.dead <- all.ca.sample %>% dplyr::filter(sequence == '2nd Drought Only' & drought == '2012-2015' & ADS.cat == 1) %>% count()
 ADS.2015.second.dead
 
 #Create a frequency matrix for a chi-square test
@@ -759,11 +760,11 @@ ADS <- matrix(c(as.numeric(ADS.1999.both.dead), as.numeric(ADS.2015.both.dead), 
 
 #Give the matrix column and row names
 colnames(ADS) <- c("Mortality", "No Mortality")
-rownames(ADS) <- c('Both Droughts: 1999-2002', 'Both Droughts: 2012-2015', '2012-2015 Only: 1999-2002','2012-2015 Only: 2012-2015')
+rownames(ADS) <- c('Both Droughts: 1999-2002', 'Both Droughts: 2012-2015', '2nd Drought Only: 1999-2002','2nd Drought Only: 2012-2015')
 
 #Convert the matrix to a data frame
 ADS <- as.data.frame(ADS)
-
+ADS
 #Do the chi-squared test
 mychi <- chisq.test(ADS)
 
@@ -775,13 +776,13 @@ mychi$expected
 
 #Calculate proportion of ADS mortality and no mortality by drought sequence and time period
 #2012-2015 Only sample in 1999-2002
-second.2002 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% sum()
-second.2002.total <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% count()
+second.2002 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% sum()
+second.2002.total <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002') %>% dplyr::select(ADS.cat) %>% count()
 second.2002 / second.2002.total
 
-#2012-2015 Only sample in 2012-2015
-second.2015 <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% sum()
-second.2015.total <- all.ca.sample %>% filter(sequence == '2012-2015 Only' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% count()
+#2nd Drought Only sample in 2012-2015
+second.2015 <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% sum()
+second.2015.total <- all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '2012-2015') %>% dplyr::select(ADS.cat) %>% count()
 second.2015 / second.2015.total
 
 #Both Droughts sample in 1999-2002
