@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: September 8, 2022
+#Date Edited: September 9, 2022
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -62,8 +62,8 @@ all.ca.combined$region[all.ca.combined$USFS == 262] <- "Southern California"
 #Convert the ADS data to categorical mortality or no mortality
 #Trying the ADS Categorical with a 3 threshold
 all.ca.combined <- all.ca.combined %>% mutate(ADS.cat = case_when(
-                                          (ADS) >= 8 ~ 1, #mortality
-                                          (ADS) < 8 ~ 0)) #no mortality
+                                          (ADS) >= 5 ~ 1, #mortality
+                                          (ADS) < 5 ~ 0)) #no mortality
 
 #Make drought sequence into dummy categorical variables for statistical analysis
 all.ca.sample <- all.ca.combined %>% mutate(sequence.c = case_when(

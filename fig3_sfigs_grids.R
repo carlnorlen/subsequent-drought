@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: September 8, 2022
+#Date Edited: September 9, 2022
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -30,11 +30,11 @@ all.ca <- all.ca %>% mutate(drought.sequence = case_when((spi48_09_2002 <= -1.5)
 
 #Add Categorical ADS mortality data data 
 all.ca <- all.ca %>% mutate(ADS_2004.cat = case_when(
-  (ADS_2004) >= 8 ~ 1, #Mortality 
-  (ADS_2004) < 8 ~ 0), #No Mortality
+  (ADS_2004) >= 5 ~ 1, #Mortality 
+  (ADS_2004) < 5 ~ 0), #No Mortality
   ADS_2017.cat = case_when(
-    (ADS_2017) >= 8 ~ 1, #Mortality 
-    (ADS_2017) < 8 ~ 0)) #No Mortality
+    (ADS_2017) >= 5 ~ 1, #Mortality 
+    (ADS_2017) < 5 ~ 0)) #No Mortality
 
 #Do binning by SPI48 and Pr-ET over four years.
 all.ca.spi48 <- all.ca %>%
@@ -67,13 +67,13 @@ all.ca.spi48 <- all.ca %>%
   ungroup()
 
 #Calculate proportion of Both Droughts in Socal
-both.socal <- all.ca.spi48 %>% filter(drought.sequence == 'Both Droughts') %>% select(socal) %>% sum()
-both.count <- all.ca.spi48 %>% filter(drought.sequence == 'Both Droughts') %>% select(socal) %>% count()
+both.socal <- all.ca.spi48 %>% filter(drought.sequence == 'Both Droughts') %>% dplyr::select(socal) %>% sum()
+both.count <- all.ca.spi48 %>% filter(drought.sequence == 'Both Droughts') %>% dplyr::select(socal) %>% count()
 both.socal / both.count
 
 #Calculate proportion of 2012-2015 Only in Sierra Nevada
-second.socal <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% select(sierra) %>% sum()
-second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% select(sierra) %>% count()
+second.socal <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% dplyr::select(sierra) %>% sum()
+second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% dplyr::select(sierra) %>% count()
 second.socal / second.count
 
 #Add columns for labeling plots.
@@ -165,7 +165,7 @@ f2 <- ggarrange(p3, p4, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend =
 annotate_figure(f2, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
 #Save the figure as a png
-ggsave(filename = 'SFig1_ADS_prop_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
+ggsave(filename = 'SFig2_ADS_prop_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
 
 #Plot 1999-2002 Pr-ET (mm/4yr) separate by SPI48 2002 versus SPI48 2015
 p5 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = PET_4yr_2002.mean, group = PET_4yr_2002.mean)) +
