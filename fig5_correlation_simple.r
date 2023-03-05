@@ -116,7 +116,7 @@ dataset.under$drought.scale <- scale(as.numeric(dataset.under$drought.f))
 dndmi.under.lm = lm(data = dataset.under, 
                 formula = dNDMI ~ drought.f * sequence.f + PET_4yr + tmax_4yr + biomass)
 
-#Get the model results as a datafram
+#Get the model results as a dataframe
 df.dndmi.lm <- dndmi.under.lm %>% tidy() %>% as.data.frame()
 
 #Label the columns of the data frame
@@ -237,7 +237,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_text(data = r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
   geom_text(data = letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
   geom_text(data = ci.label, mapping = aes(x = x, y = y, label = label), size = 2) +
-  labs(fill = "Grid Cells") +
+  c
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) + #Presentation text sizes.
   scale_fill_gradient2(limits = c(0,370), breaks = c(5,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +

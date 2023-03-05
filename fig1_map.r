@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: April 26, 2022
+#Date Updated: March 3, 2023
 #Purpose: Create figure 1 map for publication
 
 #Load required packages
@@ -11,7 +11,7 @@ lapply(p,require,character.only=TRUE)
 setwd('C:/Users/can02/mystuff/subsequent-drought')
 
 # # # File Directories
-socal_dir <- "D:\\Large_Files\\socal"
+socal_dir <- "D:\\Subsequent_Drought"
 dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 dir_in <- "D:\\Large_Files\\Landsat"
 
@@ -49,6 +49,9 @@ west_st_20m <- st_transform(west_st_20m, c)
 #Create an extend polygon based on just California and Nevada
 west.ext <- as(extent(west_st_20m), 'SpatialPolygons')
 crs(west.ext) <- c
+# 
+# ca.ext <- as(extent(ca_20m), 'SpatialPolygons')
+# crs(ca.ext) <- c
 
 #Select USFS EcoRegion for South Sierra Nevada
 usfs.regions <- st_read(file.path(dir_usfs, 'S_USA.EcomapSubsections.shp'))
@@ -65,11 +68,12 @@ usfs.socal <- subset(usfs.regions, MAP_UNIT_S == 'M262Bh' | MAP_UNIT_S == 'M262B
 usfs.socal.union <- usfs.socal %>% st_union()
 
 #Add SPI48 layers for different years and a combined layer based on SPI48 exposure
-spi48_2015.300m <- raster(file.path(socal_dir, 'Drought_second_300m_v5.tif'))
-spi48_2002.300m <- raster(file.path(socal_dir, 'Drought_first_300m_v5.tif'))
+spi48_2015.300m <- raster(file.path(socal_dir, 'Drought_second_300m_v7.tif'))
+# plot(spi48_2015.300m)
+spi48_2002.300m <- raster(file.path(socal_dir, 'Drought_first_300m_v7.tif'))
 spi48.300m.both <- spi48_2002.300m + spi48_2015.300m 
 spi48.300m.both.crop <- crop(spi48.300m.both, west.ext)
-spi48.300m.m <- spi48.300m.both.crop == 0
+spi48.300m.m <- spi48.300m.both.crop == -9999
 spi48.300m.both.mask <- mask(spi48.300m.both.crop, mask = spi48.300m.m, maskvalue = 1)
 
 #Do binning by SPI48 2002 and SPI48 2015
@@ -98,8 +102,8 @@ all.ca.spi48 <- all.ca %>%
 #Map Showing SPI 48 month Drought mask for 2002 and 2015 droughts
 p1 <- ggplot() +
 	  ggR(img = spi48.300m.both.mask, layer = 1, maxpixels = 1e10, geom_raster = TRUE, ggLayer = TRUE, forceCat = TRUE) +
-	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100"), breaks = c("1", "2", "3"), name = expression(atop(NA,atop(textstyle('Severe Drought'),textstyle('(SPI48'<= -1.5*')')))), 
-	                    labels = c("1st Drought \nOnly", "2nd Drought \nOnly", "Both \nDroughts"), na.value = NA) +
+	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100", "0" = 'white'), breaks = c("1", "2", "3", "0"), name = expression(atop(NA,atop(textstyle('Severe Drought'),textstyle('(SPI48'<= -1.5*')')))), 
+	                    labels = c("1st Drought \nOnly", "2nd Drought \nOnly", "Both \nDroughts", "Neither \nDrought"), na.value = NA) +
 	  geom_sf(data = ca_20m, color='black', size = 0.2, fill=NA) +
 	  geom_sf(data = usfs.sierra.union, color='black', size = 0.6,  fill='black', alpha = 0.2) +
 	  geom_sf(data = usfs.socal.union, color='black', size = 0.6,  fill='black', alpha = 0.2) +
@@ -112,19 +116,19 @@ p1 <- ggplot() +
       style = north_arrow_minimal) + theme_bw() + guides(fill = guide_legend(title.position = "top")) +
 	  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
 	  legend.key = element_rect(fill = NA), legend.text=element_text(size=8), legend.title = element_text(size=8),  plot.margin = unit(c(0,5,0,10), "pt")) 
-
+# p1
 #Add annotations to map of SPI48 exposure
 p2 <- p1 + 
     theme(
     legend.justification = c(1, 0),
-    legend.position = c(0.89, 0.6),
+    legend.position = c(0.89, 0.52),
     legend.text = element_text(size = 6),
     legend.title = element_text(size = 8),
     legend.direction = "vertical") +
-  guides(fill = guide_legend(ncol = 1, nrow = 3,
+  guides(fill = guide_legend(ncol = 1, nrow = 4,
                              title.position = "top", title.hjust = 0.5), override.aes = list(fill = 0.4))
 
-p2    
+# p2    
     
 #Create a figure of the sample size comparing SPI48 2002 versus SPI48 2015
 p3 <- ggplot(all.ca.spi48, mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = count, group = count)) +
@@ -166,6 +170,6 @@ p4 <- p3 + annotate("text", x = -0.5, y = -0.5, label = "Neither \nDrought") + a
 
 #Combine the two figures into one plot, add letters to label sub-plots
 f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, align = 'h', heights = c(1,1), widths = c(1, 1.5), labels = c('a)', 'b)')) #,  plot.margin = unit(c(0,3,0,0), "pt")
-
+# f1
 #Save the figure as a .png file
 ggsave(filename = 'Fig1_both_droughts_SPI48_300m_map.png', height=10, width= 20, units = 'cm', dpi=900)

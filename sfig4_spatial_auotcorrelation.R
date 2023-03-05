@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: June 2, 2022
+#Date Edited: September 9, 2022
 #Purpose: Work on spatial autocorrelation
 
 #Packages to load
@@ -201,13 +201,13 @@ test.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
 #Testing out the model with the points selected at random.
 p1 <- ggscatter(all.ca.test.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_bin2d(binwidth = c(100, 0.0075)) +
-  geom_line(data = all.ca.test.models, mapping = aes(x=PET_4yr, y=dNDMI_predict), size=2, linetype = 'dotdash', color = 'black') +
-  geom_ribbon(data = all.ca.models, mapping = aes(x = PET_4yr, y = dNDMI.fit, ymax = dNDMI.fit + 1.96*dNDMI.se.fit, ymin = dNDMI.fit - 1.96*dNDMI.se.fit), alpha = 0.4) +
+  geom_line(data = all.ca.test.models, mapping = aes(x=PET_4yr, y=dNDMI.fit), size=2, linetype = 'dotdash', color = 'black') +
+  geom_ribbon(data = all.ca.test.models, mapping = aes(x = PET_4yr, y = dNDMI.fit, ymax = dNDMI.fit + 1.96*dNDMI.se.fit, ymin = dNDMI.fit - 1.96*dNDMI.se.fit), alpha = 0.4) +
   # geom_smooth(method = 'lm', color = 'black', size = 2) +
   # geom_smooth(method = 'lm', formula = y ~ x, color = 'black', size = 2, se = FALSE, na.rm = TRUE) +
   # stat_cor(aes(label = paste(..rr.label..)), size = 3.5, digits = 2, label.x.npc = 0.75, label.y.npc = 0.9) +
   theme_bw() +
-  ylab(label = "Die-off During Period (dNDMI)") +  xlab(label = expression('Cummulative Water Deficit (Pr-ET; mm 4 yr'^-1*')')) +
+  ylab(label = "Die-off During Period (dNDMI)") +  xlab(label = expression('Cummulative Moisture Deficit (Pr-ET; mm 4 yr'^-1*')')) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_text(data = test.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
@@ -215,7 +215,7 @@ p1 <- ggscatter(all.ca.test.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   labs(fill = "Grid Cells") +
   theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) +
-  scale_fill_gradient2(limits = c(0,20), breaks = c(5,10,15), midpoint = 10, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
+  scale_fill_gradient2(limits = c(0,42), breaks = c(10,20,30,40), midpoint = 21, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
   ylim(0.1, -0.3) + xlim(-2500, 3500) +
   facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought,
              labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',

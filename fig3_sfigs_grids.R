@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: September 9, 2022
+#Date Edited: March 5, 2023
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -64,6 +64,7 @@ all.ca.spi48 <- all.ca %>%
   dplyr::mutate(ADS_2004.count = sum(ADS_2004.cat), ADS_2017.count = sum(ADS_2017.cat)) %>%
   dplyr::mutate(ADS_2004.total = count, ADS_2017.total = count) %>%
   dplyr::mutate(ADS_2004.prop = (ADS_2004.count / ADS_2004.total) * 100, ADS_2017.prop = (ADS_2017.count / ADS_2017.total) * 100) %>%
+  mutate(dSPI48 = abs(spi48_09_2015 - spi48_09_2002)) %>%
   ungroup()
 
 #Calculate proportion of Both Droughts in Socal
@@ -323,3 +324,30 @@ p12 <- p11 +
 
 #Save the figure as a png
 ggsave(filename = 'SFig5_spi48_sierra_socal_SPI48_grid_scatter.png', device = 'png', height=6, width=7, units = 'cm', dpi=900)
+
+#Create a figure to compare SPI48 for the two droughts and figure out the drought sequences experienced by the two regions.
+p13 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dSPI48, group = dSPI48)) +
+  geom_bin2d(mapping = aes(group = dSPI48), binwidth = c(0.1, 0.1)) + theme_bw() + 
+  ylim(-3.5, 0) + xlim(-3, 2) +
+  ylab('SPI48 2012-2015') +  xlab('SPI48 1999-2002') +  
+  # geom_vline(xintercept = 0, size = 0.25) + 
+  # geom_hline(yintercept = 0, size = 0.25) +
+  geom_vline(xintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
+  geom_hline(yintercept = -1.5, size = 0.5, color = 'black', linetype='dashed') +
+  guides(fill = guide_colorbar(title.position = "top", title.hjust = 0.5, title.vjust = 0.5, barwidth = 4, barheight = 1, ticks.colour = "black"), alpha = "none") +
+  theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), 
+        axis.title.y = element_text(size = 10), plot.title = element_text(size = 12, hjust = 0.5)) + #Presentation text sizes.
+  scale_fill_gradient2(name = "dSPI48", limits = c(0,1.2), breaks = c(0.25, 0.5, 0.75, 1.0), midpoint = 0.5, low = "green", high = "pink", mid = 'white', na.value = 'grey')
+# p13
+#Add annotations and move the legend into the corner of the figure.
+p14 <- p13 +
+  theme(
+    legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
+    legend.justification = c(1, 0),
+    legend.position = c(0.88, 0.6),
+    legend.text = element_text(size = 4),
+    legend.title = element_text(size = 6),
+    legend.direction = "horizontal")
+# p14
+#Save the figure as a png
+ggsave(filename = 'SFig19_spi48_dspi48_socal_SPI48_grid_scatter.png', device = 'png', height=6, width=7, units = 'cm', dpi=900)
