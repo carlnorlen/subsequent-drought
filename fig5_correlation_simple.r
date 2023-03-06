@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: September 9, 2022
+#Date Edited: March 6, 2023
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -497,6 +497,80 @@ p10 <- p9 + theme(
 p10
 
 ggsave(filename = 'FigS18_PET_regression_with_region_faceted_plot.png', device = 'png', height=16, width=24, units = 'cm', dpi=900)
+
+#Models for four-year ET versus dNDMI
+ET_4yr.both.1999.lm <- lm(data = all.ca.both.1999, dNDMI ~ ET_4yr) # 1999-2002 Model
+ET_4yr.both.2012.lm <- lm(data = all.ca.both.2012, dNDMI ~ ET_4yr) # 2012-2015 Model
+
+#Models for 2012-2015 Only
+ET_4yr.second.1999.lm <- lm(data = all.ca.second.1999, dNDMI ~ ET_4yr) # 1999-2002 Model
+ET_4yr.second.2012.lm <- lm(data = all.ca.second.2012, dNDMI ~ ET_4yr) # 2012-2015 Model
+
+#R-Squared values for the four models
+ET.r2.a  <- format(summary(ET_4yr.both.1999.lm)$r.squared, digits = 2) #I could switch this back to segmented
+ET.r2.b <- format(summary(ET_4yr.both.2012.lm)$r.squared, digits = 2)
+ET.r2.c <- format(summary(ET_4yr.second.1999.lm)$r.squared, digits = 2)
+ET.r2.d <- format(summary(ET_4yr.second.2012.lm)$r.squared, digits = 2)
+
+#Add the letter labels for teh sub-plots.
+ET.letter.text <- data.frame(label = c("a)", "b)", "c)", "d)"),
+                              sequence   = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+                              drought = c('1999-2002', '2012-2015', '1999-2002',  '2012-2015'),
+                              y     = c(-0.32, -0.32, -0.32, -0.32),
+                              x     = c(350, 350, 350, 350)
+)
+
+ET.r2.text <- data.frame(
+  label = c(as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 =bio.r2.a)))), 
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = bio.r2.b)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = bio.r2.c)))),
+            as.character(as.expression(substitute(italic(R)^2~"="~r2, list(r2 = bio.r2.d))))
+  ),
+  sequence = c('Both Droughts', 'Both Droughts', '2nd Drought Only', '2nd Drought Only'),
+  drought = c('1999-2002', '2012-2015', '1999-2002', '2012-2015'),
+  x = c(425, 425, 425, 425),
+  y = c(-0.3, -0.3, -0.3, -0.3)
+)
+
+
+#four-year ET vs. dNDMI faceted plot regression
+p11 <- ggscatter(all.ca.sample %>% filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only'), x = "ET_4yr", y = "dNDMI", point = FALSE) +
+  geom_bin2d(binwidth = c(100, 0.0075), mapping = aes(group = ..count.., alpha = ..count..)) +
+  geom_smooth(method = 'lm', formula = y ~ x, size = 2, linetype = 'dotdash', se = TRUE, level = 0.95, color = 'black') +
+  stat_cor(aes(label = paste(..rr.label..)), color = 'black', label.x.npc = 0.15, label.y.npc = 0.9, size = 3.5, digits = 2) +
+  theme_bw() + guides(alpha = 'none') +
+  ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('four-year ET (mm 4yr'^-1*')')) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) +
+  # geom_text(data = bio.r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
+  geom_text(data = ET.letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
+  labs(fill = "Grid Cells") +
+  theme(axis.text.x = element_text(size = 10), axis.text.y = element_text(size = 10), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
+        plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) + #Presentation text sizes.
+  scale_fill_gradient2(limits = c(0,1500), breaks = c(5,500,1000), midpoint = 750, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
+  scale_alpha(range = c(1, 1), limits = c(5, 1500), na.value = 0.4) +
+  ylim(0.1, -0.35) + #xlim(0, 475) +
+  facet_grid(factor(sequence, levels = c('Both Droughts', '2nd Drought Only')) ~ drought,
+             labeller = as_labeller(c('1999-2002'='Response During 1st Period', '2012-2015'='Response During 2nd Period',
+                                      'Both Droughts' = 'Exposed to Both Droughts', '2nd Drought Only' = 'Exposed to 2nd Drought Only')))
+p11
+#Add a shared legend in a customized position on the figure
+p12 <- p11 + theme(
+  legend.background = element_rect(colour = NA, fill = NA), # This removes the white square behind the legend
+  legend.justification = c(1, 0),
+  legend.position = c(1.0, 0.8),
+  legend.text = element_text(size = 10),
+  legend.title = element_text(size = 10),
+  legend.direction = "vertical") +
+  guides(
+    fill = guide_colorbar(barwidth = 1, barheight = 3,
+                          title.position = "top",
+                          title.hjust = 0.5,
+                          ticks.colour = "black"))
+
+p12
+
+ggsave(filename = 'SFig20_4yr_ET_regression_faceted_plot.png', device = 'png', height=16, width=16, units = 'cm', dpi=900)
 
 #Count the samples for each panel
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & region == 'Southern California') %>% count()
