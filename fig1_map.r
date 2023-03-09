@@ -102,7 +102,7 @@ all.ca.spi48 <- all.ca %>%
 #Map Showing SPI 48 month Drought mask for 2002 and 2015 droughts
 p1 <- ggplot() +
 	  ggR(img = spi48.300m.both.mask, layer = 1, maxpixels = 1e10, geom_raster = TRUE, ggLayer = TRUE, forceCat = TRUE) +
-	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100", "0" = 'white'), breaks = c("1", "2", "3", "0"), name = expression(atop(NA,atop(textstyle('Severe Drought'),textstyle('(SPI48'<= -1.5*')')))), 
+	  scale_fill_manual(values = c("1" = "#E1BE6A","2" = "#5D3A9B","3" = "#E66100", "0" = 'lightgray'), breaks = c("1", "2", "3", "0"), name = expression(atop(NA,atop(textstyle('Severe Drought'),textstyle('(SPI48'<= -1.5*')')))), 
 	                    labels = c("1st Drought \nOnly", "2nd Drought \nOnly", "Both \nDroughts", "Neither \nDrought"), na.value = NA) +
 	  geom_sf(data = ca_20m, color='black', size = 0.2, fill=NA) +
 	  geom_sf(data = usfs.sierra.union, color='black', size = 0.6,  fill='black', alpha = 0.2) +
@@ -170,6 +170,6 @@ p4 <- p3 + annotate("text", x = -0.5, y = -0.5, label = "Neither \nDrought") + a
 
 #Combine the two figures into one plot, add letters to label sub-plots
 f1 <- ggarrange(p2, p4, ncol = 2, nrow = 1, common.legend = FALSE, align = 'h', heights = c(1,1), widths = c(1, 1.5), labels = c('a)', 'b)')) #,  plot.margin = unit(c(0,3,0,0), "pt")
-# f1
+f1
 #Save the figure as a .png file
 ggsave(filename = 'Fig1_both_droughts_SPI48_300m_map.png', height=10, width= 20, units = 'cm', dpi=900)
