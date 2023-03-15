@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: July 1, 2022
+#Date Edited: March 15, 2023
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -230,7 +230,8 @@ p1 <- ggbarplot(all.forest %>% filter(pltID %in% plots) %>% group_by(time.period
         legend.position = c(0.76, 0.1), legend.text = element_text(size = 6, angle = 45), legend.title = element_text(size = 8),
         legend.direction = "vertical", axis.text.x = element_blank(), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), plot.margin = unit(c(0,0,2.5,5), "pt"),
-        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold"),
+        panel.spacing = unit(20, "pt"), plot.tag.position = c(0.53, 0.96), #c(0.52, 0.96) 
+        plot.tag = element_text(face = "bold"),
         strip.text.x = element_text(size = 10, face = 'bold')) +
   # scale_x_discrete(labels = c("Response During\n1st Period", "Response During\n2nd Period")) +
   geom_text(data = p1_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
@@ -275,7 +276,8 @@ p2 <- ggbarplot(all.forest.type %>% filter(pltID %in% plots & tree_type != 'othe
         legend.direction = "horizontal", axis.text.x = element_text(size = 10, color = 'black'), axis.title.x = element_blank(),
         axis.text.y = element_text(size = 8), axis.title.y = element_text(size = 10), strip.background = element_blank(),
         strip.text.x = element_blank(), plot.margin = unit(c(2.5,0,0,5), "pt"), panel.spacing = unit(20, "pt"),
-        plot.tag.position = c(0.54, 0.96), plot.tag = element_text(face = "bold")) +
+        plot.tag.position = c(0.53, 0.96), #c(0.54, 0.96)
+        plot.tag = element_text(face = "bold")) +
   scale_x_discrete(labels = c("Response During\n1st Period", "Response During\n2nd Period")) +
   geom_text(data = p2_texta, mapping = aes(x = x, y = y, label = label), size = 5) +
   # geom_text(data = p1_textb, mapping = aes(x = x, y = y, label = label), size = 3) +
