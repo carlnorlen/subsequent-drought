@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: March 5, 2023
+#Date Edited: March 17, 2023
 #Purpose: Create Figures 3 and 5 for publication
 
 #Packages to load
@@ -73,9 +73,9 @@ both.count <- all.ca.spi48 %>% filter(drought.sequence == 'Both Droughts') %>% d
 both.socal / both.count
 
 #Calculate proportion of 2012-2015 Only in Sierra Nevada
-second.socal <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% dplyr::select(sierra) %>% sum()
+second.sierra <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% dplyr::select(sierra) %>% sum()
 second.count <- all.ca.spi48 %>% filter(drought.sequence == '2012-2015 Only') %>% dplyr::select(sierra) %>% count()
-second.socal / second.count
+second.sierra / second.count
 
 #Add columns for labeling plots.
 all.ca.spi48$both <- 'Response During 1st Period'#'1999-2002'
