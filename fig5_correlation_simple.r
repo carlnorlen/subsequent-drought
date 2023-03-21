@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: March 6, 2023
+#Date Edited: March 21, 2023
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -75,6 +75,10 @@ all.ca.sample <- all.ca.sample %>% mutate(drought.c = case_when(
                                     drought == '1999-2002' ~ 0, 
                                     drought == '2012-2015' ~ 1))
 
+#Create data sets as factors
+all.ca.sample$sequence.f <- as.factor(all.ca.sample$sequence)
+all.ca.sample$drought.f <- as.factor(all.ca.sample$drought)
+
 #Select the drought sequence samples and data columns for analysis
 dataset <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only') %>%
                              dplyr::select('PET_4yr', 'dNDMI', 'drought.c', 'sequence.c', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
@@ -95,6 +99,9 @@ all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% co
 #Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.c)
 dataset$drought.f <- as.factor(dataset$drought.c)
+
+#Set the random number seed
+set.seed(1234)
 
 #Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Only
 task = makeClassifTask(data = dataset, target = "sequence.f")
@@ -124,7 +131,7 @@ df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-
 
 #Calculate the relative importance of model variables with a relative weight analysis.
 dndmi.relimp <- calc.relimp(dndmi.under.lm, rela = TRUE, type = "lmg") 
-
+dndmi.relimp 
 #Add the results of the relative weigth analysis to the data frame
 df.dndmi.lm$relimp <- c(0, 0.03706293, 0.01952194, 0.36576597, 0.09262433, 0.02743045, 0.45759438)
 
@@ -138,10 +145,10 @@ df.dndmi.tbl <- df.dndmi.lm %>% dplyr::select(variable, estimate, std.error, sta
 colnames(df.dndmi.tbl) <- c('Variable', 'Coefficient', 'Standard Error', 'T-Statistic', 'p-value', 'Relative Importance (%)')
 
 #Create the data table with a title
-tba <- kbl(df.dndmi.tbl, caption = "Table S4: Die-off (dNDMI) Multiple Linear Regression", digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+tba <- kbl(df.dndmi.tbl, caption = "Table S6: Die-off (dNDMI) Multiple Linear Regression", digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
 
 #Export the data table as a .PNG file
-as_image(x = tba, width = 6, file = "STable4_multiple_regression_results.png", zoom = 5.0)
+as_image(x = tba, width = 6, file = "STable6_multiple_regression_results.png", zoom = 5.0)
 
 #Convert the dummy data back to a numeric format
 dataset.under$sequence.f <- as.numeric(dataset.under$sequence.f)
@@ -237,7 +244,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_text(data = r2.text, mapping = aes(x = x, y = y, label = label), size = 3.5, parse = TRUE) +
   geom_text(data = letter.text, mapping = aes(x = x, y = y, label = label), size = 5, fontface = "bold") +
   geom_text(data = ci.label, mapping = aes(x = x, y = y, label = label), size = 2) +
-  c
+  labs(fill = "Grid Cells") +
   theme(axis.text.x = element_text(size = 8), axis.text.y = element_text(size = 8), axis.title.x = element_text(size = 10), axis.title.y = element_text(size = 10),
         plot.title = element_text(size = 10, hjust = 0.5), strip.text.x = element_text(size = 10, face = 'bold'), strip.text.y = element_text(size = 10, face = 'bold')) + #Presentation text sizes.
   scale_fill_gradient2(limits = c(0,370), breaks = c(5,100,200,300), midpoint = 185, low = "cornflowerblue", mid = "yellow", high = "red", na.value = 'transparent') +
@@ -579,9 +586,9 @@ all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Sierra Nevada') %>% count()
 
 #Store filtered and sampled drought sequence data as its own vector
-dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2012-2015 Only') %>%
+dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only') %>%
   dplyr::select('PET_4yr', 'ET_4yr', 'ppt_4yr', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
-
+dataset.2 %>% summary()
 #Create a task to use with the caret package
 task.2 <- makeClassifTask(data = dataset.2, target = "sequence.f")
 
@@ -594,7 +601,7 @@ dataset.2.under <- getTaskData(task.2.under)
 #Make variables into dummy categorical variables for statistical analysis
 dataset.2.under <- dataset.2.under %>% mutate(sequence = case_when(
   sequence.f == 0 ~ 'Both Droughts', 
-  sequence.f == 1 ~ '2012-2015 Only'))
+  sequence.f == 1 ~ '2nd Drought Only'))
 
 #Create column with the years for the data as a string
 dataset.2.under <- dataset.2.under %>% mutate(drought = case_when(
@@ -605,37 +612,37 @@ dataset.2.under <- dataset.2.under %>% mutate(drought = case_when(
 dataset.3 <- dataset.2.under %>% arrange(drought.f, pixel.id, by_group = TRUE)
 
 #Combined anova/t-test analysis for Biomass by year collected and drought sequence
-biomass.aov <- aov(data = dataset.2.under, biomass ~ drought*sequence)
+biomass.aov <- aov(data = dataset.2.under, biomass ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for biomass
 biomass.tHSD <- TukeyHSD(biomass.aov) 
 
 #ANOVA for Pr-ET
-PET_4yr.aov <- aov(data = dataset.2.under, PET_4yr ~ drought*sequence)
+PET_4yr.aov <- aov(data = dataset.2.under, PET_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for Pr-ET
 PET_4yr.tHSD <- TukeyHSD(PET_4yr.aov)
 
 #ANOVA for Precip
-ppt_4yr.aov <- aov(data = dataset.2.under, ppt_4yr ~ drought*sequence)
+ppt_4yr.aov <- aov(data = dataset.2.under, ppt_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for Pr-ET
 ppt_4yr.tHSD <- TukeyHSD(ppt_4yr.aov)
 
 #ANOVA for ET
-ET_4yr.aov <- aov(data = dataset.2.under, ET_4yr ~ drought*sequence)
+ET_4yr.aov <- aov(data = dataset.2.under, ET_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for ET
 ET_4yr.tHSD <- TukeyHSD(ET_4yr.aov)
 
 #ANOVA for Tmax
-tmax_4yr.aov <- aov(data = dataset.2.under, tmax_4yr ~ drought*sequence)
+tmax_4yr.aov <- aov(data = dataset.2.under, tmax_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for Tmax
 tmax_4yr.tHSD <- TukeyHSD(tmax_4yr.aov)
 
 #ANOVA for dNDMI
-dNDMI.aov <- aov(data = dataset.2.under, dNDMI ~ drought*sequence)
+dNDMI.aov <- aov(data = dataset.2.under, dNDMI ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for dNDMI
 dNDMI.tHSD <- TukeyHSD(dNDMI.aov)
@@ -709,8 +716,8 @@ df.tHSD.pub <- df.tHSD %>% dplyr::select(variable, contrast, estimate.1, estimat
 colnames(df.tHSD.pub) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2','Difference', 'Low 95% CI', 'High 95% CI', 'p-value')
 
 #ANOVA and Tukey HSD comparing by time period and drought sequence
-tb1 <- kbl(df.tHSD.pub, format = 'html', caption = "Table S1: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb1, width = 10, file = "STable1_tHSD_test_results.png", zoom = 5.0)  
+tb1 <- kbl(df.tHSD.pub, format = 'html', caption = "Table S2: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb1, width = 10, file = "STable2_tHSD_test_results.png", zoom = 5.0)  
 
 #Create same table as Table 1, but add a percent change column, not included with manuscript
 #Calculate proportion differences from Tukey HSD tests
@@ -728,11 +735,12 @@ colnames(df.tHSD.sup) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2',
 
 #ANOVA and Tukey HSD comparing by time period and drought sequence, same as Table S3 plus % changes
 tb3 <- kbl(df.tHSD.sup, format = 'html', caption = "Table S15: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb3, width = 10, file = "STable5_tHSD_test_results.png", zoom = 5.0) 
+as_image(x = tb3, width = 10, file = "STable15_tHSD_test_results.png", zoom = 5.0) 
 
 #Filtering by drought sequence
+summary(all.ca)
 all.ca.both <- all.ca %>% dplyr::filter(drought.sequence == 'Both Droughts')
-all.ca.2015 <- all.ca %>% dplyr::filter(drought.sequence == '2012-2015 Only')
+all.ca.2015 <- all.ca %>% dplyr::filter(drought.sequence == '2nd Drought Only')
 
 #Paired t-tests for Geo-spatial data sets
 #Biomass
@@ -771,8 +779,8 @@ df.t$variable <- c('Biomass (Mg ha<sup>-1</sup>)','Biomass (Mg ha<sup>-1</sup>)'
                    'Pr-ET (mm 4yr<sup>-1</sup>)','Pr-ET (mm 4yr<sup>-1</sup>)','Temperature (C)','Temperature (C)')
 
 #Add a drought sequence column
-df.t$sequence <- c('Both Droughts', '2012-2015 Only', 'Both Droughts', '2012-2015 Only',
-                   'Both Droughts', '2012-2015 Only','Both Droughts', '2012-2015 Only')
+df.t$sequence <- c('Both Droughts', '2nd Drougth Only', 'Both Droughts', '2nd Drougth Only',
+                   'Both Droughts', '2nd Drougth Only','Both Droughts', '2nd Drougth Only')
 
 #Add mean values for 1999-2002
 df.t$value.1999 <- c(mean(all.ca.both$biomass_1999), mean(all.ca.2015$biomass_1999), mean(all.ca.both$dNDMI_2004), mean(all.ca.2015$dNDMI_2004),
@@ -789,8 +797,8 @@ df.t.label <- df.t %>% dplyr::select(variable, sequence, value.1999, value.2012,
 colnames(df.t.label) <- c('Variable','Drought Sequence', 'Estimate 1', 'Estimate 2', 'Difference', 'Low 95% CI', 'High 95% CI', 't', 'p-value')
  
 #Paired T-test table
-tb2 <- kbl(df.t.label, format = 'html', caption = "Table S2: Paired two-tailed T-Test Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb2, width = 10, file = "STable2_t_test_results.png", zoom = 5.0)
+tb2 <- kbl(df.t.label, format = 'html', caption = "Table S1: Paired two-tailed T-Test Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb2, width = 10, file = "STable1_paired_t_test_results.png", zoom = 5.0)
 
 #Create table that is the same as Table 2, but has percent change column. Not included with manuscript
 #Calculate percent differences for paired t-tests
@@ -807,8 +815,8 @@ df.t.sup <- df.t %>% dplyr::select(variable, sequence, value.1999, value.2012, e
 colnames(df.t.sup) <- c('Variable','Drought Sequence', 'Estimate 1', 'Estimate 2', 'Difference', 'Low 95% CI', 'High 95% CI', 'Difference (%)', 'Low (%)', 'High (%)', 't', 'p-value', 'df (n-1)')
 
 #Paired T-test table
-tb4 <- kbl(df.t.sup, format = 'html', caption = "Table S6: Paired two-tailed T-Test Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb4, width = 10, file = "STable6_t_test_results.png", zoom = 5.0)
+tb4 <- kbl(df.t.sup, format = 'html', caption = "Table S7: Paired two-tailed T-Test Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb4, width = 10, file = "STable7_t_test_results.png", zoom = 5.0)
 
 #Select out ADS die-off data for chi-square test
 ADS.1999.both.alive <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' & drought == '1999-2002' & ADS.cat == 0) %>% count()

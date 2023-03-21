@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: November 11, 2019
-#Date Edited: March 15, 2023
+#Date Edited: March 21, 2023
 #Purpose: Create bar graphs for manuscript FIA analysis, testing out a new way of calculating the bar charts
 
 # Specify necessary packages
@@ -583,7 +583,7 @@ colnames(df.pine.tHSD.label) <- c('Variable', 'Comparison', 'Estimate 1', 'Estim
                                   'Difference', 'Low 95% CI', 'High 95% CI', 'p-value')
 
 #Combined ANOVA and Tukey HSD table
-tb6 <- kbl(df.pine.tHSD.label, format = 'html', caption = "Table S5: Pine Tree FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+tb6 <- kbl(df.pine.tHSD.label, format = 'html', caption = "Table S4: Pine Tree FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
 as_image(x = tb6, width = 10, file = "STable11_FIA_tHSD_test_results_pine.png", zoom = 5.0)
 
 
@@ -663,7 +663,7 @@ colnames(df.fir.tHSD.label) <- c('Variable', 'Comparison', 'Estimate 1', 'Estima
                                   'Difference', 'Low 95% CI', 'High 95% CI', 'p-value')
 
 #Combined ANOVA and Tukey HSD table
-tb8 <- kbl(df.fir.tHSD.label, format = 'html', caption = "Table S6: Fir Tree FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+tb8 <- kbl(df.fir.tHSD.label, format = 'html', caption = "Table S5: Fir Tree FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
 as_image(x = tb8, width = 10, file = "STable13_FIA_tHSD_test_results_fir.png", zoom = 5.0)
 
 
