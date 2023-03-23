@@ -20,7 +20,7 @@ memory.limit(32000)
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
 # all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v24.csv"))
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
 
 #Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
@@ -96,12 +96,12 @@ all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% co
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
+#Set the random number seed
+# set.seed(1234)
+
 #Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.c)
 dataset$drought.f <- as.factor(dataset$drought.c)
-
-#Set the random number seed
-set.seed(1234)
 
 #Create a task to undersample the drought sequence data by a factor of 0.2 for 2012-2015 Only
 task = makeClassifTask(data = dataset, target = "sequence.f")
@@ -734,8 +734,8 @@ df.tHSD.sup <- df.tHSD %>% dplyr::select(variable, contrast, estimate.1, estimat
 colnames(df.tHSD.sup) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2','Difference', 'Low 95% CI', 'High 95% CI', 'Difference (%)', 'Low (%)', 'High (%)', 'p-value')
 
 #ANOVA and Tukey HSD comparing by time period and drought sequence, same as Table S3 plus % changes
-tb3 <- kbl(df.tHSD.sup, format = 'html', caption = "Table S15: ANOVA and Tukey HSD Results", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb3, width = 10, file = "STable15_tHSD_test_results.png", zoom = 5.0) 
+tb3 <- kbl(df.tHSD.sup, format = 'html', caption = "Table S13: ANOVA and Tukey HSD Results with Percentages", digits = 3, escape = F) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb3, width = 10, file = "STable13_tHSD_test_results_with_pct.png", zoom = 5.0) 
 
 #Filtering by drought sequence
 summary(all.ca)

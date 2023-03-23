@@ -465,14 +465,14 @@ df.all.tHSD.sup <- df.all.tHSD %>% dplyr::select(variable, contrast, estimate.1,
 colnames(df.all.tHSD.sup) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2', 'Difference', 'Low 95% CI', 'High 95% CI', 'Difference (%)', 'Low (%)', 'High (%)', 'p-value')
 
 #Combined ANOVA and Tukey HSD table. This is the same data table as Sup Table 3, but with percentage changes. It is not included with the manuscript.
-tb2 <- kbl(df.all.tHSD.sup, format = 'html', caption = "Table S7: Field ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb2, width = 10, file = "STable7_FIA_tHSD_test_results.png", zoom = 5.0)
+tb2 <- kbl(df.all.tHSD.sup, format = 'html', caption = "Table S7: FIA ANOVA and Tukey HSD Results with Percentages", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb2, width = 10, file = "STable7_FIA_tHSD_test_results_with_pct.png", zoom = 5.0)
 
 #Summary statistics for all the data
 tb3 <- conifer.forest.all.summary %>% dplyr::select("time.period", "sequence", "count", "live.count", "dead.count", "BAA.all.mean", "BAA.all.sd",        
                                                      "BAA.live.mean", "BAA.live.sd", "BAA.dead.mean", "BAA.dead.sd") %>% 
   kbl(caption = "Table S9: FIA Overall Summary Statistics") %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb3, width = 5, file = "STable8_Southern_California_mortality_summary_statistics_v1.png", zoom = 4.0) 
+as_image(x = tb3, width = 5, file = "STable9_FIA_overall_summary_statistics.png", zoom = 4.0) 
 
 
 
@@ -480,7 +480,7 @@ as_image(x = tb3, width = 5, file = "STable8_Southern_California_mortality_summa
 tb4 <- conifer.forest.type.summary %>% dplyr::select("tree_type", "time.period", "sequence", "count", "live.count", "dead.count", "BAA.all.mean", "BAA.all.sd",        
                                                  "BAA.live.mean", "BAA.live.sd", "BAA.dead.mean", "BAA.dead.sd") %>% 
   kbl(caption = "Table S10: FIA Tree Species Summary Statistics") %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb4, width = 5, file = "STable9_Southern_California_mortality_summary_statistics_v1.png", zoom = 4.0) 
+as_image(x = tb4, width = 5, file = "STable10_FIA_tree_species_summary_statistics.png", zoom = 4.0) 
 
 #Analayis by Tree Speices
 #ANOVA and Tukey HSD for basal are die-off by forest type, sequence, ane time period
@@ -520,9 +520,9 @@ colnames(df.type.tHSD.label) <- c('Variable', 'Comparison', #'Estimate 1', 'Esti
                                  'Difference', 'Low 95% CI', 'High 95% CI', 'p-value')
 
 #Combined ANOVA and Tukey HSD table
-tb5 <- kbl(df.type.tHSD.label, format = 'html', caption = "Table S10: FIA ANOVA and Tukey HSD Results by Species Group", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+tb5 <- kbl(df.type.tHSD.label, format = 'html', caption = "Table S14: FIA ANOVA and Tukey HSD Results by Species Group", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
 # tb5
-as_image(x = tb5, width = 10, file = "STable10_FIA_tHSD_test_results_species.png", zoom = 5.0)
+as_image(x = tb5, width = 10, file = "STable14_FIA_tHSD_test_results_species.png", zoom = 5.0)
 
 #Analayis by Just Pine trees
 #ANOVA and Tukey HSD for basal are die-off by forest type, sequence, ane time period
@@ -584,7 +584,7 @@ colnames(df.pine.tHSD.label) <- c('Variable', 'Comparison', 'Estimate 1', 'Estim
 
 #Combined ANOVA and Tukey HSD table
 tb6 <- kbl(df.pine.tHSD.label, format = 'html', caption = "Table S4: Pine Tree FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb6, width = 10, file = "STable11_FIA_tHSD_test_results_pine.png", zoom = 5.0)
+as_image(x = tb6, width = 10, file = "STable4_FIA_tHSD_test_results_pine.png", zoom = 5.0)
 
 
 #Calculate the precentage changes based on the Tukey HSD test
@@ -601,8 +601,8 @@ df.pine.tHSD.sup <- df.pine.tHSD %>% dplyr::select(variable, contrast, estimate.
 colnames(df.pine.tHSD.sup) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2', 'Difference', 'Low 95% CI', 'High 95% CI', 'Difference (%)', 'Low (%)', 'High (%)', 'p-value')
 
 #Combined ANOVA and Tukey HSD table. This is the same data table as Sup Table 5, but with percentage changes. It is not included with the manuscript.
-tb7 <- kbl(df.pine.tHSD.sup, format = 'html', caption = "Table S12: FIA ANOVA and Tukey HSD Results for Pines", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb7, width = 10, file = "STable12_FIA_tHSD_test_results_pine.png", zoom = 5.0)
+tb7 <- kbl(df.pine.tHSD.sup, format = 'html', caption = "Table S11: FIA ANOVA and Tukey HSD Results for Pines with Percentages", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb7, width = 10, file = "STable11_FIA_tHSD_test_results_pine_with_pct.png", zoom = 5.0)
 
 #Analysis Just for Firs
 fir.aov.all <- aov(data = all.forest.type %>% filter(pltID %in% plots & tree_type %in% c('fir')), BAA.all.sum ~ time.period * sequence)
@@ -664,7 +664,7 @@ colnames(df.fir.tHSD.label) <- c('Variable', 'Comparison', 'Estimate 1', 'Estima
 
 #Combined ANOVA and Tukey HSD table
 tb8 <- kbl(df.fir.tHSD.label, format = 'html', caption = "Table S5: Fir Tree FIA ANOVA and Tukey HSD Results", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb8, width = 10, file = "STable13_FIA_tHSD_test_results_fir.png", zoom = 5.0)
+as_image(x = tb8, width = 10, file = "STable5_FIA_tHSD_test_results_fir.png", zoom = 5.0)
 
 
 #Calculate the precentage changes based on the Tukey HSD test
@@ -681,5 +681,5 @@ df.fir.tHSD.sup <- df.fir.tHSD %>% dplyr::select(variable, contrast, estimate.1,
 colnames(df.fir.tHSD.sup) <- c('Variable', 'Comparison', 'Estimate 1', 'Estimate 2', 'Difference', 'Low 95% CI', 'High 95% CI', 'Difference (%)', 'Low (%)', 'High (%)', 'p-value')
 
 #Combined ANOVA and Tukey HSD table. This is the same data table as Sup Table 3, but with percentage changes. It is not included with the manuscript.
-tb9 <- kbl(df.fir.tHSD.sup, format = 'html', caption = "Table S14: FIA ANOVA and Tukey HSD Results for Firs", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
-as_image(x = tb9, width = 10, file = "STable14_FIA_tHSD_test_results_fir.png", zoom = 5.0)
+tb9 <- kbl(df.fir.tHSD.sup, format = 'html', caption = "Table S12: FIA ANOVA and Tukey HSD Results for Firs with Percentages", escape = F, digits = 3) %>% kable_classic_2(font_size = 14, full_width = F)
+as_image(x = tb9, width = 10, file = "STable12_FIA_tHSD_test_results_fir_with_pct.png", zoom = 5.0)

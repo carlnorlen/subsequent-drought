@@ -22,7 +22,7 @@ memory.limit(32000)
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Subsequent_Drought"
 dir_in <- "D:\\Large_Files\\Landsat"
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v24.csv"))
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
 
 #Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
