@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: March 21, 2023
+#Date Edited: April 10, 2023
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -20,8 +20,9 @@ memory.limit(32000)
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
 # all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23_v2.csv"))
+# summary(all.ca)
+# summary(all.ca.test)
 #Calculate the difference between SPI48 2002 and SPI48 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
 
@@ -237,7 +238,7 @@ p3 <- ggscatter(all.ca.models, x = "PET_4yr", y = "dNDMI", point = FALSE) +
   geom_line(data = all.ca.models, mapping = aes(x=PET_4yr, y=dNDMI.fit), size=2, color = 'black', linetype = 'dotdash') +
   #Piecewise fit uncertainty
   geom_ribbon(data = all.ca.models, mapping = aes(x = PET_4yr, y = dNDMI.fit, ymax = dNDMI.fit + 1.96*dNDMI.se.fit, ymin = dNDMI.fit - 1.96*dNDMI.se.fit), alpha = 0.4) +
-  theme_bw() + guides(alpha = FALSE) +
+  theme_bw() + guides(alpha = 'none') +
   ylab(label = "Die-off Severity (dNDMI)") +  xlab(label = expression('Cummulative Moisture Deficit (Pr-ET; mm 4 yr'^-1*')')) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
