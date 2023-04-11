@@ -97,8 +97,7 @@ all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% co
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
-#Random number set was not set with published results
-# set.seed(090821)
+#Random number seed was not set with published results (e.g., set.seed)
 
 #Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.c)

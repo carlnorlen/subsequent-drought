@@ -18,7 +18,7 @@ setwd('C:/Users/can02/mystuff/subsequent-drought')
 dir_in <- "D:\\Large_Files\\Landsat"
 
 #Load CSV data into the script.
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23_v3.csv"))
 
 #Calculate the difference in SPI48 between 2002 and 2015
 all.ca$dSPI48 <- abs(all.ca$spi48_09_2015 - all.ca$spi48_09_2002)
@@ -209,7 +209,7 @@ f3 <- ggarrange(p5, p6, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend =
 annotate_figure(f3, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
 #Save the figure as a png
-ggsave(filename = 'SFig2_spi48_PrET_4yr_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
+ggsave(filename = 'SFig3_spi48_PrET_4yr_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
 
 #Plot 1999 Biomass (Mg/ha) for SPI48 2002 versus SPI48 2015
 p7 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = biomass_1999.mean, group = biomass_1999.mean)) +
@@ -252,7 +252,7 @@ f4 <- ggarrange(p7, p8, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend =
 annotate_figure(f4, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
 #Save the figure as a png
-ggsave(filename = 'SFig3_biomass_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
+ggsave(filename = 'SFig4_biomass_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
 
 #Plot 1999-2002 4 year Max Temperature for SPI48 2002 vs. SPI48 2015
 p9 <- ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = tmax_4yr_2002.mean, group = tmax_4yr_2002.mean)) +
@@ -295,7 +295,7 @@ f5 <- ggarrange(p9, p10, ncol = 2, nrow = 1, widths = c(1, 0.95), common.legend 
 annotate_figure(f5, left = textGrob(label = "SPI48 2012-2015", rot = 90, hjust = 0.5, vjust = 0.3), bottom = textGrob(label = 'SPI48 1999-2002', vjust = 0.1, hjust = 0.5))
 
 #Save the figure as a png
-ggsave(filename = 'SFig4_tmax_4yr_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
+ggsave(filename = 'SFig5_tmax_4yr_SPI48_grid_scatter.png', device = 'png', height=7, width=14, units = 'cm', dpi=900)
 
 #Create a figure to compare SPI48 for the two droughts and figure out the drought sequences experienced by the two regions.
 p11 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = sierra_prop, group = sierra_prop)) +
@@ -323,7 +323,7 @@ p12 <- p11 +
     legend.direction = "horizontal")
 
 #Save the figure as a png
-ggsave(filename = 'SFig5_spi48_sierra_socal_SPI48_grid_scatter.png', device = 'png', height=6, width=7, units = 'cm', dpi=900)
+ggsave(filename = 'SFig1_spi48_sierra_socal_SPI48_grid_scatter.png', device = 'png', height=6, width=7, units = 'cm', dpi=900)
 
 #Create a figure to compare SPI48 for the two droughts and figure out the drought sequences experienced by the two regions.
 p13 <-ggplot(subset(all.ca.spi48, count >= 20), mapping = aes(x = spi48_09_2002, y = spi48_09_2015, fill = dSPI48, group = dSPI48)) +
