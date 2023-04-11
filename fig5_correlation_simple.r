@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 10, 2023
+#Date Edited: April 11, 2023
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -20,7 +20,7 @@ memory.limit(32000)
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
 # all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
-all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23_v2.csv"))
+all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23_v3.csv"))
 # summary(all.ca)
 # summary(all.ca.test)
 #Calculate the difference between SPI48 2002 and SPI48 2015
@@ -98,7 +98,7 @@ all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% co
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
 #Set the random number seed
-# set.seed(1234)
+set.seed(090821)
 
 #Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.c)
