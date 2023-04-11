@@ -97,8 +97,8 @@ all.ca.combined %>% dplyr::filter(drought == '1999-2002' & spi48 <= -1.5) %>% co
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count()
 all.ca.combined %>% dplyr::filter(drought == '2012-2015' & spi48 <= -1.5) %>% count() / all.ca.combined %>% dplyr::filter(drought == '2012-2015') %>% count()
 
-#Set the random number seed
-set.seed(090821)
+#Random number set was not set with published results
+# set.seed(090821)
 
 #Convert dummy variables to factors
 dataset$sequence.f <- as.factor(dataset$sequence.c)
@@ -134,8 +134,7 @@ df.dndmi.lm$variable <- c('Intercept', 'Time Period', 'Drought Sequence', 'four-
 dndmi.relimp <- calc.relimp(dndmi.under.lm, rela = TRUE, type = "lmg") 
 dndmi.relimp 
 #Add the results of the relative weigth analysis to the data frame
-# df.dndmi.lm$relimp <- c(0, 0.03706293, 0.01952194, 0.36576597, 0.09262433, 0.02743045, 0.45759438) #old result, without seed
-df.dndmi.lm$relimp <- c(0, 0.03699812, 0.01722664, 0.36505762, 0.09369896, 0.02653059, 0.46048807)
+df.dndmi.lm$relimp <- c(0, 0.03706293, 0.01952194, 0.36576597, 0.09262433, 0.02743045, 0.45759438) #old result, without seed
 
 #Covert the relative weight analysis outputs as percentages
 df.dndmi.lm$relimp.pct <- df.dndmi.lm$relimp * 100
