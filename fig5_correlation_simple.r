@@ -1,6 +1,6 @@
 #Author: Carl A. Norlen
 #Date Created: November 11, 2019
-#Date Edited: April 11, 2023
+#Date Edited: April 12, 2023
 #Purpose: Create regression plots (Fig 5) and SPI48 grids (Sup Figures) for publication
 
 #Packages to load
@@ -19,7 +19,6 @@ memory.limit(32000)
 
 #Read in csv data for Regression Data Sets
 dir_in <- "D:\\Large_Files\\Landsat"
-# all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23.csv"))
 all.ca <- read.csv(file.path(dir_in, "Regression_all_socal_300m_v23_v3.csv"))
 # summary(all.ca)
 # summary(all.ca.test)
@@ -585,64 +584,41 @@ all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts' & 
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Southern California') %>% count()
 all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only' & region == 'Sierra Nevada') %>% count()
 
-#Store filtered and sampled drought sequence data as its own vector
-dataset.2 <- all.ca.sample %>% dplyr::filter(sequence == 'Both Droughts' | sequence == '2nd Drought Only') %>%
-  dplyr::select('PET_4yr', 'ET_4yr', 'ppt_4yr', 'dNDMI', 'drought.f', 'sequence.f', 'biomass', 'pixel.id', 'tmax_4yr', 'ADS.cat')
-dataset.2 %>% summary()
-#Create a task to use with the caret package
-task.2 <- makeClassifTask(data = dataset.2, target = "sequence.f")
-
-#Under sample the data by 20%
-task.2.under <- undersample(task.2, rate = 0.2)
-
-#Get the actual data o]ut of the caret task
-dataset.2.under <- getTaskData(task.2.under)
-
-#Make variables into dummy categorical variables for statistical analysis
-dataset.2.under <- dataset.2.under %>% mutate(sequence = case_when(
-  sequence.f == 'Both Droughts' ~ 'Both Droughts', 
-  sequence.f == '2nd Drought Only' ~ '2nd Drought Only'))
-
-#Create column with the years for the data as a string
-dataset.2.under <- dataset.2.under %>% mutate(drought = case_when(
-  drought.f == '1999-2002' ~ '1999-2002', 
-  drought.f == '2012-2015' ~ '2012-2015'))
-
 #Sort the data by drought and pixel.id to prepare for Chi-squared test
-dataset.3 <- dataset.2.under %>% arrange(drought.f, pixel.id, by_group = TRUE)
+dataset.3 <- all.ca.sample %>% arrange(drought.f, pixel.id, by_group = TRUE)
 
 #Combined anova/t-test analysis for Biomass by year collected and drought sequence
-biomass.aov <- aov(data = dataset.2.under, biomass ~ drought.f*sequence.f)
+biomass.aov <- aov(data = all.ca.sample, biomass ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for biomass
 biomass.tHSD <- TukeyHSD(biomass.aov) 
 
 #ANOVA for Pr-ET
-PET_4yr.aov <- aov(data = dataset.2.under, PET_4yr ~ drought.f*sequence.f)
+PET_4yr.aov <- aov(data = all.ca.sample, PET_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for Pr-ET
 PET_4yr.tHSD <- TukeyHSD(PET_4yr.aov)
 
 #ANOVA for Precip
-ppt_4yr.aov <- aov(data = dataset.2.under, ppt_4yr ~ drought.f*sequence.f)
+ppt_4yr.aov <- aov(data = all.ca.sample, ppt_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for Pr-ET
 ppt_4yr.tHSD <- TukeyHSD(ppt_4yr.aov)
 
 #ANOVA for ET
-ET_4yr.aov <- aov(data = dataset.2.under, ET_4yr ~ drought.f*sequence.f)
+ET_4yr.aov <- aov(data = all.ca.sample, ET_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for ET
 ET_4yr.tHSD <- TukeyHSD(ET_4yr.aov)
 
 #ANOVA for Tmax
-tmax_4yr.aov <- aov(data = dataset.2.under, tmax_4yr ~ drought.f*sequence.f)
+tmax_4yr.aov <- aov(data = all.ca.sample, tmax_4yr ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for Tmax
 tmax_4yr.tHSD <- TukeyHSD(tmax_4yr.aov)
 
 #ANOVA for dNDMI
-dNDMI.aov <- aov(data = dataset.2.under, dNDMI ~ drought.f*sequence.f)
+dNDMI.aov <- aov(data = all.ca.sample, dNDMI ~ drought.f*sequence.f)
 
 #Tukey Post Hoc analysis for dNDMI
 dNDMI.tHSD <- TukeyHSD(dNDMI.aov)
@@ -659,55 +635,55 @@ df.tHSD$variable <- c('Biomass (Mg ha<sup>-1</sup>)', 'Biomass (Mg ha<sup>-1</su
                    'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI', 'dNDMI',
                    'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)', 'Pr-ET (mm 4yr<sup>-1</sup>)',
                    'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)', 'Temperature (C)')
-summary(dataset.2.under)
+summary(all.ca.sample)
 #Get the sample size for the two main drought sequences
-dataset.2.under %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002') %>% count()
-dataset.2.under %>% filter(sequence == 'Both Droughts' & drought == '1999-2002') %>% count()
+all.ca.sample %>% filter(sequence == '2nd Drought Only' & drought == '1999-2002') %>% count()
+all.ca.sample %>% filter(sequence == 'Both Droughts' & drought == '1999-2002') %>% count()
 
 #Add mean values for Estimate 1
 df.tHSD$estimate.1 <- c(#Biomass density
-                        mean((dataset.2.under %>% filter(drought == '2012-2015'))$biomass), mean((dataset.2.under %>% filter(sequence == 'Both Droughts'))$biomass),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$biomass), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$biomass), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$biomass), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015'))$biomass), mean((all.ca.sample %>% filter(sequence == 'Both Droughts'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$biomass), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$biomass), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$biomass), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$biomass),
                         #dNDMI
-                        mean((dataset.2.under %>% filter(drought == '2012-2015'))$dNDMI), mean((dataset.2.under %>% filter(sequence == 'Both Droughts'))$dNDMI),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$dNDMI), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$dNDMI),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$dNDMI), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$dNDMI),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$dNDMI), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015'))$dNDMI), mean((all.ca.sample %>% filter(sequence == 'Both Droughts'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$dNDMI), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$dNDMI), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$dNDMI), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$dNDMI),
                         #PET 4yr
-                        mean((dataset.2.under %>% filter(drought == '2012-2015'))$PET_4yr), mean((dataset.2.under %>% filter(sequence == 'Both Droughts'))$PET_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$PET_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$PET_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$PET_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$PET_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$PET_4yr), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015'))$PET_4yr), mean((all.ca.sample %>% filter(sequence == 'Both Droughts'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$PET_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$PET_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$PET_4yr), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$PET_4yr),
                         #Temperature 4yr
-                        mean((dataset.2.under %>% filter(drought == '2012-2015'))$tmax_4yr), mean((dataset.2.under %>% filter(sequence == 'Both Droughts'))$tmax_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr))
+                        mean((all.ca.sample %>% filter(drought == '2012-2015'))$tmax_4yr), mean((all.ca.sample %>% filter(sequence == 'Both Droughts'))$tmax_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$tmax_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == 'Both Droughts'))$tmax_4yr))
 
 
 #Add mean values for Estimate 2
 df.tHSD$estimate.2 <- c(#Biomass
-                        mean((dataset.2.under %>% filter(drought == '1999-2002'))$biomass), mean((dataset.2.under %>% filter(sequence == '2nd Drought Only'))$biomass),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$biomass), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$biomass),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$biomass), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$biomass),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$biomass), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002'))$biomass), mean((all.ca.sample %>% filter(sequence == '2nd Drought Only'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$biomass), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$biomass), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$biomass),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$biomass), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$biomass),
                         #dNDMI
-                        mean((dataset.2.under %>% filter(drought == '1999-2002'))$dNDMI), mean((dataset.2.under %>% filter(sequence == '2nd Drought Only'))$dNDMI),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$dNDMI), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$dNDMI),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$dNDMI), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$dNDMI),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$dNDMI), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002'))$dNDMI), mean((all.ca.sample %>% filter(sequence == '2nd Drought Only'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$dNDMI), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$dNDMI), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$dNDMI),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$dNDMI), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$dNDMI),
                         #PrET 4yr
-                        mean((dataset.2.under %>% filter(drought == '1999-2002'))$PET_4yr), mean((dataset.2.under %>% filter(sequence == '2nd Drought Only'))$PET_4yr),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$PET_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$PET_4yr),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$PET_4yr), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$PET_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$PET_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002'))$PET_4yr), mean((all.ca.sample %>% filter(sequence == '2nd Drought Only'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$PET_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$PET_4yr), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$PET_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$PET_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$PET_4yr),
                         #Tmax 4yr
-                        mean((dataset.2.under %>% filter(drought == '1999-2002'))$tmax_4yr), mean((dataset.2.under %>% filter(sequence == '2nd Drought Only'))$tmax_4yr),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$tmax_4yr),
-                        mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$tmax_4yr),
-                        mean((dataset.2.under %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$tmax_4yr), mean((dataset.2.under %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr))
+                        mean((all.ca.sample %>% filter(drought == '1999-2002'))$tmax_4yr), mean((all.ca.sample %>% filter(sequence == '2nd Drought Only'))$tmax_4yr),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$tmax_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$tmax_4yr),
+                        mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == '2nd Drought Only'))$tmax_4yr), mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$tmax_4yr),
+                        mean((all.ca.sample %>% filter(drought == '2012-2015' & sequence == '2nd Drought Only'))$tmax_4yr), mean((all.ca.sample %>% filter(drought == '1999-2002' & sequence == 'Both Droughts'))$tmax_4yr))
 
 #Select and sort the tukey HSD columns and 
 df.tHSD.pub <- df.tHSD %>% dplyr::select(variable, contrast, estimate.1, estimate.2, estimate, conf.low, conf.high, adj.p.value)
