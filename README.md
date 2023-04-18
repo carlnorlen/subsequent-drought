@@ -11,11 +11,11 @@ Shape File of USFS Ecological Subsections used to create Manuscript Figure 1a
 Geotiffs used to create Manuscript Figure 1a
   *  Drought_first_300m_v7, Drought_second_300m_v7 (1 = drought, 0 = no drought)
   
-CSV files used to Data sets for creation of Manuscript Figure 2. The files include dNDMI (unitless), Pr-ET (mm/year), and tpa max (trees/acre) as a time series for the two drought sequences.
+CSV files used to Data sets for creation of Manuscript Figure 2. The files include dNDMI_mean, dNDMI_stdDev (unitless), PET_mean, PET_stdDev (mm/year), and tpa_mid_sum (# of tpa pixels > 5), tpa_count (total number of TPA pixels), and system:time_start (start date of values) as a time series for the two drought sequences.
   * dNDMI_NDMI_PET_Temp_ADS_trajectories_second_drought_full_region_300m_v9.csv (data for the 2nd Drought Only sequence)
-  * dNDMI_NDMI_PET_Temp_ADS_trajectories_first_drought_full_region_300m_v9.csv (data for the Boht Droughts sequence)  
+  * dNDMI_NDMI_PET_Temp_ADS_trajectories_first_drought_full_region_300m_v9.csv (data for the Both Droughts sequence)  
 
-CSV file with data set for four-year Evapotranspiration (mm/4yr), four year precipitation (mm/4yr), four-year temperature (C), biomass (Mg/ha), tpa_max (max trees/acre), dNDMI (unit less), Precipitation minus ET (mm/yr), elevation (meters), latitude, longitude, fortyeight month standardized precipitation index (unit less), and four year Precipitation minus ET (mm/4yr) for each grid cell used in the following scripts: fig5_correlation_simple.r, fig3_sfigs_grids.r, and  sfig4_spatial_autocorrelation.r 
+CSV file with data set for four-year Evapotranspiration (mm/4yr), four year precipitation (mm/4yr), four-year temperature (C), biomass (Mg/ha), ADS (dead trees/acre), dNDMI (unit less), Precipitation minus ET (mm/yr), elevation (meters), latitude, longitude, forty-eight month standardized precipitation index (unit less), USFS Zone (261 = Sierra Nevada, 262 = Southern California), and four year Precipitation minus ET (mm/4yr) for each grid cell. There are multiple columns for each variable with years at the end of the column name that represent different time periods (i.e, 2002, 2015). The data is used in the following scripts: fig5_correlation_simple.r, fig3_sfigs_grids.r, and  sfig4_spatial_autocorrelation.r 
 to create Figures 1b, 3, 5, S2, S3, S5, S8, S10, S12, S14, S15, S16 to S20, and Tables S1, S2, and S6.
   * Regression_all_socal_300m_v23_v3.csv
 
@@ -24,9 +24,10 @@ Geotiffs used to create Manuscript Figures S1, S6, S7, S9, S11, and S13.
   *  biomass_1999_bigger_region_300m.tif, biomass_2012_bigger_region_300m.tif (Mg/ha)
   *  PrET_2002_bigger_region_300m_v4.tif, PrET_2015_bigger_region_300m_v4.tif (mm/4yr)
   *  tmax_2002_bigger_region_300m.tif, tmax_2015_bigger_region_300m.tif (C)
-  *  ADS_2004_bigger_region_300m.tif, ADS_2017_bigger_region_300m.tif (trees/acre)
-  *  Drought_second_bigger_region_300m_v5.tif, Drought_both_bigger_region_300m_v5.tif
-  *  hillshade_bigger_region_300m_v2.tif
+  *  ADS_2004_bigger_region_300m.tif, ADS_2017_bigger_region_300m.tif (dead trees/acre)
+  *  Drought_second_300m_v7.tif (0 = no 2nd drought, 2 = 2nd drought) 
+  *  Drought_first_300m_v7.tif (0 = no 1st drought, 1 = 1st drought)
+  *  hillshade_bigger_region_300m_v2.tif (unit less)
   
 CSV files of annual data from 10 eddy covariance tower locations used to create Figure S4. Each file is for one of the 10 eddy covariance sites. Each file contains the following variables: wYEAR (water year), Evapotranspiration (ET, mm/yr), n_days (number of days with data), and ID (site description).
   * Pinyon_Annual_EClos_Hinojo.csv
@@ -40,7 +41,7 @@ CSV files of annual data from 10 eddy covariance tower locations used to create 
   * SJER_Annual_EClos_Hinojo.csv
   * Soaproot_Annual_EClos_Hinojo.csv
 
-CSV file of annual NDVI (unit less) for each of the 10 eddy covariance sites used to create Figure S4.
+CSV file of annual NDVI (unit less), year, Site (FluxNext Site ID), Pixel # (Number of 9 upwind Landsat pixels from tower) for each of the 10 eddy covariance sites used to create Figure S4.
   * UCIupwind_pixels_NDVI_met_30m.csv
 
 ## Sharing/Access information

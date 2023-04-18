@@ -1,6 +1,6 @@
 #Author: Carl Norlen
 #Date Created: February 6, 2020
-#Date Updated: May 10, 2022
+#Date Updated: April 18, 2023
 #Purpose: Create Figure 2 time series for publication
 
 #Load required scripts for teh script
@@ -36,18 +36,8 @@ time.series$time_start <- as.Date(time.series$time_start)
 #Create a year column
 time.series$year <- format(time.series$time_start, '%Y')
 
-#Convert acres to hectares
-time.series$tpa_sum <- time.series$tpa_sum * 2.41705 * 2.25 # convert acres to hectares and then convert 150 m pixels (2.25 hectares) into number of dead trees
-# time.series$tpa <- time.series$tpa_sum / (time.series$tpa_count * 2.25)
-time.series$tpa_mean <- time.series$tpa_mean * 2.41705 
-time.series$tpa_stdDev <- time.series$tpa_stdDev * 2.41705 
-# time.series$tpa_stdError <- time.series$tpa_stdDev / sqrt(time.series$tpa_count)
-time.series$tpa_p100 <- time.series$tpa_p100 * 2.41705 
-time.series$tpa_p50 <- time.series$tpa_p50 * 2.41705
-time.series$tpa_p75 <- time.series$tpa_p75 * 2.41705 
-time.series$tpa_p25 <- time.series$tpa_p25 * 2.41705
-time.series$tpa_low_area <- (time.series$tpa_mid_sum / time.series$tpa_count) * 100 
-time.series$biomass_mean[time.series$biomass_mean == 0] <- NA
+#Convert TPA to a percent by area
+time.series$tpa_mid_area <- (time.series$tpa_mid_sum / time.series$tpa_count) * 100 
 
 #Make the drought/Region a factor
 time.series$drought <- factor(time.series$drought)
@@ -58,7 +48,7 @@ p1 <- ggplot() +
             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
   geom_rect(data = data.frame(xmin = as.Date('2011-10-01'), xmax = as.Date('2015-09-30'), ymin = -Inf, ymax = Inf), 
             fill = "red", alpha = 0.3, mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)) +
-  geom_line(data = time.series, mapping = aes(x = time_start, y = tpa_low_area, color = drought, linetype = drought), size = 0.5, na.rm = TRUE) + 
+  geom_line(data = time.series, mapping = aes(x = time_start, y = tpa_mid_area, color = drought, linetype = drought), size = 0.5, na.rm = TRUE) + 
   theme_bw() + guides(color = guide_legend(title = 'Drought\nSequence', nrow = 2, title.position = 'top'), 
                       linetype = guide_legend(title = 'Drought\nSequence', nrow = 2, title.position = 'top')) +
   scale_linetype_manual(values=c("solid", "twodash"), labels = c('Both\nDroughts', '2nd Drought\nOnly')) + labs(color = 'Drought\nSequence', linetype = 'Drought\nSequence') +
