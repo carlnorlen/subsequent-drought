@@ -1,4 +1,4 @@
-# Datasets used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
+# Datasets and R scripts used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
 ---
 
 These data sets and scripts allow for the creation of all figures and supplementary figures and tables cited in 
