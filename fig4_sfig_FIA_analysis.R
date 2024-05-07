@@ -16,7 +16,7 @@ lapply(p,require,character.only=TRUE)
 setwd('C:/Users/can02/mystuff/subsequent-drought')
 
 #Add Data Sets
-fiaCA <- 'D:\\Large_Files\\FIA\\SQLite_FIADB_CA\\2019_CSV' #Downloaedd from FIA DataMart
+fiaCA <- 'D:\\Large_Files\\FIA\\SQLite_FIADB_CA\\2019_CSV' #Downloaded from FIA DataMart
 dir_usfs <- "D:\\Large_Files\\USFS\\data\\subsections"
 
 #Load teh FIA data

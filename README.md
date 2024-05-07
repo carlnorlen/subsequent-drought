@@ -1,8 +1,12 @@
-# Datasets used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
+# Datasets and R scripts used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
 ---
 
 These data sets and scripts allow for the creation of all figures and supplementary figures and tables cited in 
 Norlen, C.A., Goulden, M.L. (2023) "Recent tree mortality dampens semi-arid forest die-off during subsequent drought" AGU Advances
+
+## Data Access
+The data sets required to create the figures are available in the following DRYAD repository: 
+Norlen, Carl; Goulden, Michael (2023). Recent tree mortality dampens semi-arid forest die-off during subsequent drought [Dataset]. Dryad. https://doi.org/10.7280/D1FQ2B
 
 ## Description of the data and file structure
 Shape File of USFS Ecological Subsections used to create Manuscript Figure 1a
