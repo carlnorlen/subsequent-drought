@@ -2,7 +2,7 @@
 ---
 
 These data sets and scripts allow for the creation of all figures and supplementary figures and tables cited in 
-Norlen, C.A., Goulden, M.L. (2023) "Recent tree mortality dampens semi-arid forest die-off during subsequent drought" AGU Advances
+Norlen, C.A., Goulden, M.L. (2023) "Recent tree mortality dampens semi-arid forest die-off during subsequent drought" AGU Advances https://doi.org/10.1029/2022AV000810
 
 ## Data Access
 The data sets required to create the figures are available in the following DRYAD repository: 
