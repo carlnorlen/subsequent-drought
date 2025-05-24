@@ -1,8 +1,8 @@
 # Datasets and R scripts used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
 ---
 
-These data sets and scripts allow for the creation of all figures and supplementary figures and tables cited in 
-Norlen, C.A., Goulden, M.L. (2023) "Recent tree mortality dampens semi-arid forest die-off during subsequent drought" AGU Advances https://doi.org/10.1029/2022AV000810
+These data sets and scripts allow for the creation of all figures and supplementary figures and tables from the following manuscript. When using the code, data, or figures and tables please cite the following manuscript.
+Norlen, C.A., Goulden, M.L. (2023) "Recent tree mortality dampens semi-arid forest die-off during subsequent drought" AGU Advances, 4 (3), e2022AV000810. https://doi.org/10.1029/2022AV000810
 
 ## Data Access
 The data sets required to create the figures are available in the following DRYAD repository: 
@@ -66,29 +66,99 @@ Data was derived from these publicly available sources:
   * Above ground biomass data: http://emapr.ceoas.oregonstate.edu/pages/data/viz/index.html
 
 ## Code/Software
-The code shared with this submission were written in R 4.02 and run using RStudio.
-The code requires the tidyverse, sf, RSQlite, rFIA, RSToolbox, patchwork, ggpubr, kableExtra, and gstat packages.
+The code shared with this submission were written in JavaScript for Google Earth Engine and  R 4.02 run using RStudio.
+The R code requires the tidyverse, sf, RSQlite, rFIA, RSToolbox, patchwork, ggpubr, kableExtra, and gstat packages. GEE code can
+be added to the code editor using the following link https://code.earthengine.google.com/?accept_repo=users/cnorlen/subsequent_drought.
 
-R script used to create Figure 1 of the manuscript.
+## R Code
+Script used to create Figure 1 of the manuscript.
   * fig1_map.r
   
-R script used to create Figure 2 of the manuscript. 
+Script used to create Figure 2 of the manuscript. 
   * fig2_time_series.r
   
-R script used to create Figure 3 of the manuscript, and Figures S2, S3, S5, S8, S10, S12 and S19. 
+Script used to create Figure 3 of the manuscript, and Figures S2, S3, S5, S8, S10, S12 and S19. 
   * fig3_sfigs_grids.r
   
-R script used to create Figure 4 of the manuscript, Figure S6, and Tables S3 to S5. 
+Script used to create Figure 4 of the manuscript, Figure S6, and Tables S3 to S5. 
   * fig4_sfig_FIA_analysis.r
   
-R script used to create Figure 5 of the manuscript, Tables S1, S2, and S6, and Figures S14, S15, S18, and S20.
+Script used to create Figure 5 of the manuscript, Tables S1, S2, and S6, and Figures S14, S15, S18, and S20.
   * fig5_correlation_simple.r
   
-R script used to create Figures S1, S6, S7, S9, S11, and S13. 
+Script used to create Figures S1, S6, S7, S9, S11, and S13. 
   * sfig1_maps.r
   
-R script used to create Figure S4.
+Script used to create Figure S4.
   * sfig3_ndvi_flux_tower
   
-R script used to create Figures S16, S17.
+Script used to create Figures S16, S17.
   * sfig4_spatial_autocorrelation
+  
+## GEE JavaScript Code
+Script used to create a Landsat Tasseled Cap Brightness composites and save the GeoTiffs as GEE assets
+  * Export_Landsat_Brightness_Composite_CA.js
+  
+Script used to create an NDMI time series and save the GeoTiffs as GEE assets  
+  * Export_Landsat_NDMI_TimeSeries_CA.js
+  
+Script used to create an NDVI time series and save the GeoTiffs as GEE assets
+  * Export_Landsat_NDVI_TimeSeries_CA.js
+  
+Script used to process and export the data used to create manuscript Figure 1
+  * Fig1_drought_exposure_map.js
+  
+Script used to process and export the data used to create manuscript Figure 2
+  * Fig2_time_series.js
+  
+Script used to process and export the data used to create manuscript Figures 3, 4, and 5
+  * Fig3_5_SFigs_regression_data
+  
+Script used to process and export the data used to create manuscript Figures S13
+  * SFig_13_NDVI_ET_scaling.js
+  
+Script used to process and export the hillshade data used to create additional Supplementary manuscript Figures
+  * SFigs_hillshade_base_map.js
+  
+Script used to process and export the data used to create additional Supplementary mansucript Figures assessing spatial autocorrelation
+  * SFigs_spatial_autocorrelation_data.js
+  
+Functions used to create a time series of Aerial Detection Survey (ADS) data and add it to another script
+  * ads.js
+  
+Functions used to create a time series stack of Landsat data and add that to another script
+  * All_Landsat.js
+  
+Functions used to process an biomass time series dataset and add it to another script
+  * biomass.js
+  
+Functions used to process climate time series data and add it to another script
+  * climate.js 
+  
+Functions used to process climatology data and add it to another script
+  * climatology.js
+  
+Functions used to create time series composites of Landsat data at various time lenghts and add it to another Script
+  * composites.js
+  
+Functions used to download data as a CSV file for further Analysis
+  * download.js
+  
+Functions used to add wildfire data (FRAP) to another Script
+  * frap.js
+  
+Functions used to join data sets together
+  * join.js
+  
+Functions used to mask raster data sets
+  * mask.js
+  
+Functions used to process Pr-ET time series data and add it to other scripts
+  * pet.js
+
+Functions used to change the spatial resolution of raster data sets
+  * resolution.js
+
+Functions used to calculate vegetation indices for Landsat data
+  * veg_indices.js
+  
