@@ -1,4 +1,4 @@
-# Datasets and R scripts used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
+# Datasets R, and Google Earth Engine scripts used in "Recent tree mortality dampens semi-arid forest die-off during subsequent drought
 ---
 
 These data sets and scripts allow for the creation of all figures and supplementary figures and tables from the following manuscript. When using the code, data, or figures and tables please cite the following manuscript.
